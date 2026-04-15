@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Historique — Les Microdoniens</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --cream: #faf8f4; --charcoal: #1a1a1a; --text: #2d2d2d; --text-muted: #717171;
+      --border: #e4e0d8; --terracotta: #d96b3f; --terracotta-light: #f5ede7;
+      --terracotta-dark: #b8562e; --sage-light: #edf3ee; --yellow: #f5c842;
+      --radius: 16px; --shadow: 0 2px 16px rgba(0,0,0,0.07);
+      --shadow-hover: 0 8px 32px rgba(0,0,0,0.13); --nav-h: 72px;
+    }
+
+    /* ── NAV ── */
+    nav { position: fixed; top: 0; left: 0; right: 0; height: var(--nav-h); background: rgba(250,248,244,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); z-index: 100; display: flex; align-items: center; padding: 0 24px; }
+    .nav-inner { max-width: 1200px; width: 100%; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--charcoal); flex-shrink: 0; }
+    .nav-logo-mark { width: 36px; height: 36px; background: var(--terracotta); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Fraunces', serif; font-size: 16px; color: white; flex-shrink: 0; }
+    .nav-logo-text { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 400; color: var(--charcoal); }
+    .nav-logo-text span { display: block; font-size: 10px; font-family: 'DM Sans', sans-serif; font-weight: 300; color: var(--text-muted); letter-spacing: 0.04em; text-transform: uppercase; }
+    .nav-links { display: flex; align-items: center; gap: 2px; list-style: none; flex-shrink: 0; }
+    .nav-links a { display: block; padding: 7px 11px; text-decoration: none; color: var(--text); font-size: 13px; border-radius: 8px; transition: background 0.15s; white-space: nowrap; }
+    .nav-links a:hover { background: rgba(0,0,0,0.05); }
+    .nav-links a.active { font-weight: 500; color: var(--terracotta); }
+    .nav-cta { background: var(--terracotta) !important; color: white !important; font-weight: 500 !important; border-radius: 50px !important; }
+    .nav-cta:hover { background: var(--terracotta-dark) !important; }
+    /* Dropdown */
+    .nav-dropdown { position: relative; }
+    .nav-dropdown-btn { display: flex; align-items: center; gap: 4px; padding: 7px 11px; font-size: 13px; color: var(--text); background: none; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; border-radius: 8px; transition: background 0.15s; white-space: nowrap; }
+    .nav-dropdown-btn:hover { background: rgba(0,0,0,0.05); }
+    .nav-dropdown-menu { display: none; position: absolute; top: calc(100% + 8px); right: 0; background: white; border: 1.5px solid var(--border); border-radius: var(--radius); padding: 6px; min-width: 200px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); z-index: 200; }
+    .nav-dropdown:hover .nav-dropdown-menu, .nav-dropdown.open .nav-dropdown-menu { display: flex; flex-direction: column; }
+    .nav-dropdown-menu a { display: block; padding: 9px 14px; text-decoration: none; color: var(--text); font-size: 13px; border-radius: 8px; transition: background 0.15s; white-space: nowrap; }
+    .nav-dropdown-menu a:hover { background: var(--cream); }
+    .nav-dropdown-menu a.active { color: var(--terracotta); font-weight: 500; }
+    /* Hamburger */
+    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 8px; border: none; background: none; flex-shrink: 0; }
+    .hamburger span { width: 22px; height: 2px; background: var(--charcoal); border-radius: 2px; display: block; }
+    .mobile-menu { display: none; position: fixed; top: var(--nav-h); left: 0; right: 0; bottom: 0; background: var(--cream); z-index: 99; padding: 24px; overflow-y: auto; }
+    .mobile-menu.open { display: flex; flex-direction: column; gap: 4px; }
+    .mobile-menu a { display: block; padding: 16px; text-decoration: none; color: var(--text); font-size: 18px; border-bottom: 1px solid var(--border); }
+    .mobile-menu a:last-child { margin-top: 16px; background: var(--terracotta); color: white; border-radius: var(--radius); border: none; text-align: center; }
+
+
+    /* ── PAGE HERO — canonical single-column header ── */
+    .page-hero, .page-header {
+      padding-top: calc(var(--nav-h) + 56px);
+      padding-bottom: 56px;
+      padding-left: 24px;
+      padding-right: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+    .breadcrumb a { color: var(--text-muted); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--terracotta); }
+    .breadcrumb > span { color: var(--border); }
+    .page-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 13px; font-weight: 500;
+      color: var(--terracotta);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 16px;
+    }
+    .page-eyebrow::before {
+      content: '';
+      width: 24px; height: 2px;
+      background: var(--terracotta);
+      border-radius: 2px;
+    }
+    h1 {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(40px, 5vw, 62px);
+      font-weight: 400;
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      color: var(--charcoal);
+      margin-bottom: 20px;
+    }
+    h1 em { font-style: italic; color: var(--terracotta); }
+    .hero-intro, .page-intro {
+      font-size: 17px;
+      line-height: 1.75;
+      color: var(--text-muted);
+      max-width: 640px;
+      margin-bottom: 0;
+    }
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    .hero-intro, 
+
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text); -webkit-font-smoothing: antialiased; }
+
+    
+
+    
+    
+    
+    
+    .nav-logo-text span { display: block; font-size: 11px; font-family: 'DM Sans', sans-serif; font-weight: 300; color: var(--text-muted); letter-spacing: 0.04em; text-transform: uppercase; }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+
+    
+
+    
+.stats-row {
+      display: flex; justify-content: center; gap: 0;
+      margin: 64px auto 0;
+      max-width: 700px;
+      background: white;
+      border-radius: var(--radius);
+      border: 1.5px solid var(--border);
+      overflow: hidden;
+    }
+    .stat-cell {
+      flex: 1; padding: 28px 20px; text-align: center;
+      border-right: 1px solid var(--border);
+    }
+    .stat-cell:last-child { border-right: none; }
+    .stat-cell strong { display: block; font-family: 'Fraunces', serif; font-size: 38px; font-weight: 400; color: var(--charcoal); }
+    .stat-cell span { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+
+    
+.timeline-section {
+      padding: 96px 24px;
+      max-width: 900px; margin: 0 auto;
+    }
+
+    .timeline { position: relative; }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 50%; top: 0; bottom: 0;
+      width: 2px;
+      background: var(--border);
+      transform: translateX(-50%);
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 1fr 60px 1fr;
+      gap: 0;
+      margin-bottom: 64px;
+      position: relative;
+    }
+    .timeline-item:last-child { margin-bottom: 0; }
+
+    
+.timeline-item:nth-child(odd) .tl-content { grid-column: 1; text-align: right; padding-right: 40px; }
+    .timeline-item:nth-child(odd) .tl-empty  { grid-column: 3; }
+    .timeline-item:nth-child(even) .tl-content { grid-column: 3; text-align: left; padding-left: 40px; }
+    .timeline-item:nth-child(even) .tl-empty  { grid-column: 1; }
+
+    .tl-center {
+      grid-column: 2;
+      display: flex; flex-direction: column; align-items: center;
+      z-index: 1;
+    }
+    .tl-dot {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+      position: relative; z-index: 2;
+      border: 3px solid var(--cream);
+    }
+    .tl-dot-primary { background: var(--terracotta); }
+    .tl-dot-secondary { background: var(--charcoal); }
+    .tl-dot-accent { background: var(--yellow); }
+    .tl-dot-sage { background: var(--sage-light); }
+
+    .tl-year {
+      font-family: 'Fraunces', serif;
+      font-size: 13px; font-weight: 500;
+      color: var(--text-muted);
+      margin-top: 8px;
+      white-space: nowrap;
+    }
+
+    .tl-content {}
+    .tl-tag {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 50px;
+      font-size: 11px; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      margin-bottom: 10px;
+    }
+    .tag-founding { background: var(--terracotta-light); color: var(--terracotta-dark); }
+    .tag-growth   { background: #e8f4f8; color: #2a6a8a; }
+    .tag-life     { background: var(--sage-light); color: #3a6b3e; }
+    .tag-today    { background: #fef9e7; color: #7a5f00; }
+
+    .tl-content h3 {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(20px, 2.5vw, 26px);
+      font-weight: 400; color: var(--charcoal);
+      line-height: 1.2; margin-bottom: 12px;
+    }
+    .tl-content p {
+      font-size: 15px; color: var(--text-muted);
+      line-height: 1.75;
+    }
+    .tl-content p + p { margin-top: 10px; }
+
+    
+.speech-section {
+      background: var(--charcoal);
+      padding: 96px 24px;
+    }
+    .speech-inner { max-width: 800px; margin: 0 auto; }
+    .speech-label { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: var(--yellow); margin-bottom: 12px; }
+    .speech-title { font-family: 'Fraunces', serif; font-size: clamp(26px, 3.5vw, 40px); font-weight: 400; color: white; line-height: 1.2; margin-bottom: 8px; }
+    .speech-meta { font-size: 14px; color: rgba(255,255,255,0.4); margin-bottom: 48px; }
+
+    .speech-quote-mark { font-family: 'Fraunces', serif; font-size: 80px; line-height: 0.5; color: rgba(255,255,255,0.1); display: block; margin-bottom: 24px; }
+
+    .speech-body {
+      border-left: 3px solid var(--terracotta);
+      padding-left: 32px;
+      display: flex; flex-direction: column; gap: 20px;
+    }
+    .speech-body p {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(17px, 2vw, 20px);
+      font-style: italic;
+      font-weight: 300;
+      color: rgba(255,255,255,0.8);
+      line-height: 1.7;
+    }
+    .speech-body p strong { font-style: normal; font-weight: 500; color: white; }
+
+    .speech-author {
+      margin-top: 40px;
+      display: flex; align-items: center; gap: 14px;
+    }
+    .speech-author-dot {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: var(--terracotta);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
+    }
+    .speech-author strong { display: block; color: white; font-size: 15px; }
+    .speech-author span { font-size: 13px; color: rgba(255,255,255,0.45); }
+
+    
+.thanks-section { background: white; padding: 80px 24px; }
+    .thanks-inner { max-width: 1200px; margin: 0 auto; }
+    .section-label { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: var(--terracotta); margin-bottom: 12px; }
+    h2 { font-family: 'Fraunces', serif; font-size: clamp(28px, 3.5vw, 42px); font-weight: 400; letter-spacing: -0.02em; color: var(--charcoal); line-height: 1.15; margin-bottom: 16px; }
+    .section-subtitle { font-size: 16px; color: var(--text-muted); line-height: 1.7; max-width: 560px; margin-bottom: 48px; }
+
+    .thanks-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .thanks-card { padding: 22px; border-radius: var(--radius); border: 1.5px solid var(--border); text-align: center; transition: all 0.2s; }
+    .thanks-card:hover { border-color: var(--terracotta); transform: translateY(-2px); }
+    .thanks-card-icon { font-size: 28px; margin-bottom: 10px; }
+    .thanks-card h4 { font-size: 13px; font-weight: 500; color: var(--charcoal); margin-bottom: 4px; }
+    .thanks-card p { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+
+    
+.cta-section { background: var(--terracotta); padding: 80px 24px; text-align: center; }
+    .cta-section h2 { color: white; font-size: clamp(26px, 3.5vw, 40px); margin-bottom: 14px; font-family: 'Fraunces', serif; font-weight: 400; }
+    .cta-section p { color: rgba(255,255,255,0.75); font-size: 17px; line-height: 1.7; max-width: 520px; margin: 0 auto 36px; }
+    .cta-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 14px 24px; font-size: 15px; font-weight: 500; border-radius: 50px; text-decoration: none; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
+    .btn-white { background: white; color: var(--terracotta); }
+    .btn-white:hover { background: var(--cream); transform: translateY(-1px); }
+    .btn-ghost { background: rgba(255,255,255,0.15); color: white; border: 1.5px solid rgba(255,255,255,0.35); }
+    .btn-ghost:hover { background: rgba(255,255,255,0.25); }
+
+    
+footer { background: var(--charcoal); color: white; padding: 48px 24px 32px; }
+    .footer-inner { max-width: 1200px; margin: 0 auto; }
+    .footer-
+    .footer-nav a { font-size: 14px; color: rgba(255,255,255,0.55); text-decoration: none; }
+    .footer-nav a:hover { color: white; }
+    .footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 24px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: rgba(255,255,255,0.35); }
+
+    
+@media (max-width: 900px) {
+       
+      
+.timeline::before { left: 28px; transform: none; }
+      .timeline-item { grid-template-columns: 60px 1fr; grid-template-rows: auto; }
+      .timeline-item:nth-child(odd) .tl-content,
+      .timeline-item:nth-child(even) .tl-content { grid-column: 2; text-align: left; padding-left: 24px; padding-right: 0; }
+      .timeline-item:nth-child(odd) .tl-center,
+      .timeline-item:nth-child(even) .tl-center { grid-column: 1; grid-row: 1; }
+      .tl-empty { display: none; }
+      .stats-row { flex-direction: column; }
+      .stat-cell { border-right: none; border-bottom: 1px solid var(--border); }
+      .stat-cell:last-child { border-bottom: none; }
+      .thanks-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .thanks-grid { grid-template-columns: 1fr 1fr; }
+      .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
+    }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    
+
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-mark">M</div>
+      <div class="nav-logo-text">Les Microdoniens<span>Crèche parentale · Saint-Ouen</span></div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html#espaces">La crèche</a></li>
+      <li><a href="vie.html">Vie de la crèche</a></li>
+      <li><a href="association.html">L'association</a></li>
+      <li><a href="inscriptions.html">Inscriptions</a></li>
+      <li class="nav-dropdown">
+        <button class="nav-dropdown-btn" style="color:var(--terracotta);font-weight:500">Plus ▾</button>
+        <div class="nav-dropdown-menu">
+          <a href="pedagogie.html">Pédagogie</a>
+          <a href="evenements.html">Événements</a>
+          <a href="historique.html" class="active">Historique</a>
+          <a href="presse.html">On parle de nous</a>
+          <a href="contact.html">Contact</a>
+          </div>
+      </li>
+      <li><a href="contact.html" class="nav-cta">Contact</a></li>
+    </ul>
+    <button class="hamburger" onclick="toggleMenu()" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html#espaces" onclick="toggleMenu()">La crèche</a>
+  <a href="vie.html" onclick="toggleMenu()">Vie de la crèche</a>
+  <a href="association.html" onclick="toggleMenu()">L'association</a>
+  <a href="inscriptions.html" onclick="toggleMenu()">Inscriptions</a>
+  <a href="pedagogie.html" onclick="toggleMenu()">Pédagogie</a>
+  <a href="evenements.html" onclick="toggleMenu()">Événements</a>
+  <a href="historique.html" onclick="toggleMenu()">Historique</a>
+  <a href="presse.html" onclick="toggleMenu()">On parle de nous</a>
+  <a href="contact.html" onclick="toggleMenu()">Contact</a>
+</div>
+
+<!-- HERO -->
+<div class="page-hero">
+  <div class="breadcrumb">
+    <a href="index.html">Accueil</a><span>›</span><span>Historique</span>
+  </div>
+  <div class="page-eyebrow">Notre histoire</div>
+  <h1>De l'idée d'une maman<br>à une <em>communauté</em></h1>
+  <p class="hero-intro">Les Microdoniens sont nés d'un constat simple : Saint-Ouen, ville dynamique et jeune, méritait sa crèche parentale. Ce qui a suivi est une belle histoire collective.</p>
+
+  <div class="stats-row">
+    <div class="stat-cell">
+      <strong>2012</strong>
+      <span>Année de création</span>
+    </div>
+    <div class="stat-cell">
+      <strong>16 → 20</strong>
+      <span>Places après extension</span>
+    </div>
+    <div class="stat-cell">
+      <strong>+12</strong>
+      <span>Ans d'existence</span>
+    </div>
+  </div>
+</div>
+
+<!-- TIMELINE -->
+<section class="timeline-section">
+  <div class="timeline">
+
+    <!-- 2011 -->
+    <div class="timeline-item">
+      <div class="tl-content">
+        <div class="tl-tag tag-founding">Genèse</div>
+        <h3>L'idée germe à Saint-Ouen</h3>
+        <p>Une maman constate que Saint-Ouen, pourtant ville dynamique sur le plan associatif, ne dispose pas de crèche parentale. Elle décide de changer ça.</p>
+        <p>Le constat est sévère : avec un taux de réponse aux besoins de garde de seulement 30% (contre 50% au niveau national), de nombreuses familles se trouvent dans l'incapacité de travailler.</p>
+      </div>
+      <div class="tl-center">
+        <div class="tl-dot tl-dot-primary">💡</div>
+        <div class="tl-year">2011</div>
+      </div>
+      <div class="tl-empty"></div>
+    </div>
+
+    <!-- 2012 -->
+    <div class="timeline-item">
+      <div class="tl-empty"></div>
+      <div class="tl-center">
+        <div class="tl-dot tl-dot-secondary">🐝</div>
+        <div class="tl-year">2012</div>
+      </div>
+      <div class="tl-content">
+        <div class="tl-tag tag-founding">Fondation</div>
+        <h3>Naissance des Microdoniens</h3>
+        <p>L'association loi 1901 « Les Microdoniens » est créée. Les premiers parents pionniers s'engagent dans l'aventure, portant le projet avec énergie et sans compter leur temps.</p>
+        <p>La crèche ouvre ses portes au 53 rue Albert Dhalenne, avec une capacité initiale de <strong>16 places</strong>, sous l'influence pédagogique de la méthode Loczy — respectueuse du rythme et de l'autonomie de chaque enfant.</p>
+      </div>
+    </div>
+
+    <!-- 20 février 2013 -->
+    <div class="timeline-item">
+      <div class="tl-content">
+        <div class="tl-tag tag-founding">Inauguration</div>
+        <h3>20 février 2013 — La grande inauguration</h3>
+        <p>La crèche est inaugurée officiellement. Audrey Liese, présidente fondatrice, prononce un discours fondateur qui remercie les dizaines de personnes — institutions, parents, professionnels — qui ont rendu ce projet possible.</p>
+        <p>La Mairie de Saint-Ouen, la CAF, la PMI, l'ACEPP et de nombreux partenaires locaux sont présents pour célébrer cette première en Seine-Saint-Denis.</p>
+      </div>
+      <div class="tl-center">
+        <div class="tl-dot tl-dot-accent">🎉</div>
+        <div class="tl-year">Fév. 2013</div>
+      </div>
+      <div class="tl-empty"></div>
+    </div>
+
+    <!-- Printemps 2014 -->
+    <div class="timeline-item">
+      <div class="tl-empty"></div>
+      <div class="tl-center">
+        <div class="tl-dot tl-dot-primary">🏗️</div>
+        <div class="tl-year">2014</div>
+      </div>
+      <div class="tl-content">
+        <div class="tl-tag tag-growth">Expansion</div>
+        <h3>L'agrandissement : le jardin, l'atelier, la rénovation</h3>
+        <p>Après à peine plus d'un an, l'association fait le choix audacieux d'un profond renouvellement. Les parents — anciens et nouveaux — mobilisent leurs énergies pendant plusieurs mois pour réaliser trois chantiers majeurs :</p>
+        <p>🌿 <strong>Un jardin</strong> d'une soixantaine de m² dans la cour intérieure.<br>
+        🏃 <strong>Une salle de motricité</strong> dans un nouveau local adjacent.<br>
+        🏠 <strong>La rénovation complète</strong> de la crèche principale.</p>
+      </div>
+    </div>
+
+    <!-- Octobre 2014 -->
+    <div class="timeline-item">
+      <div class="tl-content">
+        <div class="tl-tag tag-growth">Agrément PMI</div>
+        <h3>16 → 20 places : 7 nouvelles familles</h3>
+        <p>Grâce aux travaux, l'agrément PMI est révisé en octobre 2014 : la capacité d'accueil passe de <strong>16 à 20 places</strong>. Sept nouvelles familles peuvent rejoindre l'aventure.</p>
+        <p>Le 12 décembre, les Microdoniens fêtent leur agrandissement lors d'une deuxième inauguration — en moins de deux ans d'existence.</p>
+      </div>
+      <div class="tl-center">
+        <div class="tl-dot tl-dot-secondary">📋</div>
+        <div class="tl-year">Oct. 2014</div>
+      </div>
+      <div class="tl-empty"></div>
+    </div>
+
+    <!-- 2019 -->
+    <div class="timeline-item">
+      <div class="tl-empty"></div>
+      <div class="tl-center">
+        <div class="tl-dot tl-dot-sage">🌱</div>
+        <div class="tl-year">2019</div>
+      </div>
+      <div class="tl-content">
+        <div class="tl-tag tag-life">Vie de la crèche</div>
+        <h3>Rénovation du jardin & ouverture sur le monde</h3>
+        <p>Le jardin est entièrement rénové grâce à la collaboration avec des parents en formation de jardiniers paysagistes. La crèche développe son projet d'ouverture culturelle : sorties au cinéma, à la médiathèque, interventions musicales et visites de ferme.</p>
+      </div>
+    </div>
+
+    <!-- 2021 -->
+    <div class="timeline-item">
+      <div class="tl-content">
+        <div class="tl-tag tag-life">Anniversaire</div>
+        <h3>Les 9 ans — et la fierté d'une communauté</h3>
+        <p>La crèche fête ses 9 ans avec une réflexion sur son héritage : l'équipe pédagogique, les liens tissés avec les familles, et tous les petits Audoniens accompagnés sur le chemin du collectif.</p>
+        <p><em>« Seul on va plus vite, ensemble on va plus loin. »</em></p>
+      </div>
+      <div class="tl-center">
+        <div class="tl-dot tl-dot-accent">🎂</div>
+        <div class="tl-year">2021</div>
+      </div>
+      <div class="tl-empty"></div>
+    </div>
+
+    <!-- Aujourd'hui -->
+    <div class="timeline-item">
+      <div class="tl-empty"></div>
+      <div class="tl-center">
+        <div class="tl-dot tl-dot-primary">✨</div>
+        <div class="tl-year">Aujourd'hui</div>
+      </div>
+      <div class="tl-content">
+        <div class="tl-tag tag-today">2026</div>
+        <h3>Plus de 12 ans et toujours vivants</h3>
+        <p>Les Microdoniens accueillent aujourd'hui une vingtaine d'enfants, portés par une équipe de 8 professionnels et des familles engagées. Le projet pédagogique continue d'évoluer, fidèle à ses valeurs fondatrices.</p>
+        <p>Les inscriptions 2026/2027 sont ouvertes — une nouvelle génération de familles s'apprête à écrire le prochain chapitre.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- DISCOURS FONDATEUR -->
+<section class="speech-section">
+  <div class="speech-inner">
+    <div class="speech-label">Discours fondateur</div>
+    <div class="speech-title">L'inauguration du 20 février 2013</div>
+    <div class="speech-meta">Audrey Liese, présidente fondatrice de l'association</div>
+
+    <span class="speech-quote-mark">"</span>
+
+    <div class="speech-body">
+      <p>J'aimerais vous raconter l'histoire d'une maman qui s'est dit qu'une ville comme Saint-Ouen, aussi dynamique sur le plan associatif, <strong>ne pouvait pas ne pas avoir de crèche parentale.</strong></p>
+      <p>Ce projet est d'autant plus pertinent dans cette ville que de nombreuses familles « galèrent » pour trouver un mode de garde. Avec un taux de réponse de 30%, notre ville est certes dans la moyenne du département mais loin des 50% nationaux.</p>
+      <p>Merci aux parents pionniers qui ont osé croire en l'aventure et donner leur temps et leur énergie sans compter. J'espère que nos successeurs sauront bien s'occuper de ce bel héritage et le faire partager dans des <strong>valeurs de mixité et de solidarité.</strong></p>
+      <p>Des remerciements tout particuliers aux professionnelles qui nous ont rejoint pour mettre en place un très beau projet pédagogique avec des influences Loczy. Ce seront les gardiennes du temple, de sa pérennité et de ses valeurs.</p>
+    </div>
+
+    <div class="speech-author">
+      <div class="speech-author-dot">👑</div>
+      <div>
+        <strong>Audrey Liese</strong>
+        <span>Présidente fondatrice — Inauguration, 20 février 2013</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PARTENAIRES FONDATEURS -->
+<section class="thanks-section">
+  <div class="thanks-inner">
+    <div class="section-label">Dès le premier jour</div>
+    <h2>Ils ont rendu<br>tout cela possible</h2>
+    <p class="section-subtitle">La crèche n'aurait pas vu le jour sans le soutien d'un réseau dense de partenaires institutionnels, associatifs et individuels.</p>
+    <div class="thanks-grid">
+      <div class="thanks-card">
+        <div class="thanks-card-icon">🏙️</div>
+        <h4>Mairie de Saint-Ouen</h4>
+        <p>Convention de partenariat et soutien municipal dès l'origine.</p>
+      </div>
+      <div class="thanks-card">
+        <div class="thanks-card-icon">👶</div>
+        <h4>CAF Seine-Saint-Denis</h4>
+        <p>Principal investisseur — financement des travaux et du fonctionnement.</p>
+      </div>
+      <div class="thanks-card">
+        <div class="thanks-card-icon">🩺</div>
+        <h4>PMI Seine-St-Denis</h4>
+        <p>Agrément, suivi sanitaire et accompagnement réglementaire.</p>
+      </div>
+      <div class="thanks-card">
+        <div class="thanks-card-icon">🤝</div>
+        <h4>ACEPP</h4>
+        <p>Association Collectif Enfants Parents Professionnels — réseau national des crèches parentales.</p>
+      </div>
+      <div class="thanks-card">
+        <div class="thanks-card-icon">💛</div>
+        <h4>Garances / France Active</h4>
+        <p>Fonds solidaire territorial du 93 — premiers fonds dès le stade du projet.</p>
+      </div>
+      <div class="thanks-card">
+        <div class="thanks-card-icon">🏘️</div>
+        <h4>Maison de quartier du Landy</h4>
+        <p>Accueil des réunions de préparation dans un cadre associatif bienveillant.</p>
+      </div>
+      <div class="thanks-card">
+        <div class="thanks-card-icon">🌱</div>
+        <h4>Crèche de Saint-Denis</h4>
+        <p>Conseils, hotline et partage d'expérience de crèche parentale à crèche parentale.</p>
+      </div>
+      <div class="thanks-card">
+        <div class="thanks-card-icon">👨‍👩‍👧</div>
+        <h4>Les parents pionniers</h4>
+        <p>Sans eux, rien. Leur engagement désintéressé a tout rendu possible.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <h2>Écrire le prochain chapitre</h2>
+  <p>Les Microdoniens continuent de grandir grâce aux familles qui s'engagent. Rejoignez l'aventure pour 2026/2027.</p>
+  <div class="cta-actions">
+    <a href="contact.html" class="btn btn-white">Candidater maintenant</a>
+    <a href="association.html" class="btn btn-ghost">L'association →</a>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <nav class="footer-nav">
+      <a href="index.html#espaces">La crèche</a>
+      <a href="vie.html">Vie de la crèche</a>
+      <a href="pedagogie.html">Pédagogie</a>
+      <a href="association.html">L'association</a>
+      <a href="evenements.html">Événements</a>
+      <a href="historique.html">Historique</a>
+      <a href="presse.html">On parle de nous</a>
+      <a href="inscriptions.html">Inscriptions</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <div class="footer-bottom">
+      <span>© 2026 Les Microdoniens — Association loi 1901</span>
+      <span>53 rue Albert Dhalenne, Saint-Ouen 93400</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  function toggleMenu() { document.getElementById('mobileMenu').classList.toggle('open'); }
+  document.addEventListener('click', e => {
+    const m = document.getElementById('mobileMenu');
+    if (m.classList.contains('open') && !e.target.closest('nav') && !e.target.closest('#mobileMenu')) m.classList.remove('open');
+  });
+</script>
+</body>
+</html>

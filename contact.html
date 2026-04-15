@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact & Inscriptions — Les Microdoniens</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream: #faf8f4;
+      --charcoal: #1a1a1a;
+      --text: #2d2d2d;
+      --text-muted: #717171;
+      --border: #e4e0d8;
+      --terracotta: #d96b3f;
+      --terracotta-light: #f5ede7;
+      --terracotta-dark: #b8562e;
+      --radius: 16px;
+      --shadow-hover: 0 8px 32px rgba(0,0,0,0.14);
+      --nav-h: 72px;
+    }
+
+    /* ── NAV ── */
+    nav { position: fixed; top: 0; left: 0; right: 0; height: var(--nav-h); background: rgba(250,248,244,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); z-index: 100; display: flex; align-items: center; padding: 0 24px; }
+    .nav-inner { max-width: 1200px; width: 100%; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--charcoal); flex-shrink: 0; }
+    .nav-logo-mark { width: 36px; height: 36px; background: var(--terracotta); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Fraunces', serif; font-size: 16px; color: white; flex-shrink: 0; }
+    .nav-logo-text { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 400; color: var(--charcoal); }
+    .nav-logo-text span { display: block; font-size: 10px; font-family: 'DM Sans', sans-serif; font-weight: 300; color: var(--text-muted); letter-spacing: 0.04em; text-transform: uppercase; }
+    .nav-links { display: flex; align-items: center; gap: 2px; list-style: none; flex-shrink: 0; }
+    .nav-links a { display: block; padding: 7px 11px; text-decoration: none; color: var(--text); font-size: 13px; border-radius: 8px; transition: background 0.15s; white-space: nowrap; }
+    .nav-links a:hover { background: rgba(0,0,0,0.05); }
+    .nav-links a.active { font-weight: 500; color: var(--terracotta); }
+    .nav-cta { background: var(--terracotta) !important; color: white !important; font-weight: 500 !important; border-radius: 50px !important; }
+    .nav-cta:hover { background: var(--terracotta-dark) !important; }
+    /* Dropdown */
+    .nav-dropdown { position: relative; }
+    .nav-dropdown-btn { display: flex; align-items: center; gap: 4px; padding: 7px 11px; font-size: 13px; color: var(--text); background: none; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; border-radius: 8px; transition: background 0.15s; white-space: nowrap; }
+    .nav-dropdown-btn:hover { background: rgba(0,0,0,0.05); }
+    .nav-dropdown-menu { display: none; position: absolute; top: calc(100% + 8px); right: 0; background: white; border: 1.5px solid var(--border); border-radius: var(--radius); padding: 6px; min-width: 200px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); z-index: 200; }
+    .nav-dropdown:hover .nav-dropdown-menu, .nav-dropdown.open .nav-dropdown-menu { display: flex; flex-direction: column; }
+    .nav-dropdown-menu a { display: block; padding: 9px 14px; text-decoration: none; color: var(--text); font-size: 13px; border-radius: 8px; transition: background 0.15s; white-space: nowrap; }
+    .nav-dropdown-menu a:hover { background: var(--cream); }
+    .nav-dropdown-menu a.active { color: var(--terracotta); font-weight: 500; }
+    /* Hamburger */
+    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 8px; border: none; background: none; flex-shrink: 0; }
+    .hamburger span { width: 22px; height: 2px; background: var(--charcoal); border-radius: 2px; display: block; }
+    .mobile-menu { display: none; position: fixed; top: var(--nav-h); left: 0; right: 0; bottom: 0; background: var(--cream); z-index: 99; padding: 24px; overflow-y: auto; }
+    .mobile-menu.open { display: flex; flex-direction: column; gap: 4px; }
+    .mobile-menu a { display: block; padding: 16px; text-decoration: none; color: var(--text); font-size: 18px; border-bottom: 1px solid var(--border); }
+    .mobile-menu a:last-child { margin-top: 16px; background: var(--terracotta); color: white; border-radius: var(--radius); border: none; text-align: center; }
+
+
+    /* ── PAGE HERO — canonical single-column header ── */
+    .page-hero, .page-header {
+      padding-top: calc(var(--nav-h) + 56px);
+      padding-bottom: 56px;
+      padding-left: 24px;
+      padding-right: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+    .breadcrumb a { color: var(--text-muted); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--terracotta); }
+    .breadcrumb > span { color: var(--border); }
+    .page-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 13px; font-weight: 500;
+      color: var(--terracotta);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 16px;
+    }
+    .page-eyebrow::before {
+      content: '';
+      width: 24px; height: 2px;
+      background: var(--terracotta);
+      border-radius: 2px;
+    }
+    h1 {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(40px, 5vw, 62px);
+      font-weight: 400;
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      color: var(--charcoal);
+      margin-bottom: 20px;
+    }
+    h1 em { font-style: italic; color: var(--terracotta); }
+    .hero-intro, .page-intro {
+      font-size: 17px;
+      line-height: 1.75;
+      color: var(--text-muted);
+      max-width: 640px;
+      margin-bottom: 0;
+    }
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    .hero-intro, 
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream); color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    .nav-logo-text span {
+      display: block; font-size: 11px;
+      font-family: 'DM Sans', sans-serif; font-weight: 300;
+      color: var(--text-muted); letter-spacing: 0.04em; text-transform: uppercase;
+    }
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+.contact-layout {
+      padding-top: calc(var(--nav-h) + 64px);
+      padding-bottom: 80px;
+      padding-left: 24px; padding-right: 24px;
+      max-width: 1200px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 80px; align-items: start;
+    }
+
+    .contact-left {}
+
+    
+    
+    
+    
+    
+    
+
+    
+
+    .contact-intro {
+      font-size: 16px; color: var(--text-muted);
+      line-height: 1.7; margin-bottom: 48px;
+    }
+
+    .contact-block {
+      display: flex; gap: 16px; align-items: flex-start;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .contact-block:last-of-type { border-bottom: none; }
+
+    .contact-icon {
+      width: 44px; height: 44px; flex-shrink: 0;
+      background: var(--terracotta-light);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+
+    .contact-block strong {
+      display: block; font-size: 13px; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--text-muted); margin-bottom: 4px;
+    }
+
+    .contact-block p {
+      font-size: 16px; color: var(--charcoal); line-height: 1.5;
+    }
+
+    .contact-block a {
+      color: var(--terracotta); text-decoration: none;
+    }
+
+    .contact-block a:hover { text-decoration: underline; }
+
+    
+.map-placeholder {
+      margin-top: 40px;
+      background: linear-gradient(135deg, #e8f0e8, #d4e4d4);
+      border-radius: var(--radius);
+      height: 200px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 48px;
+      border: 1.5px solid var(--border);
+    }
+
+    
+.contact-right {}
+
+    .form-card {
+      background: white;
+      border-radius: 24px;
+      padding: 40px;
+      border: 1.5px solid var(--border);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    }
+
+    .form-card h2 {
+      font-family: 'Fraunces', serif;
+      font-size: 26px; font-weight: 400;
+      color: var(--charcoal); margin-bottom: 8px;
+    }
+
+    .form-card p {
+      font-size: 14px; color: var(--text-muted);
+      margin-bottom: 32px; line-height: 1.6;
+    }
+
+    .form-group { margin-bottom: 20px; }
+
+    .form-row {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    label {
+      display: block; font-size: 13px; font-weight: 500;
+      color: var(--text); margin-bottom: 6px;
+    }
+
+    input, textarea, select {
+      width: 100%; padding: 12px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px; color: var(--text);
+      background: var(--cream);
+      transition: border-color 0.15s;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--terracotta);
+      background: white;
+    }
+
+    textarea { resize: vertical; min-height: 120px; }
+
+    .form-note {
+      font-size: 12px; color: var(--text-muted);
+      margin-top: 6px; line-height: 1.5;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 15px 24px;
+      background: var(--terracotta);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px; font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 8px;
+    }
+
+    .btn-submit:hover {
+      background: var(--terracotta-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(217,107,63,0.4);
+    }
+
+    .form-success {
+      display: none;
+      text-align: center; padding: 40px 20px;
+    }
+
+    .form-success .success-icon {
+      font-size: 56px; margin-bottom: 16px;
+    }
+
+    .form-success h3 {
+      font-family: 'Fraunces', serif;
+      font-size: 24px; font-weight: 400;
+      color: var(--charcoal); margin-bottom: 10px;
+    }
+
+    .form-success p {
+      font-size: 15px; color: var(--text-muted);
+    }
+
+    
+.inscription-banner {
+      background: var(--terracotta);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      display: flex; align-items: center; gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .inscription-banner-icon { font-size: 32px; flex-shrink: 0; }
+
+    .inscription-banner strong {
+      display: block; color: white; font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .inscription-banner p {
+      color: rgba(255,255,255,0.75); font-size: 14px; line-height: 1.5;
+    }
+
+    
+@media (max-width: 900px) {
+      
+      
+      .contact-layout { grid-template-columns: 1fr; gap: 48px; }
+    }
+
+    @media (max-width: 600px) {
+      .form-row { grid-template-columns: 1fr; }
+      .form-card { padding: 24px; }
+    }
+
+    footer {
+      background: var(--charcoal); color: white;
+      padding: 40px 24px 32px;
+    }
+
+    .footer-bottom {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 13px; color: rgba(255,255,255,0.35);
+    }
+
+    @media (max-width: 600px) {
+      .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-mark">M</div>
+      <div class="nav-logo-text">Les Microdoniens<span>Crèche parentale · Saint-Ouen</span></div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html#espaces">La crèche</a></li>
+      <li><a href="vie.html">Vie de la crèche</a></li>
+      <li><a href="association.html">L'association</a></li>
+      <li><a href="inscriptions.html">Inscriptions</a></li>
+      <li class="nav-dropdown">
+        <button class="nav-dropdown-btn" style="color:var(--terracotta);font-weight:500">Plus ▾</button>
+        <div class="nav-dropdown-menu">
+          <a href="pedagogie.html">Pédagogie</a>
+          <a href="evenements.html">Événements</a>
+          <a href="historique.html">Historique</a>
+          <a href="presse.html">On parle de nous</a>
+          <a href="contact.html" class="active">Contact</a>
+          </div>
+      </li>
+      <li><a href="contact.html" class="nav-cta">Contact</a></li>
+    </ul>
+    <button class="hamburger" onclick="toggleMenu()" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html#espaces" onclick="toggleMenu()">La crèche</a>
+  <a href="vie.html" onclick="toggleMenu()">Vie de la crèche</a>
+  <a href="association.html" onclick="toggleMenu()">L'association</a>
+  <a href="inscriptions.html" onclick="toggleMenu()">Inscriptions</a>
+  <a href="pedagogie.html" onclick="toggleMenu()">Pédagogie</a>
+  <a href="evenements.html" onclick="toggleMenu()">Événements</a>
+  <a href="historique.html" onclick="toggleMenu()">Historique</a>
+  <a href="presse.html" onclick="toggleMenu()">On parle de nous</a>
+  <a href="contact.html" onclick="toggleMenu()">Contact</a>
+</div>
+
+<div class="contact-layout">
+  <div class="contact-left">
+    <div class="breadcrumb">
+      <a href="index.html">Accueil</a><span>›</span><span>Contact</span>
+    </div>
+    <div class="page-eyebrow">Nous trouver</div>
+    <h1>Contact &<br><em>Inscriptions</em></h1>
+    <p class="contact-intro">
+      Une question sur la crèche, le processus d'admission ou la vie associative ? Écrivez-nous, nous vous répondrons rapidement.
+    </p>
+
+    <div class="contact-block">
+      <div class="contact-icon">📍</div>
+      <div>
+        <strong>Adresse</strong>
+        <p>53 rue Albert Dhalenne<br>93400 Saint-Ouen</p>
+      </div>
+    </div>
+
+    <div class="contact-block">
+      <div class="contact-icon">🕐</div>
+      <div>
+        <strong>Horaires d'accueil</strong>
+        <p>Lundi — vendredi · 8h15 à 18h30<br>Fermée en août et aux congés de Noël</p>
+      </div>
+    </div>
+
+    <div class="contact-block">
+      <div class="contact-icon">📅</div>
+      <div>
+        <strong>Journée d'information</strong>
+        <p>Organisée chaque année entre mars et avril — annoncée dans le Journal de la Ville de Saint-Ouen et dans les PMI locales.</p>
+      </div>
+    </div>
+
+    <div class="contact-block">
+      <div class="contact-icon">💶</div>
+      <div>
+        <strong>Participation financière</strong>
+        <p>Calculée selon les revenus du foyer et le nombre d'enfants à charge — barème CNAF.</p>
+      </div>
+    </div>
+
+    <div class="map-placeholder">🗺️</div>
+  </div>
+
+  <div class="contact-right">
+    <div class="form-card">
+
+      <div class="inscription-banner">
+        <div class="inscription-banner-icon">🌟</div>
+        <div>
+          <strong>Inscriptions 2026/2027 ouvertes</strong>
+          <p>Candidatez dès maintenant pour la prochaine rentrée. Places limitées.</p>
+        </div>
+      </div>
+
+      <h2>Envoyer un message</h2>
+      <p>Nous vous répondrons dans les meilleurs délais.</p>
+
+      <div id="contactForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="prenom">Prénom *</label>
+            <input type="text" id="prenom" placeholder="Marie" required />
+          </div>
+          <div class="form-group">
+            <label for="nom">Nom *</label>
+            <input type="text" id="nom" placeholder="Dupont" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email *</label>
+          <input type="email" id="email" placeholder="marie.dupont@email.com" required />
+        </div>
+
+        <div class="form-group">
+          <label for="tel">Téléphone</label>
+          <input type="tel" id="tel" placeholder="06 00 00 00 00" />
+        </div>
+
+        <div class="form-group">
+          <label for="sujet">Sujet</label>
+          <select id="sujet">
+            <option value="">Choisir un sujet…</option>
+            <option value="inscription">Inscription 2026/2027</option>
+            <option value="visite">Demande de visite</option>
+            <option value="info">Informations générales</option>
+            <option value="autre">Autre</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="message">Message *</label>
+          <textarea id="message" placeholder="Bonjour, je souhaite en savoir plus sur les inscriptions…" required></textarea>
+          <p class="form-note">Si vous candidatez pour une inscription, merci d'indiquer l'âge de votre enfant et votre disponibilité pour une permanence.</p>
+        </div>
+
+        <button class="btn-submit" onclick="submitForm()">Envoyer le message →</button>
+      </div>
+
+      <div class="form-success" id="formSuccess">
+        <div class="success-icon">✅</div>
+        <h3>Message envoyé !</h3>
+        <p>Merci pour votre message. Nous vous répondrons dans les meilleurs délais.</p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-bottom">
+    <span>© 2026 Les Microdoniens — Association loi 1901</span>
+    <span>Agréée PMI Seine-Saint-Denis</span>
+  </div>
+</footer>
+
+<script>
+  function toggleMenu() {
+    document.getElementById('mobileMenu').classList.toggle('open');
+  }
+
+  function submitForm() {
+    const required = ['prenom', 'nom', 'email', 'message'];
+    let valid = true;
+
+    required.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el.value.trim()) {
+        el.style.borderColor = '#d96b3f';
+        valid = false;
+      } else {
+        el.style.borderColor = '';
+      }
+    });
+
+    if (!valid) return;
+
+    document.getElementById('contactForm').style.display = 'none';
+    document.getElementById('formSuccess').style.display = 'block';
+  }
+</script>
+</body>
+</html>

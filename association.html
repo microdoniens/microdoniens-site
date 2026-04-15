@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>L'Association — Les Microdoniens</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --cream: #faf8f4; --charcoal: #1a1a1a; --text: #2d2d2d; --text-muted: #717171;
+      --border: #e4e0d8; --terracotta: #d96b3f; --terracotta-light: #f5ede7;
+      --terracotta-dark: #b8562e; --sage-light: #edf3ee; --yellow: #f5c842;
+      --radius: 16px; --shadow: 0 2px 16px rgba(0,0,0,0.07);
+      --shadow-hover: 0 8px 32px rgba(0,0,0,0.13); --nav-h: 72px;
+    }
+
+    /* ── NAV ── */
+    nav { position: fixed; top: 0; left: 0; right: 0; height: var(--nav-h); background: rgba(250,248,244,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); z-index: 100; display: flex; align-items: center; padding: 0 24px; }
+    .nav-inner { max-width: 1200px; width: 100%; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--charcoal); flex-shrink: 0; }
+    .nav-logo-mark { width: 36px; height: 36px; background: var(--terracotta); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Fraunces', serif; font-size: 16px; color: white; flex-shrink: 0; }
+    .nav-logo-text { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 400; color: var(--charcoal); }
+    .nav-logo-text span { display: block; font-size: 10px; font-family: 'DM Sans', sans-serif; font-weight: 300; color: var(--text-muted); letter-spacing: 0.04em; text-transform: uppercase; }
+    .nav-links { display: flex; align-items: center; gap: 2px; list-style: none; flex-shrink: 0; }
+    .nav-links a { display: block; padding: 7px 11px; text-decoration: none; color: var(--text); font-size: 13px; border-radius: 8px; transition: background 0.15s; white-space: nowrap; }
+    .nav-links a:hover { background: rgba(0,0,0,0.05); }
+    .nav-links a.active { font-weight: 500; color: var(--terracotta); }
+    .nav-cta { background: var(--terracotta) !important; color: white !important; font-weight: 500 !important; border-radius: 50px !important; }
+    .nav-cta:hover { background: var(--terracotta-dark) !important; }
+    /* Dropdown */
+    .nav-dropdown { position: relative; }
+    .nav-dropdown-btn { display: flex; align-items: center; gap: 4px; padding: 7px 11px; font-size: 13px; color: var(--text); background: none; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; border-radius: 8px; transition: background 0.15s; white-space: nowrap; }
+    .nav-dropdown-btn:hover { background: rgba(0,0,0,0.05); }
+    .nav-dropdown-menu { display: none; position: absolute; top: calc(100% + 8px); right: 0; background: white; border: 1.5px solid var(--border); border-radius: var(--radius); padding: 6px; min-width: 200px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); z-index: 200; }
+    .nav-dropdown:hover .nav-dropdown-menu, .nav-dropdown.open .nav-dropdown-menu { display: flex; flex-direction: column; }
+    .nav-dropdown-menu a { display: block; padding: 9px 14px; text-decoration: none; color: var(--text); font-size: 13px; border-radius: 8px; transition: background 0.15s; white-space: nowrap; }
+    .nav-dropdown-menu a:hover { background: var(--cream); }
+    .nav-dropdown-menu a.active { color: var(--terracotta); font-weight: 500; }
+    /* Hamburger */
+    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 8px; border: none; background: none; flex-shrink: 0; }
+    .hamburger span { width: 22px; height: 2px; background: var(--charcoal); border-radius: 2px; display: block; }
+    .mobile-menu { display: none; position: fixed; top: var(--nav-h); left: 0; right: 0; bottom: 0; background: var(--cream); z-index: 99; padding: 24px; overflow-y: auto; }
+    .mobile-menu.open { display: flex; flex-direction: column; gap: 4px; }
+    .mobile-menu a { display: block; padding: 16px; text-decoration: none; color: var(--text); font-size: 18px; border-bottom: 1px solid var(--border); }
+    .mobile-menu a:last-child { margin-top: 16px; background: var(--terracotta); color: white; border-radius: var(--radius); border: none; text-align: center; }
+
+
+    /* ── PAGE HERO — canonical single-column header ── */
+    .page-hero, .page-header {
+      padding-top: calc(var(--nav-h) + 56px);
+      padding-bottom: 56px;
+      padding-left: 24px;
+      padding-right: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+    .breadcrumb a { color: var(--text-muted); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--terracotta); }
+    .breadcrumb > span { color: var(--border); }
+    .page-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 13px; font-weight: 500;
+      color: var(--terracotta);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 16px;
+    }
+    .page-eyebrow::before {
+      content: '';
+      width: 24px; height: 2px;
+      background: var(--terracotta);
+      border-radius: 2px;
+    }
+    h1 {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(40px, 5vw, 62px);
+      font-weight: 400;
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      color: var(--charcoal);
+      margin-bottom: 20px;
+    }
+    h1 em { font-style: italic; color: var(--terracotta); }
+    .hero-intro, .page-intro {
+      font-size: 17px;
+      line-height: 1.75;
+      color: var(--text-muted);
+      max-width: 640px;
+      margin-bottom: 0;
+    }
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    .hero-intro, 
+
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text); -webkit-font-smoothing: antialiased; }
+    
+    
+    
+    
+    
+    .nav-logo-text span { display: block; font-size: 11px; font-family: 'DM Sans', sans-serif; font-weight: 300; color: var(--text-muted); letter-spacing: 0.04em; text-transform: uppercase; }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+
+    
+    .hero-stat-row { display: flex; gap: 32px; padding-top: 32px; border-top: 1px solid var(--border); }
+    .hero-stat strong { display: block; font-family: 'Fraunces', serif; font-size: 36px; font-weight: 400; color: var(--charcoal); }
+    .hero-stat span { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .hero-visual { background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); border-radius: 24px; padding: 36px; display: flex; flex-direction: column; gap: 10px; }
+    .hero-visual-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.35); margin-bottom: 8px; }
+    .org-chip { padding: 8px 16px; border-radius: 50px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+    .org-chip-primary { background: var(--terracotta); color: white; }
+    .org-chip-secondary { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.15); }
+    
+
+    .explainer-section { background: white; padding: 96px 24px; }
+    .explainer-inner { max-width: 1200px; margin: 0 auto; }
+    .section-label { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: var(--terracotta); margin-bottom: 12px; }
+    h2 { font-family: 'Fraunces', serif; font-size: clamp(28px, 3.5vw, 42px); font-weight: 400; letter-spacing: -0.02em; color: var(--charcoal); line-height: 1.15; margin-bottom: 16px; }
+    .section-subtitle { font-size: 16px; color: var(--text-muted); line-height: 1.7; max-width: 560px; margin-bottom: 56px; }
+    .explainer-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .explainer-card { padding: 32px; border-radius: var(--radius); border: 1.5px solid var(--border); transition: all 0.22s; }
+    .explainer-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); border-color: transparent; }
+    .explainer-icon { font-size: 36px; margin-bottom: 20px; }
+    .explainer-card h3 { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 400; color: var(--charcoal); margin-bottom: 12px; }
+    .explainer-card p { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
+
+    .org-section { padding: 96px 24px; max-width: 1200px; margin: 0 auto; }
+    .org-block { margin-bottom: 72px; }
+    .org-block:last-child { margin-bottom: 0; }
+    .org-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 40px; flex-wrap: wrap; gap: 16px; }
+    .org-tag { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 50px; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 10px; }
+    .org-tag-bureau { background: var(--charcoal); color: white; }
+    .org-tag-commissions { background: var(--terracotta-light); color: var(--terracotta-dark); }
+    .org-header-desc { font-size: 15px; color: var(--text-muted); max-width: 440px; }
+    .bureau-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .bureau-card { background: white; border-radius: var(--radius); padding: 24px 20px; border: 1.5px solid var(--border); text-align: center; transition: all 0.2s; }
+    .bureau-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); border-color: transparent; }
+    .bureau-avatar { width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 14px; display: flex; align-items: center; justify-content: center; font-size: 26px; }
+    .av-terracotta { background: var(--terracotta-light); }
+    .av-sage { background: var(--sage-light); }
+    .av-yellow { background: #fef9e7; }
+    .av-blue { background: #e8f4f8; }
+    .bureau-card h4 { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 400; color: var(--charcoal); margin-bottom: 6px; }
+    .bureau-card p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+    .commissions-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .commission-card { background: var(--cream); border-radius: var(--radius); padding: 28px; border: 1.5px solid transparent; transition: all 0.2s; }
+    .commission-card:hover { background: white; border-color: var(--border); box-shadow: var(--shadow); transform: translateY(-2px); }
+    .commission-icon { font-size: 32px; margin-bottom: 14px; }
+    .commission-card h4 { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 400; color: var(--charcoal); margin-bottom: 8px; }
+    .commission-card p { font-size: 14px; color: var(--text-muted); line-height: 1.65; }
+
+    .permanences-section { background: var(--charcoal); padding: 96px 24px; }
+    .permanences-inner { max-width: 1200px; margin: 0 auto; }
+    .permanences-section .section-label { color: var(--yellow); }
+    .permanences-section h2 { color: white; margin-bottom: 16px; }
+    .permanences-section .perm-subtitle { color: rgba(255,255,255,0.55); font-size: 16px; line-height: 1.7; max-width: 560px; margin-bottom: 56px; }
+    .perm-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
+    .perm-timeline { display: flex; flex-direction: column; gap: 0; }
+    .perm-step { display: flex; gap: 20px; padding-bottom: 28px; position: relative; }
+    .perm-step:not(:last-child)::after { content: ''; position: absolute; left: 19px; top: 44px; bottom: 0; width: 2px; background: rgba(255,255,255,0.1); }
+    .perm-dot { width: 40px; height: 40px; flex-shrink: 0; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 18px; position: relative; z-index: 1; }
+    .perm-step-body strong { display: block; color: white; font-size: 15px; font-weight: 500; margin-bottom: 4px; margin-top: 8px; }
+    .perm-step-body p { font-size: 14px; color: rgba(255,255,255,0.5); line-height: 1.6; }
+    .perm-values { display: flex; flex-direction: column; gap: 16px; }
+    .perm-value { padding: 24px; border: 1.5px solid rgba(255,255,255,0.1); border-radius: var(--radius); display: flex; gap: 16px; align-items: flex-start; transition: all 0.2s; }
+    .perm-value:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); }
+    .perm-value-icon { font-size: 24px; flex-shrink: 0; margin-top: 2px; }
+    .perm-value strong { display: block; color: white; font-size: 15px; font-weight: 500; margin-bottom: 4px; }
+    .perm-value p { font-size: 14px; color: rgba(255,255,255,0.5); line-height: 1.6; }
+
+    .partners-section { background: white; padding: 80px 24px; }
+    .partners-inner { max-width: 1200px; margin: 0 auto; }
+    .partners-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: 48px; }
+    .partner-card { border-radius: var(--radius); padding: 28px 24px; border: 1.5px solid var(--border); text-align: center; transition: all 0.2s; }
+    .partner-card:hover { border-color: var(--terracotta); transform: translateY(-2px); }
+    .partner-card-icon { font-size: 32px; margin-bottom: 12px; }
+    .partner-card h4 { font-size: 14px; font-weight: 500; color: var(--charcoal); margin-bottom: 6px; }
+    .partner-card p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+    .docs-section { padding: 80px 24px; max-width: 1200px; margin: 0 auto; }
+    .docs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 40px; }
+    .doc-card { display: flex; align-items: center; gap: 16px; padding: 20px 24px; background: white; border-radius: var(--radius); border: 1.5px solid var(--border); text-decoration: none; color: var(--text); transition: all 0.2s; }
+    .doc-card:hover { border-color: var(--terracotta); transform: translateY(-2px); box-shadow: var(--shadow); }
+    .doc-card-icon { font-size: 28px; flex-shrink: 0; }
+    .doc-card strong { display: block; font-size: 14px; font-weight: 500; color: var(--charcoal); margin-bottom: 3px; }
+    .doc-card span { font-size: 12px; color: var(--text-muted); }
+
+    .cta-section { background: var(--terracotta); padding: 80px 24px; text-align: center; }
+    .cta-section h2 { color: white; font-size: clamp(26px, 3.5vw, 40px); margin-bottom: 14px; font-family: 'Fraunces', serif; font-weight: 400; letter-spacing: -0.02em; }
+    .cta-section p { color: rgba(255,255,255,0.75); font-size: 17px; line-height: 1.7; max-width: 560px; margin: 0 auto 36px; }
+    .cta-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 14px 24px; font-size: 15px; font-weight: 500; border-radius: 50px; text-decoration: none; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
+    .btn-white { background: white; color: var(--terracotta); }
+    .btn-white:hover { background: var(--cream); transform: translateY(-1px); }
+    .btn-ghost { background: rgba(255,255,255,0.15); color: white; border: 1.5px solid rgba(255,255,255,0.35); }
+    .btn-ghost:hover { background: rgba(255,255,255,0.25); }
+
+    footer { background: var(--charcoal); color: white; padding: 48px 24px 32px; }
+    .footer-inner { max-width: 1200px; margin: 0 auto; }
+    .footer-
+    .footer-nav a { font-size: 14px; color: rgba(255,255,255,0.55); text-decoration: none; }
+    .footer-nav a:hover { color: white; }
+    .footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 24px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: rgba(255,255,255,0.35); }
+
+    @media (max-width: 900px) {
+       
+      
+
+      .hero-visual { order: -1; }
+      .explainer-grid { grid-template-columns: 1fr; }
+      .bureau-grid { grid-template-columns: repeat(2, 1fr); }
+      .commissions-grid { grid-template-columns: 1fr 1fr; }
+      .perm-layout { grid-template-columns: 1fr; }
+      .partners-grid { grid-template-columns: repeat(2, 1fr); }
+      .docs-grid { grid-template-columns: 1fr; }
+      .org-header { flex-direction: column; align-items: flex-start; }
+    }
+    @media (max-width: 600px) {
+      .commissions-grid { grid-template-columns: 1fr; }
+      .partners-grid { grid-template-columns: 1fr 1fr; }
+      .hero-stat-row { gap: 20px; }
+      .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
+    }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .page-hero > * { animation: fadeUp 0.55s ease both; }
+    .page-hero > *:nth-child(2) { animation-delay: 0.12s; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-mark">M</div>
+      <div class="nav-logo-text">Les Microdoniens<span>Crèche parentale · Saint-Ouen</span></div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html#espaces">La crèche</a></li>
+      <li><a href="vie.html">Vie de la crèche</a></li>
+      <li><a href="association.html" class="active">L'association</a></li>
+      <li><a href="inscriptions.html">Inscriptions</a></li>
+      <li class="nav-dropdown">
+        <button class="nav-dropdown-btn">Plus ▾</button>
+        <div class="nav-dropdown-menu">
+          <a href="pedagogie.html">Pédagogie</a>
+          <a href="evenements.html">Événements</a>
+          <a href="historique.html">Historique</a>
+          <a href="presse.html">On parle de nous</a>
+          <a href="contact.html">Contact</a>
+          </div>
+      </li>
+      <li><a href="contact.html" class="nav-cta">Contact</a></li>
+    </ul>
+    <button class="hamburger" onclick="toggleMenu()" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html#espaces" onclick="toggleMenu()">La crèche</a>
+  <a href="vie.html" onclick="toggleMenu()">Vie de la crèche</a>
+  <a href="association.html" onclick="toggleMenu()">L'association</a>
+  <a href="inscriptions.html" onclick="toggleMenu()">Inscriptions</a>
+  <a href="pedagogie.html" onclick="toggleMenu()">Pédagogie</a>
+  <a href="evenements.html" onclick="toggleMenu()">Événements</a>
+  <a href="historique.html" onclick="toggleMenu()">Historique</a>
+  <a href="presse.html" onclick="toggleMenu()">On parle de nous</a>
+  <a href="contact.html" onclick="toggleMenu()">Contact</a>
+</div>
+
+<div class="page-hero">
+  <div>
+    <div class="breadcrumb"><a href="index.html">Accueil</a><span>›</span><span>L'association</span></div>
+    <div class="page-eyebrow">Association loi 1901</div>
+    <h1>Les parents<br>sont <em>l'association</em></h1>
+    <p class="hero-intro">Les Microdoniens ne fonctionnent pas malgré les parents — ils fonctionnent grâce à eux. Chaque famille est membre actif, participe à la gouvernance et s'engage quotidiennement dans la vie de la crèche.</p>
+    <div class="hero-stat-row">
+      <div class="hero-stat"><strong>~20</strong><span>familles membres</span></div>
+      <div class="hero-stat"><strong>1901</strong><span>Loi association</span></div>
+      <div class="hero-stat"><strong>+12</strong><span>ans d'histoire</span></div>
+    </div>
+  </div>
+  
+</div>
+
+
+<section class="explainer-section">
+  <div class="explainer-inner">
+    <div class="section-label">Comprendre le modèle</div>
+    <h2>Qu'est-ce qu'une<br>crèche parentale ?</h2>
+    <p class="section-subtitle">Un modèle unique où les familles ne sont pas de simples usagers — elles co-construisent et co-gèrent la structure avec les professionnels.</p>
+    <div class="explainer-grid">
+      <div class="explainer-card">
+        <div class="explainer-icon">🏛️</div>
+        <h3>Une association, pas une entreprise</h3>
+        <p>Les Microdoniens sont une association loi 1901 à but non lucratif. Les parents en sont les gestionnaires légaux — ils prennent les décisions collectives, gèrent le budget et assurent le bon fonctionnement de la structure.</p>
+      </div>
+      <div class="explainer-card">
+        <div class="explainer-icon">🤝</div>
+        <h3>Co-construction avec les pros</h3>
+        <p>L'équipe de professionnels et les parents travaillent ensemble. Les décisions pédagogiques sont prises en concertation, et les parents participent quotidiennement lors de leurs permanences.</p>
+      </div>
+      <div class="explainer-card">
+        <div class="explainer-icon">🌍</div>
+        <h3>Un lieu laïc et ouvert</h3>
+        <p>La crèche est un lieu laïc de rencontre, de coopération entre familles, d'ouverture culturelle sur la ville et de sensibilisation aux enjeux écologiques. Toutes les familles contribuent à cette richesse collective.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="org-section">
+  <div class="org-block">
+    <div class="org-header">
+      <div>
+        <div class="org-tag org-tag-bureau">🏛️ Gouvernance</div>
+        <h2>Le Bureau</h2>
+      </div>
+      <p class="org-header-desc">Le Bureau assure la gestion légale et administrative de l'association. Il est élu par l'Assemblée générale et rend compte à l'ensemble des familles membres.</p>
+    </div>
+    <div class="bureau-grid">
+      <div class="bureau-card">
+        <div class="bureau-avatar av-terracotta">👑</div>
+        <h4>Président·e</h4>
+        <p>Représente l'association légalement, préside les AG et coordonne les instances.</p>
+      </div>
+      <div class="bureau-card">
+        <div class="bureau-avatar av-sage">📊</div>
+        <h4>Trésorier·ère</h4>
+        <p>Gère les finances de l'association, suit le budget et les subventions.</p>
+      </div>
+      <div class="bureau-card">
+        <div class="bureau-avatar av-yellow">📝</div>
+        <h4>Secrétaire</h4>
+        <p>Rédige les comptes-rendus et gère la correspondance officielle.</p>
+      </div>
+      <div class="bureau-card">
+        <div class="bureau-avatar av-blue">🤝</div>
+        <h4>Membres actifs</h4>
+        <p>Parents élus qui participent aux décisions et soutiennent les commissions.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="org-block">
+    <div class="org-header">
+      <div>
+        <div class="org-tag org-tag-commissions">⚙️ Organisation</div>
+        <h2>Les Commissions</h2>
+      </div>
+      <p class="org-header-desc">Les familles se répartissent les tâches logistiques et administratives au sein de commissions thématiques, selon leurs disponibilités et compétences.</p>
+    </div>
+    <div class="commissions-grid">
+      <div class="commission-card">
+        <div class="commission-icon">📣</div>
+        <h4>Communication</h4>
+        <p>Gère les communications internes et externes — site web, affichage, relations avec les partenaires institutionnels et la presse locale.</p>
+      </div>
+      <div class="commission-card">
+        <div class="commission-icon">🧹</div>
+        <h4>Entretien & logistique</h4>
+        <p>Assure l'entretien des locaux, le suivi des travaux, la gestion du matériel et des équipements.</p>
+      </div>
+      <div class="commission-card">
+        <div class="commission-icon">🍽️</div>
+        <h4>Cuisine & nutrition</h4>
+        <p>Organise les repas, gère les menus et les relations avec les fournisseurs. Veille à la qualité nutritionnelle.</p>
+      </div>
+      <div class="commission-card">
+        <div class="commission-icon">📅</div>
+        <h4>Permanences</h4>
+        <p>Planifie et coordonne les permanences des parents — chaque famille assure une présence tournante aux côtés des professionnels.</p>
+      </div>
+      <div class="commission-card">
+        <div class="commission-icon">🎉</div>
+        <h4>Événements & vie sociale</h4>
+        <p>Organise les fêtes, sorties collectives, journées portes ouvertes et moments conviviaux tout au long de l'année.</p>
+      </div>
+      <div class="commission-card">
+        <div class="commission-icon">📋</div>
+        <h4>Admissions</h4>
+        <p>Pilote le processus annuel — journée de présentation, entretiens avec les familles candidates, constitution des listes.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="permanences-section">
+  <div class="permanences-inner">
+    <div class="section-label">L'engagement quotidien</div>
+    <h2>Les permanences parentales</h2>
+    <p class="perm-subtitle">Au-delà des commissions, chaque famille assure une permanence régulière au sein de la crèche — c'est l'un des piliers du modèle parental.</p>
+    <div class="perm-layout">
+      <div class="perm-timeline">
+        <div class="perm-step">
+          <div class="perm-dot">📋</div>
+          <div class="perm-step-body"><strong>Planification en amont</strong><p>La commission permanences établit un planning tournant équitable entre toutes les familles, en tenant compte des contraintes de chacun.</p></div>
+        </div>
+        <div class="perm-step">
+          <div class="perm-dot">🌅</div>
+          <div class="perm-step-body"><strong>Arrivée avec l'équipe</strong><p>Le parent de permanence arrive le matin et intègre l'équipe professionnelle pour la journée complète d'accueil des enfants.</p></div>
+        </div>
+        <div class="perm-step">
+          <div class="perm-dot">🎨</div>
+          <div class="perm-step-body"><strong>Participation aux activités</strong><p>Le parent peut proposer un atelier ou partager une passion — musique, cuisine, art, langue — enrichissant le quotidien des enfants.</p></div>
+        </div>
+        <div class="perm-step">
+          <div class="perm-dot">🌙</div>
+          <div class="perm-step-body"><strong>Fin de journée</strong><p>La permanence se termine à la fermeture. C'est aussi un moment d'échange avec les professionnels sur la journée des enfants.</p></div>
+        </div>
+      </div>
+      <div class="perm-values">
+        <div class="perm-value">
+          <div class="perm-value-icon">💛</div>
+          <div><strong>Un lien unique avec son enfant</strong><p>La permanence permet au parent de voir son enfant évoluer dans son environnement de crèche — une fenêtre précieuse sur sa vie collective.</p></div>
+        </div>
+        <div class="perm-value">
+          <div class="perm-value-icon">🤝</div>
+          <div><strong>Tisser des liens entre familles</strong><p>Les permanences sont l'occasion de rencontrer d'autres parents, de créer des amitiés et de construire une vraie communauté.</p></div>
+        </div>
+        <div class="perm-value">
+          <div class="perm-value-icon">🌱</div>
+          <div><strong>Apport de compétences</strong><p>Chaque parent apporte ses compétences, sa culture, sa créativité — c'est ce qui rend la vie aux Microdoniens si riche.</p></div>
+        </div>
+        <div class="perm-value">
+          <div class="perm-value-icon">⚖️</div>
+          <div><strong>Un engagement partagé équitablement</strong><p>Le planning est conçu pour que l'effort soit réparti de manière juste et adaptée aux contraintes professionnelles de chacun.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="partners-section">
+  <div class="partners-inner">
+    <div class="section-label">Nos soutiens</div>
+    <h2>Financeurs & partenaires</h2>
+    <div class="partners-grid">
+      <div class="partner-card"><div class="partner-card-icon">🏙️</div><h4>Ville de Saint-Ouen</h4><p>Soutien municipal et partenariat local fort.</p></div>
+      <div class="partner-card"><div class="partner-card-icon">👶</div><h4>CAF</h4><p>Financement et barème des participations familiales.</p></div>
+      <div class="partner-card"><div class="partner-card-icon">🏛️</div><h4>Conseil Départemental 93</h4><p>Seine-Saint-Denis — soutien départemental.</p></div>
+      <div class="partner-card"><div class="partner-card-icon">🩺</div><h4>PMI Seine-St-Denis</h4><p>Protection Maternelle et Infantile — agrément et suivi.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="docs-section">
+  <div class="section-label">Documents officiels</div>
+  <h2>Textes fondateurs</h2>
+  <div class="docs-grid">
+    <a href="https://microdoniens.wordpress.com/wp-content/uploads/2025/08/microdoniens-_-statuts_mai2025_version-finale.pdf" class="doc-card" target="_blank">
+      <div class="doc-card-icon">📄</div>
+      <div><strong>Statuts de l'association</strong><span>Mis à jour mai 2025</span></div>
+    </a>
+    <a href="https://microdoniens.wordpress.com/wp-content/uploads/2025/08/projet-social_les-microdoniens-mai2025-1.pdf" class="doc-card" target="_blank">
+      <div class="doc-card-icon">📄</div>
+      <div><strong>Projet associatif et social</strong><span>Mis à jour mai 2025</span></div>
+    </a>
+    <a href="https://microdoniens.wordpress.com/wp-content/uploads/2026/02/reglement-fonctionnement-fevrier2026.pdf" class="doc-card" target="_blank">
+      <div class="doc-card-icon">📄</div>
+      <div><strong>Règlement de fonctionnement</strong><span>Février 2026</span></div>
+    </a>
+  </div>
+</section>
+
+<section class="cta-section">
+  <h2>Rejoindre l'aventure</h2>
+  <p>Vous souhaitez intégrer Les Microdoniens ? Découvrez le processus d'admission ou contactez-nous directement.</p>
+  <div class="cta-actions">
+    <a href="contact.html" class="btn btn-white">Candidater pour 2026/27</a>
+    <a href="index.html#admission" class="btn btn-ghost">Processus d'admission →</a>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <nav class="footer-nav">
+      <a href="index.html#espaces">La crèche</a>
+      <a href="vie.html">Vie de la crèche</a>
+      <a href="pedagogie.html">Pédagogie</a>
+      <a href="association.html">L'association</a>
+      <a href="evenements.html">Événements</a>
+      <a href="historique.html">Historique</a>
+      <a href="presse.html">On parle de nous</a>
+      <a href="inscriptions.html">Inscriptions</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <div class="footer-bottom">
+      <span>© 2026 Les Microdoniens — Association loi 1901</span>
+      <span>53 rue Albert Dhalenne, Saint-Ouen 93400</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  function toggleMenu() { document.getElementById('mobileMenu').classList.toggle('open'); }
+  document.addEventListener('click', e => {
+    const m = document.getElementById('mobileMenu');
+    if (m.classList.contains('open') && !e.target.closest('nav') && !e.target.closest('#mobileMenu')) m.classList.remove('open');
+  });
+</script>
+</body>
+</html>
