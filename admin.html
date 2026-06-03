@@ -1324,6 +1324,16 @@ async function sendPrompt() {
 
       if (state.isNewArticle && articleFileMatch) {
         state.pendingFile = articleFileMatch[1].trim();
+      } else if (state.isNewArticle) {
+        // Fallback: derive slug from the article title
+        const articleTitle = extractTitleFromHtml(state.pendingHtml);
+        const slug = articleTitle
+          .toLowerCase()
+          .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '')
+          .slice(0, 50) || 'article';
+        state.pendingFile = `vie/${slug}.html`;
       } else if (state.isNewEvent && eventFileMatch) {
         state.pendingFile = eventFileMatch[1].trim();
       } else if (state.isNewPublication && publicationFileMatch) {
@@ -1795,19 +1805,16 @@ function showPreview(html, filename) {
   const isNew = state.isNewArticle || state.isNewEvent;
   const publishLabel = isNew ? '🚀 Publier l\'article' : '🚀 Publier sur le site';
   card.innerHTML = `
-    <div class="publish-bar" style="border-top:none;">
-      <div style="display:flex;align-items:center;gap:10px;flex:1;">
-        <div class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--yellow);flex-shrink:0;"></div>
-        <span style="font-size:12px;color:var(--text-muted);">${escHtml(filename)}</span>
-        <a href="${url}" target="_blank" class="btn btn-ghost" style="font-size:12px;padding:4px 10px;">Prévisualiser ↗</a>
-      </div>
+    <iframe class="preview-iframe" src="${url}"></iframe>
+    <div class="publish-bar">
+      <p><strong>${escHtml(filename)}</strong></p>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-ghost" onclick="this.closest('.preview-card').remove()">Annuler</button>
         <button class="btn btn-green" onclick="confirmPublish('${escHtml(filename)}')">${publishLabel}</button>
       </div>
     </div>`;
   conv.appendChild(card);
-  card.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  card.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function confirmPublish(filename) {
@@ -1859,7 +1866,6 @@ function extractTitleFromHtml(html) {
 
 // Build a minimal article card to prepend to vie.html as fallback
 async function buildFallbackVieUpdate(articleFile, articleHtml) {
-  const slug = articleFile.replace('vie/', '').replace('.html', '');
   const title = extractTitleFromHtml(articleHtml);
   const today = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -1871,23 +1877,23 @@ async function buildFallbackVieUpdate(articleFile, articleHtml) {
   }
 
   const card = `
-      <article class="activity-post" data-category="vie">
-        <div class="post-thumb thumb-orange">🌱</div>
-        <div class="post-body">
-          <div class="post-tag">🌱 Vie de la crèche</div>
-          <a href="${articleFile}"><h2>${title}</h2></a>
-          <p>Retrouvez le récit de cette activité sur la page dédiée.</p>
-          <div class="post-meta"><span>${today}</span></div>
-        </div>
-      </article>`;
+    <article class="activity-post" data-category="Découvertes">
+      <div class="post-thumb thumb-orange">🌱</div>
+      <div class="post-body">
+        <div class="post-tag">🌱 Vie de la crèche</div>
+        <a href="${articleFile}"><h2>${title}</h2></a>
+        <p>Retrouvez le récit de cette activité sur la page dédiée.</p>
+        <div class="post-meta"><span>${today}</span></div>
+      </div>
+    </article>`;
 
-  // Insert after the opening tag of the articles container
-  const insertAfter = vieHtml.match(/<div[^>]+class="[^"]*activity-grid[^"]*"[^>]*>/i)
-    || vieHtml.match(/<section[^>]+id="articles"[^>]*>/i)
-    || vieHtml.match(/(<main[^>]*>)/i);
+  // Find the activities-list container (the real class used in vie.html)
+  const containerMatch = vieHtml.match(/(<div[^>]+class="[^"]*activities-list[^"]*"[^>]*>)/i)
+    || vieHtml.match(/(<div[^>]+class="[^"]*activity-grid[^"]*"[^>]*>)/i)
+    || vieHtml.match(/(<section[^>]+id="[^"]*articles[^"]*"[^>]*>)/i);
 
-  if (insertAfter) {
-    return vieHtml.replace(insertAfter[0], insertAfter[0] + card);
+  if (containerMatch) {
+    return vieHtml.replace(containerMatch[0], containerMatch[0] + '\n' + card);
   }
   return null;
 }
