@@ -1416,7 +1416,7 @@ CARTE À AJOUTER DANS VIE.HTML (structure d'une entrée existante) :
 
 Catégories disponibles : Musique, Créativité, Nature, Motricité, Culture, Découvertes
 
-RÈGLES DE SORTIE (respecte exactement ce format) :
+RÈGLES DE SORTIE — OBLIGATOIRE, respecte exactement ce format sans exception :
 1. Explique brièvement ce que tu as créé (1-2 phrases)
 2. Indique le nom du fichier :
    ARTICLE_FILE: vie/[slug].html
@@ -1425,11 +1425,12 @@ RÈGLES DE SORTIE (respecte exactement ce format) :
    <html-output>
    [HTML complet de l'article vie/[slug].html]
    </html-output>
-4. Vie.html mis à jour avec la carte en tête de liste (si vie.html était fourni) :
+4. ⚠️ OBLIGATOIRE — vie.html mis à jour avec la carte du nouvel article insérée EN TÊTE de liste (juste après l'ouverture du conteneur des articles). Tu DOIS toujours inclure ce bloc, même si vie.html n'était pas fourni (génère une entrée cohérente) :
    <vie-update>
    [HTML complet de vie.html mis à jour]
    </vie-update>
 
+Ne termine JAMAIS ta réponse sans le bloc <vie-update>. C'est indispensable pour que l'article apparaisse sur le site.
 Réponds en français.`;
 }
 
@@ -1472,7 +1473,7 @@ CARTE À AJOUTER DANS EVENEMENTS.HTML (structure d'une entrée existante dans #e
 Classes de couleur thumb : et-orange, et-green, et-blue, et-yellow, et-pink, et-dark
 Classes de tag : tag-fete, tag-sport, tag-solidarite, tag-culture, tag-vie
 
-RÈGLES DE SORTIE (respecte exactement ce format) :
+RÈGLES DE SORTIE — OBLIGATOIRE, respecte exactement ce format sans exception :
 1. Explique brièvement ce que tu as créé (1-2 phrases)
 2. Indique le nom du fichier :
    EVENT_FILE: evenements/[slug].html
@@ -1481,11 +1482,12 @@ RÈGLES DE SORTIE (respecte exactement ce format) :
    <html-output>
    [HTML complet de evenements/[slug].html]
    </html-output>
-4. Evenements.html mis à jour avec la carte en tête du grid (si evenements.html était fourni) :
+4. ⚠️ OBLIGATOIRE — evenements.html mis à jour avec la carte du nouvel événement insérée EN TÊTE du grid (#eventsGrid). Tu DOIS toujours inclure ce bloc, même si evenements.html n'était pas fourni (génère une entrée cohérente) :
    <evenements-update>
    [HTML complet de evenements.html mis à jour]
    </evenements-update>
 
+Ne termine JAMAIS ta réponse sans le bloc <evenements-update>. C'est indispensable pour que l'événement apparaisse sur le site.
 Réponds en français.`;
 }
 
@@ -1538,7 +1540,7 @@ Classes disponibles :
 - Icône couleur : cov-orange, cov-blue, cov-green, cov-yellow
 - Badge type : badge-presse, badge-tv, badge-asso, badge-web
 
-RÈGLES DE SORTIE (respecte exactement ce format) :
+RÈGLES DE SORTIE — OBLIGATOIRE, respecte exactement ce format sans exception :
 1. Explique brièvement ce que tu as créé (1-2 phrases)
 2. Indique le nom du fichier :
    PUBLICATION_FILE: presse/[slug].html
@@ -1547,11 +1549,12 @@ RÈGLES DE SORTIE (respecte exactement ce format) :
    <html-output>
    [HTML complet de presse/[slug].html]
    </html-output>
-4. Presse.html mis à jour avec la nouvelle entrée dans la coverage-list (si presse.html était fourni) :
+4. ⚠️ OBLIGATOIRE — presse.html mis à jour avec la nouvelle entrée insérée EN TÊTE de la coverage-list. Tu DOIS toujours inclure ce bloc, même si presse.html n'était pas fourni (génère une entrée cohérente) :
    <presse-update>
    [HTML complet de presse.html mis à jour]
    </presse-update>
 
+Ne termine JAMAIS ta réponse sans le bloc <presse-update>. C'est indispensable pour que la publication apparaisse sur le site.
 Réponds en français.`;
 }
 
@@ -1792,25 +1795,19 @@ function showPreview(html, filename) {
   const isNew = state.isNewArticle || state.isNewEvent;
   const publishLabel = isNew ? '🚀 Publier l\'article' : '🚀 Publier sur le site';
   card.innerHTML = `
-    <div class="preview-card-bar">
-      <div class="preview-card-title">
-        <div class="dot"></div>
-        Prévisualisation — ${escHtml(filename)}
+    <div class="publish-bar" style="border-top:none;">
+      <div style="display:flex;align-items:center;gap:10px;flex:1;">
+        <div class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--yellow);flex-shrink:0;"></div>
+        <span style="font-size:12px;color:var(--text-muted);">${escHtml(filename)}</span>
+        <a href="${url}" target="_blank" class="btn btn-ghost" style="font-size:12px;padding:4px 10px;">Prévisualiser ↗</a>
       </div>
-      <div class="preview-card-actions">
-        <a href="${url}" target="_blank" class="btn btn-ghost" style="font-size:12px;">Ouvrir ↗</a>
-      </div>
-    </div>
-    <iframe class="preview-iframe" src="${url}"></iframe>
-    <div class="publish-bar">
-      <p>Tu es satisfait·e ? <strong>Dis-le à Claude</strong> ou clique sur Publier.</p>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-ghost" onclick="this.closest('.preview-card').remove()">Annuler</button>
         <button class="btn btn-green" onclick="confirmPublish('${escHtml(filename)}')">${publishLabel}</button>
       </div>
     </div>`;
   conv.appendChild(card);
-  card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  card.scrollIntoView({ behavior: 'smooth', block: 'end' });
 }
 
 function confirmPublish(filename) {
@@ -1851,6 +1848,50 @@ async function pushFileToGitHub(filename, html, commitMsg) {
   }
 }
 
+// Extract a title from generated HTML (fallback for missing update blocks)
+function extractTitleFromHtml(html) {
+  const h1 = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+  if (h1) return h1[1].replace(/<[^>]+>/g, '').trim();
+  const title = html.match(/<title>([\s\S]*?)<\/title>/i);
+  if (title) return title[1].replace(/\s*[-–|].*$/, '').trim();
+  return 'Nouvel article';
+}
+
+// Build a minimal article card to prepend to vie.html as fallback
+async function buildFallbackVieUpdate(articleFile, articleHtml) {
+  const slug = articleFile.replace('vie/', '').replace('.html', '');
+  const title = extractTitleFromHtml(articleHtml);
+  const today = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  let vieHtml = '';
+  try {
+    vieHtml = await fetchFileFromGitHub('vie.html');
+  } catch(e) {
+    return null;
+  }
+
+  const card = `
+      <article class="activity-post" data-category="vie">
+        <div class="post-thumb thumb-orange">🌱</div>
+        <div class="post-body">
+          <div class="post-tag">🌱 Vie de la crèche</div>
+          <a href="${articleFile}"><h2>${title}</h2></a>
+          <p>Retrouvez le récit de cette activité sur la page dédiée.</p>
+          <div class="post-meta"><span>${today}</span></div>
+        </div>
+      </article>`;
+
+  // Insert after the opening tag of the articles container
+  const insertAfter = vieHtml.match(/<div[^>]+class="[^"]*activity-grid[^"]*"[^>]*>/i)
+    || vieHtml.match(/<section[^>]+id="articles"[^>]*>/i)
+    || vieHtml.match(/(<main[^>]*>)/i);
+
+  if (insertAfter) {
+    return vieHtml.replace(insertAfter[0], insertAfter[0] + card);
+  }
+  return null;
+}
+
 async function publishAll() {
   showToast('Publication en cours…', 'info');
   try {
@@ -1868,6 +1909,16 @@ async function publishAll() {
         state.pendingVieHtml,
         `📰 Ajout article "${state.pendingFile}" dans vie.html`
       );
+    } else if (state.isNewArticle && state.pendingFile) {
+      // Fallback: Claude didn't include <vie-update> — build a minimal card and push
+      addAiMessage('⚠️ Le bloc vie.html n\'était pas dans la réponse. Génération d\'une carte de secours…');
+      const fallback = await buildFallbackVieUpdate(state.pendingFile, state.pendingHtml);
+      if (fallback) {
+        await pushFileToGitHub('vie.html', fallback, `📰 Ajout article "${state.pendingFile}" dans vie.html (secours)`);
+        addAiMessage('✓ vie.html mis à jour avec une carte de secours.');
+      } else {
+        addAiMessage('⚠️ Impossible de mettre à jour vie.html automatiquement. L\'article est publié mais n\'apparaîtra pas dans la liste sans mise à jour manuelle.');
+      }
     }
 
     // Push evenements.html update if new event
