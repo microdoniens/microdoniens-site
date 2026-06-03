@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nouvelle visite de la ferme Tiligolo — Les Microdoniens</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/shared.css" />
+  <style>
+    .article-header {
+      padding-top: calc(var(--nav-h) + 56px);
+      padding-bottom: 40px;
+      padding-left: 24px;
+      padding-right: 24px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+    .breadcrumb a { color: var(--text-muted); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--terracotta); }
+    .breadcrumb > span { color: var(--border); }
+    .article-tag {
+      display: inline-block;
+      padding: 6px 14px;
+      background: var(--terracotta-light);
+      color: var(--terracotta-dark);
+      border-radius: 50px;
+      font-size: 13px; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(32px, 4.5vw, 48px);
+      font-weight: 400;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      color: var(--charcoal);
+      margin-bottom: 20px;
+    }
+    h1 em { font-style: italic; color: var(--terracotta); }
+    .article-meta {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 14px; color: var(--text-muted);
+    }
+    .article-meta-dot {
+      width: 4px; height: 4px;
+      border-radius: 50%; background: var(--border);
+    }
+
+    .article-hero {
+      max-width: 900px;
+      margin: 0 auto 48px;
+      padding: 0 24px;
+    }
+    .article-hero .hero-placeholder {
+      border-radius: var(--radius);
+      aspect-ratio: 16/9;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 96px;
+      background: linear-gradient(135deg, #d8ead9, #b8d4b9);
+    }
+
+    .article-content {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+    .article-content p {
+      font-size: 17px;
+      line-height: 1.8;
+      color: var(--text);
+      margin-bottom: 24px;
+    }
+    .article-content p:first-of-type::first-letter {
+      font-family: 'Fraunces', serif;
+      font-size: 3.5em;
+      float: left;
+      line-height: 0.8;
+      margin-right: 12px;
+      margin-top: 6px;
+      color: var(--terracotta);
+    }
+    .article-content h2 {
+      font-family: 'Fraunces', serif;
+      font-size: 24px;
+      font-weight: 400;
+      color: var(--charcoal);
+      margin: 48px 0 20px;
+    }
+    .article-content ul {
+      margin: 0 0 24px 24px;
+      color: var(--text);
+      line-height: 1.8;
+    }
+    .article-content li {
+      margin-bottom: 8px;
+    }
+    .article-quote {
+      background: var(--charcoal);
+      border-radius: var(--radius);
+      padding: 32px 40px;
+      margin: 40px 0;
+    }
+    .article-quote p {
+      font-family: 'Fraunces', serif;
+      font-size: 20px;
+      font-style: italic;
+      color: rgba(255,255,255,0.85);
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--terracotta);
+      text-decoration: none;
+      margin-top: 48px;
+      transition: gap 0.2s;
+    }
+    .back-link:hover { gap: 12px; }
+
+    footer {
+      background: var(--charcoal); color: white;
+      padding: 48px 24px 32px;
+    }
+    .footer-inner { max-width: 1200px; margin: 0 auto; }
+    .footer-bottom {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 13px; color: rgba(255,255,255,0.35);
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 24px;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-mark"></div>
+      <div class="nav-logo-text">Les Microdoniens<span>Crèche parentale · Saint-Ouen</span></div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="../index.html">Accueil</a></li>
+      <li><a href="../vie.html" class="active">Vie de la crèche</a></li>
+      <li><a href="../association.html">L'association</a></li>
+      <li><a href="../inscriptions.html">Inscriptions 26/27</a></li>
+      <li class="nav-dropdown">
+        <button class="nav-dropdown-btn">Autres pages ▾</button>
+        <div class="nav-dropdown-menu">
+          <a href="../pedagogie.html">Pédagogie</a>
+          <a href="../evenements.html">Événements</a>
+          <a href="../historique.html">Historique</a>
+          <a href="../presse.html">On parle de nous</a>
+          <a href="../contact.html">Contact</a>
+        </div>
+      </li>
+      <li><a href="../contact.html" class="nav-cta">Contact</a></li>
+    </ul>
+    <button class="hamburger" onclick="toggleMenu()" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="../index.html" onclick="toggleMenu()">Accueil</a>
+  <a href="../vie.html" onclick="toggleMenu()">Vie de la crèche</a>
+  <a href="../association.html" onclick="toggleMenu()">L'association</a>
+  <a href="../inscriptions.html" onclick="toggleMenu()">Inscriptions 26/27</a>
+  <a href="../pedagogie.html" onclick="toggleMenu()">Pédagogie</a>
+  <a href="../evenements.html" onclick="toggleMenu()">Événements</a>
+  <a href="../historique.html" onclick="toggleMenu()">Historique</a>
+  <a href="../presse.html" onclick="toggleMenu()">On parle de nous</a>
+  <a href="../contact.html" onclick="toggleMenu()">Contact</a>
+</div>
+
+<header class="article-header">
+  <div class="breadcrumb">
+    <a href="../index.html">Accueil</a>
+    <span>›</span>
+    <a href="../vie.html">Vie de la crèche</a>
+    <span>›</span>
+    <span>Ferme Tiligolo</span>
+  </div>
+  <div class="article-tag">🌍 Découvertes</div>
+  <h1>La ferme Tiligolo <em>revient</em> aux Microdoniens&nbsp;!</h1>
+  <div class="article-meta">
+    <span>Janvier 2025</span>
+    <div class="article-meta-dot"></div>
+    <span>Le Jardin</span>
+  </div>
+</header>
+
+<div class="article-hero">
+  <div class="hero-placeholder">🐷</div>
+</div>
+
+<article class="article-content">
+  <p>Quelle joie de retrouver nos amis de la ferme Tiligolo ! Pour la deuxième fois, la ferme itinérante a posé ses valises dans le jardin de la crèche, transformant notre petit coin de verdure en véritable ferme pédagogique le temps d'une journée ensoleillée.</p>
+
+  <p>Les enfants ont pu découvrir — ou redécouvrir pour certains — une ribambelle d'animaux de la ferme. Cochons, chèvres, coqs et poules ont investi notre jardin, sous le regard émerveillé des petits Microdoniens.</p>
+
+  <h2>Une journée sous le signe de la découverte</h2>
+
+  <p>Accompagnés par les fermiers passionnés de la ferme Tiligolo, les enfants ont pu approcher les animaux en toute sécurité. Caresser le pelage doux des chèvres, observer le groin curieux des cochons, écouter le chant du coq… autant de sensations nouvelles qui éveillent les sens et la curiosité.</p>
+
+  <div class="article-quote">
+    <p>« Toucher, sentir, écouter, observer… la rencontre avec les animaux est une expérience sensorielle complète qui marque durablement les enfants. »</p>
+  </div>
+
+  <p>Cette visite s'inscrit parfaitement dans notre projet pédagogique d'ouverture sur le monde et de sensibilisation à la nature. Même en pleine ville, à Saint-Ouen, nous offrons aux enfants la possibilité de créer un lien avec le vivant et de comprendre d'où viennent les œufs du petit-déjeuner ou le lait de leur biberon.</p>
+
+  <h2>Un moment partagé</h2>
+
+  <p>Parents de permanence, professionnelles et enfants ont tous participé à cette journée exceptionnelle. Les plus grands ont posé mille questions aux fermiers, tandis que les plus petits observaient avec des yeux ronds ces drôles de créatures venues leur rendre visite.</p>
+
+  <p>Le beau soleil de cette journée a rendu l'expérience encore plus magique. Le jardin de la crèche, habituellement terrain de jeux et de jardinage, s'est métamorphosé en petit paradis champêtre.</p>
+
+  <p>Merci à la ferme Tiligolo pour cette belle aventure — et rendez-vous l'année prochaine pour de nouvelles rencontres animales !</p>
+
+  <a href="../vie.html?filter=Découvertes" class="back-link">← Retour aux découvertes</a>
+</article>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-bottom">
+      <span>© 2026 Les Microdoniens — Association loi 1901</span>
+      <span>Agréée PMI Seine-Saint-Denis</span>
+    </div>
+  </div>
+</footer>
+
+<script src="../js/nav.js"></script>
+</body>
+</html>
