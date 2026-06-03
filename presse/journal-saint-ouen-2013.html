@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Une crèche pour les enfants… et les parents ! — Journal de Saint-Ouen</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/shared.css" />
+  <style>
+    .article-hero { padding-top: calc(var(--nav-h) + 56px); padding-bottom: 48px; padding-left: 24px; padding-right: 24px; max-width: 760px; margin: 0 auto; }
+    .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
+    .breadcrumb a { color: var(--text-muted); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--terracotta); }
+    .breadcrumb > span { color: var(--border); }
+    .article-tag { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border-radius: 50px; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 20px; background: var(--terracotta-light); color: var(--terracotta-dark); }
+    .source-label { font-size: 13px; font-weight: 600; color: var(--charcoal); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+    h1 { font-family: 'Fraunces', serif; font-size: clamp(28px, 4vw, 44px); font-weight: 400; line-height: 1.1; letter-spacing: -0.02em; color: var(--charcoal); margin-bottom: 16px; }
+    .article-meta { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-muted); }
+    .article-meta-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--border); }
+    .article-visual { max-width: 760px; margin: 0 auto; padding: 0 24px 48px; }
+    .press-scan-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .press-scan-pair img { width: 100%; border-radius: var(--radius-sm); display: block; box-shadow: var(--shadow); }
+    .article-body { max-width: 760px; margin: 0 auto; padding: 0 24px 80px; }
+    .article-body p { font-size: 16px; line-height: 1.8; color: var(--text-muted); margin-bottom: 20px; }
+    .article-body p strong { color: var(--text); font-weight: 500; }
+    .article-body p em { font-style: italic; }
+    .article-body h2 { font-family: 'Fraunces', serif; font-size: clamp(20px, 2.5vw, 26px); font-weight: 400; color: var(--charcoal); margin: 36px 0 14px; }
+    .article-body blockquote { background: var(--charcoal); border-radius: var(--radius); padding: 28px 36px; margin: 28px 0; }
+    .article-body blockquote p { font-family: 'Fraunces', serif; font-size: 18px; font-style: italic; color: rgba(255,255,255,0.85); line-height: 1.55; margin: 0; }
+    .article-body blockquote cite { display: block; margin-top: 14px; font-size: 13px; color: rgba(255,255,255,0.5); font-style: normal; }
+    .source-box { background: white; border: 1.5px solid var(--border); border-radius: var(--radius); padding: 20px 24px; margin: 0 0 28px; display: flex; gap: 16px; align-items: flex-start; }
+    .source-icon { font-size: 28px; flex-shrink: 0; }
+    .source-box-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 4px; }
+    .source-box-name { font-size: 15px; font-weight: 500; color: var(--charcoal); margin-bottom: 2px; }
+    .source-box-date { font-size: 13px; color: var(--text-muted); }
+    .article-back { max-width: 760px; margin: 0 auto; padding: 0 24px 48px; }
+    .article-back a { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; color: var(--terracotta); text-decoration: none; padding: 10px 20px; border: 1.5px solid var(--terracotta); border-radius: 50px; transition: all 0.15s; }
+    .article-back a:hover { background: var(--terracotta); color: white; }
+    footer { background: var(--charcoal); color: white; padding: 48px 24px 32px; }
+    .footer-inner { max-width: 1200px; margin: 0 auto; }
+    .footer-bottom { display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: rgba(255,255,255,0.35); border-top: 1px solid rgba(255,255,255,0.1); padding-top: 24px; }
+    .footer-nav { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-bottom: 24px; }
+    .footer-nav a { font-size: 14px; color: rgba(255,255,255,0.55); text-decoration: none; }
+    .footer-nav a:hover { color: white; }
+    @media (max-width: 600px) { .press-scan-pair { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-mark">M</div>
+      <div class="nav-logo-text">Les Microdoniens<span>Crèche parentale · Saint-Ouen</span></div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="../index.html">Accueil</a></li>
+      <li><a href="../vie.html">Vie de la crèche</a></li>
+      <li><a href="../association.html">L'association</a></li>
+      <li><a href="../inscriptions.html">Inscriptions 26/27</a></li>
+      <li class="nav-dropdown">
+        <button class="nav-dropdown-btn">Autres pages ▾</button>
+        <div class="nav-dropdown-menu">
+          <a href="../pedagogie.html">Pédagogie</a>
+          <a href="../evenements.html">Événements</a>
+          <a href="../historique.html">Historique</a>
+          <a href="../presse.html" class="active">On parle de nous</a>
+          <a href="../contact.html">Contact</a>
+        </div>
+      </li>
+      <li><a href="../contact.html" class="nav-cta">Contact</a></li>
+    </ul>
+    <button class="hamburger" onclick="toggleMenu()" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="../index.html" onclick="toggleMenu()">Accueil</a>
+  <a href="../vie.html" onclick="toggleMenu()">Vie de la crèche</a>
+  <a href="../association.html" onclick="toggleMenu()">L'association</a>
+  <a href="../inscriptions.html" onclick="toggleMenu()">Inscriptions</a>
+  <a href="../pedagogie.html" onclick="toggleMenu()">Pédagogie</a>
+  <a href="../evenements.html" onclick="toggleMenu()">Événements</a>
+  <a href="../historique.html" onclick="toggleMenu()">Historique</a>
+  <a href="../presse.html" onclick="toggleMenu()">On parle de nous</a>
+  <a href="../contact.html" onclick="toggleMenu()">Contact</a>
+</div>
+
+<div class="article-hero">
+  <div class="breadcrumb">
+    <a href="../index.html">Accueil</a>
+    <span>›</span>
+    <a href="../presse.html">On parle de nous</a>
+    <span>›</span>
+    <span>Une crèche pour les enfants… et les parents !</span>
+  </div>
+  <div class="article-tag">🗞️ Presse locale</div>
+  <div class="source-label">Le Journal de Saint-Ouen</div>
+  <h1>Une crèche pour les enfants… et les parents !</h1>
+  <div class="article-meta">
+    <time datetime="2013-02">Février–Mars 2013</time>
+    <div class="article-meta-dot"></div>
+    <span>N°73 et N°74 · bimensuel municipal</span>
+  </div>
+</div>
+
+<div class="article-visual">
+  <div class="press-scan-pair">
+    <img src="../images/presse/journal-saint-ouen-2013.jpg" alt="Journal de Saint-Ouen n°73, 14-23 février 2013 — Une crèche pour les enfants... et les parents !" loading="lazy">
+    <img src="../images/presse/journal-saint-ouen-2013-b.jpg" alt="Journal de Saint-Ouen n°74, février 2013 — Ça y est, les Microdoniens savent où ils crèchent !" loading="lazy">
+  </div>
+</div>
+
+<div class="article-body">
+
+  <div class="source-box">
+    <div class="source-icon">🗞️</div>
+    <div>
+      <div class="source-box-label">Source</div>
+      <div class="source-box-name">Le Journal de Saint-Ouen · N°73 et N°74</div>
+      <div class="source-box-date">Bimensuel municipal · Février–Mars 2013</div>
+    </div>
+  </div>
+
+  <p>Le journal municipal de Saint-Ouen suit de près la naissance des Microdoniens avec deux articles en quelques semaines, dans ses numéros 73 et 74 du début 2013. Ils racontent l'ouverture, l'inauguration et les premières semaines de vie de cette crèche parentale pas comme les autres.</p>
+
+  <h2>N°73 — « Une crèche pour les enfants… et les parents ! »</h2>
+
+  <p>Le numéro 73 (du 14 au 23 février 2013) publie un portrait de la crèche dans la rubrique <em>« C'est ma ville »</em>. Il revient sur l'histoire de sa création par Audrey Liese, et sur le principe de la gouvernance parentale :</p>
+
+  <blockquote>
+    <p>Chaque jour, un parent participe à la vie de la crèche : aider pendant les repas, étendre une lessive, revisser une poignée de porte...</p>
+    <cite>— Audrey Liese, présidente et fondatrice des Microdoniens</cite>
+  </blockquote>
+
+  <p>L'article explique la genèse du projet : Audrey, arrivée à Saint-Ouen deux ans auparavant à la naissance de sa fille, cherche à transposer le modèle des crèches parentales parisiennes qu'elle a découvert. En un an, la crèche passe de l'idée à la réalité : <em>« Nous avons repéré le local il y a un an, signé le bail en mars et six mois plus tard, nous ouvrions la crèche ! »</em></p>
+
+  <h2>Le financement du projet</h2>
+
+  <p>L'article détaille le montage financier : le projet a coûté <strong>250 000 euros</strong>, financé par une aide municipale de 124 000 euros, des subventions de la CAF et un accompagnement de l'association Garances (Conseil général). Les services municipaux ont aidé à trouver le local et à monter le dossier. <em>« Nous avons économisé sur tous les détails pendant les travaux, comme les loquets de fenêtres ! »</em></p>
+
+  <h2>N°74 — « Ça y est, les Microdoniens savent où ils crèchent ! »</h2>
+
+  <p>Le numéro 74 (fin février 2013), dans sa rubrique <em>« Vues d'ici »</em>, couvre l'inauguration officielle du <strong>20 février</strong>, en présence de la maire de Saint-Ouen et de plusieurs élus. L'article annonce également les prochaines journées portes ouvertes pour la rentrée 2013 : le 6 avril et le 13 avril. À cette époque, la crèche accueille déjà <strong>16 tout-petits depuis le 22 octobre 2012</strong>.</p>
+
+</div>
+
+<div class="article-back">
+  <a href="../presse.html">← Retour à la revue de presse</a>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <nav class="footer-nav">
+      <a href="../index.html">Accueil</a>
+      <a href="../vie.html">Vie de la crèche</a>
+      <a href="../pedagogie.html">Pédagogie</a>
+      <a href="../association.html">L'association</a>
+      <a href="../evenements.html">Événements</a>
+      <a href="../historique.html">Historique</a>
+      <a href="../presse.html">On parle de nous</a>
+      <a href="../inscriptions.html">Inscriptions 26/27</a>
+      <a href="../contact.html">Contact</a>
+    </nav>
+    <div class="footer-bottom">
+      <span>© 2026 Les Microdoniens — Association loi 1901</span>
+      <span>53 rue Albert Dhalenne, Saint-Ouen 93400</span>
+    </div>
+  </div>
+</footer>
+
+<script src="../js/nav.js"></script>
+</body>
+</html>

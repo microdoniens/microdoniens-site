@@ -7,60 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/shared.css" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --cream: #faf8f4;
-      --warm-white: #ffffff;
-      --charcoal: #1a1a1a;
-      --text: #2d2d2d;
-      --text-muted: #717171;
-      --border: #e4e0d8;
-      --terracotta: #d96b3f;
-      --terracotta-light: #f5ede7;
-      --terracotta-dark: #b8562e;
-      --sage: #7a9e7e;
-      --sage-light: #edf3ee;
-      --yellow: #f5c842;
-      --radius: 16px;
-      --radius-sm: 8px;
-      --shadow: 0 2px 16px rgba(0,0,0,0.08);
-      --shadow-hover: 0 8px 32px rgba(0,0,0,0.14);
-      --nav-h: 72px;
-    }
-
-    /* ── NAV ── */
-    nav { position: fixed; top: 0; left: 0; right: 0; height: var(--nav-h); background: rgba(250,248,244,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); z-index: 100; display: flex; align-items: center; padding: 0 24px; }
-    .nav-inner { max-width: 1200px; width: 100%; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--charcoal); flex-shrink: 0; }
-    .nav-logo-mark { width: 36px; height: 36px; background: var(--terracotta); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Fraunces', serif; font-size: 16px; color: white; flex-shrink: 0; }
-    .nav-logo-text { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 400; color: var(--charcoal); }
-    .nav-logo-text span { display: block; font-size: 10px; font-family: 'DM Sans', sans-serif; font-weight: 300; color: var(--text-muted); letter-spacing: 0.04em; text-transform: uppercase; }
-    .nav-links { display: flex; align-items: center; gap: 2px; list-style: none; flex-shrink: 0; }
-    .nav-links a { display: block; padding: 7px 11px; text-decoration: none; color: var(--text); font-size: 13px; border-radius: 8px; transition: background 0.15s; white-space: nowrap; }
-    .nav-links a:hover { background: rgba(0,0,0,0.05); }
-    .nav-links a.active { font-weight: 500; color: var(--terracotta); }
-    .nav-cta { background: var(--terracotta) !important; color: white !important; font-weight: 500 !important; border-radius: 50px !important; }
-    .nav-cta:hover { background: var(--terracotta-dark) !important; }
-    /* Dropdown */
-    .nav-dropdown { position: relative; }
-    .nav-dropdown-btn { display: flex; align-items: center; gap: 4px; padding: 7px 11px; font-size: 13px; color: var(--text); background: none; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; border-radius: 8px; transition: background 0.15s; white-space: nowrap; }
-    .nav-dropdown-btn:hover { background: rgba(0,0,0,0.05); }
-    .nav-dropdown-menu { display: none; position: absolute; top: calc(100% + 8px); right: 0; background: white; border: 1.5px solid var(--border); border-radius: var(--radius); padding: 6px; min-width: 200px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); z-index: 200; }
-    .nav-dropdown:hover .nav-dropdown-menu, .nav-dropdown.open .nav-dropdown-menu { display: flex; flex-direction: column; }
-    .nav-dropdown-menu a { display: block; padding: 9px 14px; text-decoration: none; color: var(--text); font-size: 13px; border-radius: 8px; transition: background 0.15s; white-space: nowrap; }
-    .nav-dropdown-menu a:hover { background: var(--cream); }
-    .nav-dropdown-menu a.active { color: var(--terracotta); font-weight: 500; }
-    /* Hamburger */
-    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 8px; border: none; background: none; flex-shrink: 0; }
-    .hamburger span { width: 22px; height: 2px; background: var(--charcoal); border-radius: 2px; display: block; }
-    .mobile-menu { display: none; position: fixed; top: var(--nav-h); left: 0; right: 0; bottom: 0; background: var(--cream); z-index: 99; padding: 24px; overflow-y: auto; }
-    .mobile-menu.open { display: flex; flex-direction: column; gap: 4px; }
-    .mobile-menu a { display: block; padding: 16px; text-decoration: none; color: var(--text); font-size: 18px; border-bottom: 1px solid var(--border); }
-    .mobile-menu a:last-child { margin-top: 16px; background: var(--terracotta); color: white; border-radius: var(--radius); border: none; text-align: center; }
-
-
     /* ── PAGE HERO — canonical single-column header ── */
     .page-hero, .page-header {
       padding-top: calc(var(--nav-h) + 56px);
@@ -109,91 +57,7 @@
       margin-bottom: 0;
     }
 
-    
 
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    .hero-intro, 
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--cream);
-      color: var(--text);
-      -webkit-font-smoothing: antialiased;
-    }
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    .nav-logo-text span {
-      display: block; font-size: 11px;
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 300; color: var(--text-muted);
-      letter-spacing: 0.04em; text-transform: uppercase;
-    }
-
-    
-
-    
-
-    
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-    
-
-    
-    
-
-    
-
-    
-
-    
 .activities-section {
       padding: 0 24px 80px;
       max-width: 1200px; margin: 0 auto;
@@ -241,6 +105,12 @@
       font-size: 64px; flex-shrink: 0;
     }
 
+    img.post-thumb {
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+    }
+
     .thumb-orange { background: linear-gradient(135deg, #fde8d8, #f5c9a8); }
     .thumb-green  { background: linear-gradient(135deg, #d8ead9, #b8d4b9); }
     .thumb-blue   { background: linear-gradient(135deg, #d8e8f0, #b8ccd8); }
@@ -268,6 +138,13 @@
       color: var(--charcoal); line-height: 1.2;
       margin-bottom: 14px;
     }
+
+    .post-body a {
+      text-decoration: none; color: inherit;
+      display: block;
+      transition: color 0.15s;
+    }
+    .post-body a:hover h2 { color: var(--terracotta); }
 
     .post-body p {
       font-size: 15px; color: var(--text-muted);
@@ -338,19 +215,20 @@ footer {
 </head>
 <body>
 
+<!-- NAV -->
 <nav>
   <div class="nav-inner">
     <a href="index.html" class="nav-logo">
-      <div class="nav-logo-mark">M</div>
+      <div class="nav-logo-mark"></div>
       <div class="nav-logo-text">Les Microdoniens<span>Crèche parentale · Saint-Ouen</span></div>
     </a>
     <ul class="nav-links">
-      <li><a href="index.html#espaces">La crèche</a></li>
+      <li><a href="index.html">Accueil</a></li>
       <li><a href="vie.html" class="active">Vie de la crèche</a></li>
       <li><a href="association.html">L'association</a></li>
-      <li><a href="inscriptions.html">Inscriptions</a></li>
+      <li><a href="inscriptions.html">Inscriptions 26/27</a></li>
       <li class="nav-dropdown">
-        <button class="nav-dropdown-btn">Plus ▾</button>
+        <button class="nav-dropdown-btn">Autres pages ▾</button>
         <div class="nav-dropdown-menu">
           <a href="pedagogie.html">Pédagogie</a>
           <a href="evenements.html">Événements</a>
@@ -365,11 +243,12 @@ footer {
   </div>
 </nav>
 
+<!-- MOBILE MENU -->
 <div class="mobile-menu" id="mobileMenu">
-  <a href="index.html#espaces" onclick="toggleMenu()">La crèche</a>
+  <a href="index.html" onclick="toggleMenu()">Accueil</a>
   <a href="vie.html" onclick="toggleMenu()">Vie de la crèche</a>
   <a href="association.html" onclick="toggleMenu()">L'association</a>
-  <a href="inscriptions.html" onclick="toggleMenu()">Inscriptions</a>
+  <a href="inscriptions.html" onclick="toggleMenu()">Inscriptions 26/27</a>
   <a href="pedagogie.html" onclick="toggleMenu()">Pédagogie</a>
   <a href="evenements.html" onclick="toggleMenu()">Événements</a>
   <a href="historique.html" onclick="toggleMenu()">Historique</a>
@@ -390,24 +269,23 @@ footer {
 
 <div class="activities-section">
   <div class="category-filter">
-    <button class="filter-btn active">Tout</button>
-    <button class="filter-btn">🎵 Musique</button>
-    <button class="filter-btn">🎨 Créativité</button>
-    <button class="filter-btn">🌿 Nature</button>
-    <button class="filter-btn">🏃 Motricité</button>
-    <button class="filter-btn">📚 Culture</button>
-    <button class="filter-btn">🌍 Découvertes</button>
+    <button class="filter-btn active" data-filter="tout">Tout</button>
+    <button class="filter-btn" data-filter="Musique">🎵 Musique</button>
+    <button class="filter-btn" data-filter="Créativité">🎨 Créativité</button>
+    <button class="filter-btn" data-filter="Nature">🌿 Nature</button>
+    <button class="filter-btn" data-filter="Motricité">🏃 Motricité</button>
+    <button class="filter-btn" data-filter="Culture">📚 Culture</button>
+    <button class="filter-btn" data-filter="Découvertes">🌍 Découvertes</button>
   </div>
 
   <div class="activities-list">
 
-    <article class="activity-post">
-      <div class="post-thumb thumb-blue">📚</div>
+    <article class="activity-post" data-category="Culture">
+      <img src="images/vie/sortie-mediatheque-01.jpg" alt="sortie-mediatheque" class="post-thumb">
       <div class="post-body">
         <div class="post-tag">📚 Culture</div>
-        <h2>Sortie à la médiathèque Persépolis</h2>
+        <a href="vie/sortie-mediatheque.html"><h2>Sortie à la médiathèque Persépolis</h2></a>
         <p>Les enfants ont participé à un atelier proposé par le réseau des médiathèques de Plaine Commune, en partenariat avec le salon du livre de jeunesse, autour des albums de l'autrice <strong>Lucie Félix</strong>.</p>
-        <p>L'exposition <em>« Debout, Coucou, Genou ! »</em> proposait une scénographie ludique imaginée par l'autrice pour explorer son univers en s'amusant — debout, à genou, accroupis ou allongés. Tapis, paravents et labyrinthes laissaient l'enfant explorer librement.</p>
         <div class="post-meta">
           <span>Médiathèque Persépolis</span>
           <div class="post-meta-dot"></div>
@@ -416,37 +294,35 @@ footer {
       </div>
     </article>
 
-    <article class="activity-post reverse">
-      <div class="post-thumb thumb-yellow">🧀</div>
+    <article class="activity-post reverse" data-category="Découvertes">
+      <img src="images/vie/intervention-fromager-01.jpg" alt="intervention-fromager" class="post-thumb">
       <div class="post-body">
         <div class="post-tag">🌍 Découvertes</div>
-        <h2>L'intervention du fromager</h2>
+        <a href="vie/intervention-fromager.html"><h2>L'intervention du fromager</h2></a>
         <p><strong>Vincent</strong>, fromager de la fromagerie <em>Des Plateaux</em> à Saint-Ouen, a animé un atelier ludique et gourmand avec dégustation de plusieurs types de fromages.</p>
-        <p>Un moment de découverte sensorielle qui illustre parfaitement l'ouverture sur le monde portée par le projet pédagogique des Microdoniens.</p>
         <div class="post-meta">
           <span>Atelier dégustation</span>
         </div>
       </div>
     </article>
 
-    <article class="activity-post">
-      <div class="post-thumb thumb-green">🌱</div>
+    <article class="activity-post" data-category="Nature">
+      <img src="images/vie/prendre-soin-nature-01.jpg" alt="prendre-soin-nature" class="post-thumb">
       <div class="post-body">
         <div class="post-tag">🌿 Nature</div>
-        <h2>Prendre soin de la nature</h2>
+        <a href="vie/prendre-soin-nature.html"><h2>Prendre soin de la nature</h2></a>
         <p>La crèche dispose d'un espace extérieur — <em>le jardin</em> — entretenu par les adultes accompagnés des enfants. Le projet pédagogique prône la sensibilisation à la nature dès le plus jeune âge.</p>
-        <p>Les enfants ont régulièrement le plaisir de jardiner, planter de nouveaux arbres, aromates et fleurs. Un contact direct avec le vivant, au cœur de Saint-Ouen.</p>
         <div class="post-meta">
           <span>Jardinage · Saisons</span>
         </div>
       </div>
     </article>
 
-    <article class="activity-post reverse">
-      <div class="post-thumb thumb-orange">🎨</div>
+    <article class="activity-post reverse" data-category="Créativité">
+      <img src="images/vie/escargots-papier-mache-01.jpg" alt="escargots-papier-mache" class="post-thumb">
       <div class="post-body">
         <div class="post-tag">🎨 Créativité</div>
-        <h2>Escargots en papier mâché</h2>
+        <a href="vie/escargots-papier-mache.html"><h2>Escargots en papier mâché</h2></a>
         <p>Lors des permanences, les parents peuvent initier un atelier ou un jeu adapté répondant aux besoins des enfants. C'est l'un des moments forts de la vie associative : quand les familles apportent leur créativité au quotidien de la crèche.</p>
         <div class="post-meta">
           <span>Atelier parent</span>
@@ -454,11 +330,11 @@ footer {
       </div>
     </article>
 
-    <article class="activity-post">
-      <div class="post-thumb thumb-purple">🎵</div>
+    <article class="activity-post" data-category="Musique">
+      <img src="images/vie/atelier-musique-momo-01.jpg" alt="atelier-musique-momo" class="post-thumb">
       <div class="post-body">
         <div class="post-tag">🎵 Musique</div>
-        <h2>Atelier de musique avec la MOMO</h2>
+        <a href="vie/atelier-musique-momo.html"><h2>Atelier de musique avec la MOMO</h2></a>
         <p>Une intervenante de la <em>MOMO</em> vient régulièrement proposer un atelier musical aux enfants, avec différents instruments et sonorités. La musique comme outil d'expression, de concentration et de bien-être.</p>
         <div class="activity-quote">
           <p>« Patager, créer, rêver, communiquer, rigoler, élaborer, se lancer, inventer, oser, se poser, raconter… le jeu, un outil merveilleux de la vie de l'enfant. »</p>
@@ -466,26 +342,24 @@ footer {
       </div>
     </article>
 
-    <article class="activity-post reverse">
-      <div class="post-thumb thumb-pink">🏃</div>
+    <article class="activity-post reverse" data-category="Motricité">
+      <img src="images/vie/motricite-libre-01.jpeg" alt="motricite-libre" class="post-thumb">
       <div class="post-body">
         <div class="post-tag">🏃 Motricité</div>
-        <h2>Motricité libre & développement du corps</h2>
+        <a href="vie/motricite-libre.html"><h2>Motricité libre & développement du corps</h2></a>
         <p>Tout au long de la journée, des ateliers sont proposés aux enfants qui le souhaitent. Ils sont prétextes à la motricité fine, à la dextérité et au développement psychomoteur.</p>
-        <p>Laissé libre de ses mouvements dans un espace pensé en amont par l'équipe pédagogique pluridisciplinaire, l'enfant peut s'autoriser à expérimenter et construire sa proprioception, son rapport à la pesanteur et sa créativité de jeux.</p>
         <div class="post-meta">
           <span>Quotidien · L'Atelier</span>
         </div>
       </div>
     </article>
 
-    <article class="activity-post">
-      <div class="post-thumb thumb-orange">🎭</div>
+    <article class="activity-post" data-category="Culture">
+      <img src="images/vie/sieste-lyrique-01.jpeg" alt="sieste-lyrique" class="post-thumb">
       <div class="post-body">
         <div class="post-tag">📚 Culture</div>
-        <h2>Sieste lyrique</h2>
+        <a href="vie/sieste-lyrique.html"><h2>Sieste lyrique</h2></a>
         <p>Nous avons eu la chance de recevoir <strong>Clara Schmidt</strong>, artiste lyrique membre du collectif Saint Ouen sur scène. Elle a proposé une <em>«&nbsp;sieste lyrique&nbsp;»</em> avec 6 berceuses en 6 langues différentes, juste avant la sieste des enfants.</p>
-        <p>Un moment poétique et rare, emblématique de l'ouverture culturelle portée par Les Microdoniens.</p>
         <div class="post-meta">
           <span>Octobre 2022</span>
           <div class="post-meta-dot"></div>
@@ -494,13 +368,12 @@ footer {
       </div>
     </article>
 
-    <article class="activity-post reverse">
-      <div class="post-thumb thumb-green">🍂</div>
+    <article class="activity-post reverse" data-category="Nature">
+      <img src="images/vie/automne-arrive-01.jpg" alt="automne-arrive" class="post-thumb">
       <div class="post-body">
         <div class="post-tag">🌿 Nature</div>
-        <h2>L'automne arrive</h2>
+        <a href="vie/automne-arrive.html"><h2>L'automne arrive</h2></a>
         <p>Les enfants ont eu le plaisir de ramasser feuilles, marrons, glands et caroubes. Ils ont pu observer les différentes couleurs de feuilles, leurs tailles et leurs formes.</p>
-        <p>Un petit air de forêt en plein milieu de Saint-Ouen — la nature comme terrain de jeu et d'émerveillement.</p>
         <div class="post-meta">
           <span>Octobre 2022</span>
           <div class="post-meta-dot"></div>
@@ -509,29 +382,434 @@ footer {
       </div>
     </article>
 
-    <article class="activity-post">
-      <div class="post-thumb thumb-yellow">🎪</div>
+    <article class="activity-post" data-category="Culture">
+      <img src="images/vie/seance-cinema-2022-01.jpeg" alt="seance-cinema-2022" class="post-thumb">
       <div class="post-body">
         <div class="post-tag">📚 Culture</div>
-        <h2>Séance au cinéma</h2>
-        <p>Les enfants du groupe des grands ont assisté à la projection de <em>« Gros pois et petit point »</em> de Lotta Geffenblad à l'espace 1789. Les séances sont spécialement adaptées aux enfants de 2 ans, ne dépassant généralement pas 30 minutes.</p>
+        <a href="vie/seance-cinema-2022.html"><h2>Séance au cinéma — Gros pois et petit point</h2></a>
+        <p>Les enfants du groupe des grands ont assisté à la projection de <em>« Gros pois et petit point »</em> de Lotta Geffenblad à l'espace 1789. Les séances sont spécialement adaptées aux enfants de 2 ans.</p>
         <div class="post-meta">
           <span>Espace 1789 · Saint-Ouen</span>
         </div>
       </div>
     </article>
 
-    <article class="activity-post reverse">
-      <div class="post-thumb thumb-green">🧘</div>
+    <article class="activity-post reverse" data-category="Motricité">
+      <img src="images/vie/yoga-jardin-01.jpg" alt="yoga-jardin" class="post-thumb">
       <div class="post-body">
         <div class="post-tag">🏃 Motricité</div>
-        <h2>Yoga dans le jardin</h2>
+        <a href="vie/yoga-jardin.html"><h2>Yoga dans le jardin</h2></a>
         <p>Une parenthèse détente s'ouvre dans le jardin. Une séance de yoga proposée aux enfants du groupe des grands par <strong>Marion Denys – matayoga</strong>, parent de permanence.</p>
-        <p>L'initiation au yoga permet à l'enfant de découvrir son corps à travers différentes positions. L'enfant se recentre sur lui-même au niveau corporel, sensoriel et émotionnel.</p>
         <div class="post-meta">
           <span>Avril 2022</span>
           <div class="post-meta-dot"></div>
           <span>Atelier parent</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="activity-post" data-category="Créativité">
+      <img src="images/vie/ateliers-creatifs-luciana-01.jpg" alt="ateliers-creatifs-luciana" class="post-thumb">
+      <div class="post-body">
+        <div class="post-tag">🎨 Créativité</div>
+        <a href="vie/ateliers-creatifs-luciana.html"><h2>Ateliers créatifs</h2></a>
+        <p>Proposition d'ateliers par <strong>Luciana</strong>, parent de permanence : de la main à l'outil à la façon de « Hans Hartung », le noir, les reflets, l'ombre et la lumière.</p>
+        <div class="post-meta">
+          <span>Avril 2022</span>
+          <div class="post-meta-dot"></div>
+          <span>Atelier parent</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="activity-post reverse" data-category="Culture">
+      <img src="images/vie/droit-a-la-culture-01.jpeg" alt="droit-a-la-culture" class="post-thumb">
+      <div class="post-body">
+        <div class="post-tag">📚 Culture</div>
+        <a href="vie/droit-a-la-culture.html"><h2>Le droit à la culture</h2></a>
+        <p>Un panel de représentations d'œuvres d'art plastifiées mis à disposition des enfants. Ce projet éducatif répond à la charte nationale pour l'accueil du jeune enfant.</p>
+        <div class="post-meta">
+          <span>Avril 2022</span>
+          <div class="post-meta-dot"></div>
+          <span>Projet pédagogique</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="activity-post" data-category="Culture">
+      <img src="images/vie/creche-tout-un-art-01.jpeg" alt="creche-tout-un-art" class="post-thumb">
+      <div class="post-body">
+        <div class="post-tag">📚 Culture</div>
+        <a href="vie/creche-tout-un-art.html"><h2>La crèche, tout un Art</h2></a>
+        <p>Introduire l'art dans la vie de la crèche : ponctuer le quotidien et les espaces de jeu par des œuvres d'art universelles qui invitent les enfants à la rêverie et à l'évasion.</p>
+        <div class="post-meta">
+          <span>Février 2022</span>
+          <div class="post-meta-dot"></div>
+          <span>Projet pédagogique</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="activity-post reverse" data-category="Musique">
+      <img src="images/vie/musique-a-la-creche-01.jpeg" alt="musique-a-la-creche" class="post-thumb">
+      <div class="post-body">
+        <div class="post-tag">🎵 Musique</div>
+        <a href="vie/musique-a-la-creche.html"><h2>Musique à la crèche</h2></a>
+        <p>Lors des permanences, beaucoup de parents font découvrir différents instruments de musique aux enfants. La crèche parentale offre cette particularité magnifique : chaque famille apporte son univers.</p>
+        <div class="post-meta">
+          <span>Septembre 2022</span>
+          <div class="post-meta-dot"></div>
+          <span>Permanence parent</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="activity-post" data-category="Nature">
+      <img src="images/vie/ete-microdoniens-01.jpeg" alt="ete-microdoniens" class="post-thumb">
+      <div class="post-body">
+        <div class="post-tag">🌿 Nature</div>
+        <a href="vie/ete-microdoniens.html"><h2>Un été aux Microdoniens</h2></a>
+        <p>Les beaux jours s'installent, c'est le moment de réinvestir la vie en extérieur. Pique-niques au grand parc de Saint-Ouen, jardinage, liberté de mouvement au grand air.</p>
+        <div class="post-meta">
+          <span>Juillet 2022</span>
+          <div class="post-meta-dot"></div>
+          <span>Grand Parc · Saint-Ouen</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="activity-post reverse" data-category="Culture">
+      <img src="images/vie/sortie-fin-annee-01.jpeg" alt="sortie-fin-annee" class="post-thumb">
+      <div class="post-body">
+        <div class="post-tag">📚 Culture</div>
+        <a href="vie/sortie-fin-annee.html"><h2>Sortie de fin d'année — Jardin d'Acclimatation</h2></a>
+        <p>Sortie au Jardin d'Acclimatation pour clôturer l'année en beauté. Grands et petits Microdoniens se sont amusés ensemble dans un moment de convivialité et de plaisir partagé.</p>
+        <div class="post-meta">
+          <span>Juillet 2022</span>
+          <div class="post-meta-dot"></div>
+          <span>Jardin d'Acclimatation · Paris</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="activity-post" data-category="Découvertes">
+      <img src="images/vie/visite-ecole-maternelle-01.jpeg" alt="visite-ecole-maternelle" class="post-thumb">
+      <div class="post-body">
+        <div class="post-tag">🌍 Découvertes</div>
+        <a href="vie/visite-ecole-maternelle.html"><h2>Visite à l'école maternelle Paul Langevin</h2></a>
+        <p>Une petite transition entre la crèche et l'école maternelle en présence des professionnelles référentes — préparer les enfants en douceur au grand changement qui les attend.</p>
+        <div class="post-meta">
+          <span>Juillet 2022</span>
+          <div class="post-meta-dot"></div>
+          <span>École Paul Langevin · Saint-Ouen</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="activity-post reverse" data-category="Motricité">
+      <img src="images/vie/prendre-soin-care-01.jpeg" alt="prendre-soin-care" class="post-thumb">
+      <div class="post-body">
+        <div class="post-tag">🏃 Motricité</div>
+        <a href="vie/prendre-soin-care.html"><h2>Prendre soin — Care</h2></a>
+        <p>Quand, à travers leurs jeux libres et spontanés, les enfants reproduisent l'attitude des adultes qui les accompagnent — parents comme éducateurs — et nous rappellent que l'éducation passe par l'imitation.</p>
+        <div class="post-meta">
+          <span>Novembre 2021</span>
+          <div class="post-meta-dot"></div>
+          <span>Observation pédagogique</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="activity-post" data-category="Motricité">
+      <img src="images/vie/le-jeu-01.jpg" alt="le-jeu" class="post-thumb">
+      <div class="post-body">
+        <div class="post-tag">🏃 Motricité</div>
+        <a href="vie/le-jeu.html"><h2>Le jeu</h2></a>
+        <p>Patager, créer, rêver, communiquer, rigoler… Le jeu n'est pas un accessoire de l'enfance : il en est le cœur. C'est par le jeu que l'enfant explore le monde et construit sa pensée.</p>
+        <div class="post-meta">
+          <span>Novembre 2021</span>
+          <div class="post-meta-dot"></div>
+          <span>Réflexion pédagogique</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="activity-post reverse" data-category="Culture">
+      <img src="images/vie/sortie-cinema-2021-01.jpeg" alt="sortie-cinema-2021" class="post-thumb">
+      <div class="post-body">
+        <div class="post-tag">📚 Culture</div>
+        <a href="vie/sortie-cinema-2021.html"><h2>Ciné-concert — Sur l'océan</h2></a>
+        <p>Le duo électro <em>Science Fiction</em> accompagne 4 courts métrages pour faire découvrir les mystères de l'océan au rythme des percussions et du synthétiseur, à l'Espace 1789.</p>
+        <div class="post-meta">
+          <span>Novembre 2021</span>
+          <div class="post-meta-dot"></div>
+          <span>Espace 1789 · Saint-Ouen</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="activity-post" data-category="Motricité">
+      <img src="images/vie/jeux-sensori-moteurs-01.jpeg" alt="jeux-sensori-moteurs" class="post-thumb">
+      <div class="post-body">
+        <div class="post-tag">🏃 Motricité</div>
+        <a href="vie/jeux-sensori-moteurs.html"><h2>Jeux sensori-moteurs</h2></a>
+        <p>Plaisir du mouvement, compétence du corps, joie de l'expérimentation et capacité de concentration — le bonheur d'être enfant, au quotidien aux Microdoniens.</p>
+        <div class="post-meta">
+          <span>Novembre 2021</span>
+          <div class="post-meta-dot"></div>
+          <span>Quotidien</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="activity-post reverse" data-category="Culture">
+      <img src="images/vie/les-9-ans-01.jpeg" alt="les-9-ans" class="post-thumb">
+      <div class="post-body">
+        <div class="post-tag">📚 Culture</div>
+        <a href="vie/les-9-ans.html"><h2>Les 9 ans des Microdoniens</h2></a>
+        <p>Neuf ans de vie associative, neuf ans d'histoires partagées. « Seul on va plus vite, ensemble on va plus loin ! » — célébration d'une aventure humaine collective.</p>
+        <div class="post-meta">
+          <span>Octobre 2021</span>
+          <div class="post-meta-dot"></div>
+          <span>Anniversaire</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="activity-post" data-category="Motricité">
+      <img src="images/vie/liberte-motrice-01.jpeg" alt="liberte-motrice" class="post-thumb">
+      <div class="post-body">
+        <div class="post-tag">🏃 Motricité</div>
+        <a href="vie/liberte-motrice.html"><h2>Liberté motrice</h2></a>
+        <p>Laissé libre de ses mouvements dans un espace pensé par une équipe pluridisciplinaire bienveillante, l'enfant construit sa proprioception et se lance des défis à son propre rythme.</p>
+        <div class="post-meta">
+          <span>Printemps 2021</span>
+          <div class="post-meta-dot"></div>
+          <span>Quotidien</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="activity-post reverse" data-category="Nature">
+      <img src="images/vie/nature-vie-enfant-01.jpeg" alt="nature-vie-enfant" class="post-thumb">
+      <div class="post-body">
+        <div class="post-tag">🌿 Nature</div>
+        <a href="vie/nature-vie-enfant.html"><h2>La nature dans la vie de l'enfant</h2></a>
+        <p>Aux Microdoniens, tous les jours les enfants ont l'opportunité d'explorer la nature : la terre, les galets, le sable, les plantes, les insectes… tout est source de rêverie et de petits bonheurs.</p>
+        <div class="post-meta">
+          <span>Printemps 2021</span>
+          <div class="post-meta-dot"></div>
+          <span>Projet pédagogique</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="activity-post" data-category="Motricité">
+      <img src="images/vie/saint-ouen-beach-01.jpg" alt="saint-ouen-beach" class="post-thumb">
+      <div class="post-body">
+        <div class="post-tag">🏃 Motricité</div>
+        <a href="vie/saint-ouen-beach.html"><h2>Saint-Ouen on the beach !</h2></a>
+        <p>Quand tu ne peux aller à la plage, tu invites la plage dans ta crèche. Du sable, des seaux et une crèche transformée en bord de mer pour un après-midi de jeu sensori-moteur.</p>
+        <div class="post-meta">
+          <span>Hiver 2021</span>
+          <div class="post-meta-dot"></div>
+          <span>Jeu sensori-moteur</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="activity-post reverse" data-category="Créativité">
+      <img src="images/vie/peinture-vendredi-01.jpg" alt="peinture-vendredi" class="post-thumb">
+      <div class="post-body">
+        <div class="post-tag">🎨 Créativité</div>
+        <a href="vie/peinture-vendredi.html"><h2>Peinture du vendredi matin</h2></a>
+        <p>La feuille, la peinture et au-delà ! Des ateliers de peinture libre où l'enfant explore la couleur, la texture et le mouvement — sans modèle à reproduire, juste la joie de créer.</p>
+        <div class="post-meta">
+          <span>Hiver 2021</span>
+          <div class="post-meta-dot"></div>
+          <span>Atelier créatif</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="activity-post" data-category="Motricité">
+      <img src="images/vie/jeux-bebes-01.jpeg" alt="jeux-bebes" class="post-thumb">
+      <div class="post-body">
+        <div class="post-tag">🏃 Motricité</div>
+        <a href="vie/jeux-bebes.html"><h2>Jeux de bébés</h2></a>
+        <p>Les bébés ayant acquis une autonomie de mouvements, l'espace de jeu s'ouvre à de nouvelles expériences de manipulation et d'imitation. Observer un bébé en pleine exploration, c'est extraordinaire.</p>
+        <div class="post-meta">
+          <span>Printemps 2021</span>
+          <div class="post-meta-dot"></div>
+          <span>Groupe bébés</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="activity-post reverse" data-category="Nature">
+      <img src="images/vie/besoin-naturel-01.jpeg" alt="besoin-naturel" class="post-thumb">
+      <div class="post-body">
+        <div class="post-tag">🌿 Nature</div>
+        <a href="vie/besoin-naturel.html"><h2>Un besoin naturel — l'escargotière</h2></a>
+        <p>Projet du printemps : faire rentrer la nature dans notre crèche. Nous avons confectionné avec les enfants une escargotière — une initiation douce à la responsabilité et au respect du vivant.</p>
+        <div class="post-meta">
+          <span>Printemps 2021</span>
+          <div class="post-meta-dot"></div>
+          <span>Projet nature</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="activity-post" data-category="Créativité">
+      <div class="post-thumb thumb-orange">✨</div>
+      <div class="post-body">
+        <div class="post-tag">🎨 Créativité</div>
+        <a href="vie/potentiel-creatif.html"><h2>Potentiel créatif</h2></a>
+        <p>Soutenir la créativité qui sommeille en chacun — offrir des espaces de manipulations, jouer avec la matière, jouer avec son corps dans l'espace. Le potentiel créatif de l'enfant est immense.</p>
+        <div class="post-meta">
+          <span>Printemps 2021</span>
+          <div class="post-meta-dot"></div>
+          <span>Atelier créatif</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="activity-post reverse" data-category="Nature">
+      <img src="images/vie/balade-bebes-01.jpeg" alt="balade-bebes" class="post-thumb">
+      <div class="post-body">
+        <div class="post-tag">🌿 Nature</div>
+        <a href="vie/balade-bebes.html"><h2>Balade pour les bébés</h2></a>
+        <p>C'est bien serrés dans la carriole que le groupe des bébés est sorti pour profiter du grand parc et de ses espaces de motricité. La liberté motrice exercée en plein air.</p>
+        <div class="post-meta">
+          <span>Printemps 2021</span>
+          <div class="post-meta-dot"></div>
+          <span>Grand Parc · Saint-Ouen</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="activity-post" data-category="Créativité">
+      <img src="images/vie/creativite-enfant-01.jpeg" alt="creativite-enfant" class="post-thumb">
+      <div class="post-body">
+        <div class="post-tag">🎨 Créativité</div>
+        <a href="vie/creativite-enfant.html"><h2>Créativité de l'enfant</h2></a>
+        <p>La créativité de l'enfant, son esprit de recherche et sa capacité de concentration lorsqu'il est absorbé par une expérience manuelle, sont toujours une source d'ébahissement pour l'adulte qui sait regarder.</p>
+        <div class="post-meta">
+          <span>Printemps 2021</span>
+          <div class="post-meta-dot"></div>
+          <span>Réflexion pédagogique</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="activity-post reverse" data-category="Découvertes">
+      <div class="post-thumb thumb-yellow">🎃</div>
+      <div class="post-body">
+        <div class="post-tag">🌍 Découvertes</div>
+        <a href="vie/halloween-2019.html"><h2>Halloween s'invite à la crèche</h2></a>
+        <p>Sculpture d'une Jack-o'-lantern, dégustation d'une soupe de potiron… Une invitation à l'imaginaire et à la fête — explorer ce qui fait peur (mais pas trop) et rire ensemble.</p>
+        <div class="post-meta">
+          <span>Octobre 2019</span>
+          <div class="post-meta-dot"></div>
+          <span>Fête · Les Microdoniens</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="activity-post" data-category="Découvertes">
+      <img src="images/vie/voyage-autour-monde-01.png" alt="voyage-autour-monde" class="post-thumb">
+      <div class="post-body">
+        <div class="post-tag">🌍 Découvertes</div>
+        <a href="vie/voyage-autour-monde.html"><h2>Voyage autour du monde</h2></a>
+        <p>Le temps d'une brève escale, Jeannette nous fait découvrir l'Afrique. Enfants, parents et professionnelles se parent des plus belles tenues traditionnelles — chaque famille devient une fenêtre sur le monde.</p>
+        <div class="post-meta">
+          <span>Octobre 2019</span>
+          <div class="post-meta-dot"></div>
+          <span>Projet ouverture sur le monde</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="activity-post reverse" data-category="Musique">
+      <img src="images/vie/creche-des-musicos-01.jpg" alt="creche-des-musicos" class="post-thumb">
+      <div class="post-body">
+        <div class="post-tag">🎵 Musique</div>
+        <a href="vie/creche-des-musicos.html"><h2>La crèche des Musicos</h2></a>
+        <p>Une permanence c'est aussi ça : la découverte des instruments de musique, de différentes sonorités, animée par des parents très investis. Les compétences de chaque famille enrichissent collectivement tous les enfants.</p>
+        <div class="post-meta">
+          <span>Printemps 2019</span>
+          <div class="post-meta-dot"></div>
+          <span>Permanence parent</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="activity-post" data-category="Découvertes">
+      <img src="images/vie/ferme-tiligolo-01.jpg" alt="ferme-tiligolo" class="post-thumb">
+      <div class="post-body">
+        <div class="post-tag">🌍 Découvertes</div>
+        <a href="vie/ferme-tiligolo.html"><h2>Visite de la ferme du Tiligolo</h2></a>
+        <p>Le temps d'une journée, la ferme du Tiligolo s'installe dans le jardin de la crèche. Enfants, professionnelles et parents sont allés à la rencontre des animaux — la ferme urbaine pour un jour.</p>
+        <div class="post-meta">
+          <span>Printemps 2019</span>
+          <div class="post-meta-dot"></div>
+          <span>Ferme du Tiligolo</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="activity-post reverse" data-category="Découvertes">
+      <img src="images/vie/escale-marocaine-01.jpg" alt="escale-marocaine" class="post-thumb">
+      <div class="post-body">
+        <div class="post-tag">🌍 Découvertes</div>
+        <a href="vie/escale-marocaine.html"><h2>Escale marocaine le temps d'un goûter</h2></a>
+        <p>Thé à la menthe, cornes de gazelle, musique berbère… La crèche s'est transportée au Maroc le temps d'un après-midi. L'ouverture sur le monde, une saveur à la fois.</p>
+        <div class="post-meta">
+          <span>Printemps 2019</span>
+          <div class="post-meta-dot"></div>
+          <span>Projet ouverture sur le monde</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="activity-post" data-category="Culture">
+      <div class="post-thumb thumb-blue">🎭</div>
+      <div class="post-body">
+        <div class="post-tag">📚 Culture</div>
+        <a href="vie/spectacle-monsieur-pouce.html"><h2>Spectacle — Monsieur Pouce met son chapeau</h2></a>
+        <p>Un voyage onirique de <strong>Sami Hakimi</strong> à la Médiathèque Persépolis — conte musical qui traite poétiquement d'une question sans réponse : à quoi rêvent les tout-petits d'hommes ?</p>
+        <div class="post-meta">
+          <span>Printemps 2019</span>
+          <div class="post-meta-dot"></div>
+          <span>Médiathèque Persépolis · Saint-Ouen</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="activity-post reverse" data-category="Culture">
+      <img src="images/vie/sortie-cinema-2019-01.jpg" alt="sortie-cinema-2019" class="post-thumb">
+      <div class="post-body">
+        <div class="post-tag">📚 Culture</div>
+        <a href="vie/sortie-cinema-2019.html"><h2>Ciné-concert — Décrocher la lune</h2></a>
+        <p>Nicolas Stoica et Jonathan Leurquin composent un univers tout en rêve autour de cinq films sur la lune et les étoiles — les enfants, les yeux brillants, embarqués pour un voyage vers les étoiles.</p>
+        <div class="post-meta">
+          <span>Novembre 2019</span>
+          <div class="post-meta-dot"></div>
+          <span>Espace 1789 · Saint-Ouen</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="activity-post" data-category="Musique">
+      <img src="images/vie/eveil-musical-01.png" alt="eveil-musical" class="post-thumb">
+      <div class="post-body">
+        <div class="post-tag">🎵 Musique</div>
+        <a href="vie/eveil-musical.html"><h2>Éveil musical</h2></a>
+        <p>Les enfants suivent ponctuellement des ateliers d'éveil musical à travers chants, danses et pratique d'instruments — une invitation à ressentir, à bouger, à écouter dès les premiers mois de vie.</p>
+        <div class="post-meta">
+          <span>Février 2019</span>
+          <div class="post-meta-dot"></div>
+          <span>Atelier musical</span>
         </div>
       </div>
     </article>
@@ -541,36 +819,69 @@ footer {
 
 <footer>
   <div class="footer-inner">
-    <nav class="footer-nav">
-      <a href="index.html#espaces">La crèche</a>
-      <a href="vie.html">Vie de la crèche</a>
-      <a href="pedagogie.html">Pédagogie</a>
-      <a href="association.html">L'association</a>
-      <a href="evenements.html">Événements</a>
-      <a href="historique.html">Historique</a>
-      <a href="presse.html">On parle de nous</a>
-      <a href="inscriptions.html">Inscriptions</a>
-      <a href="contact.html">Contact</a>
-    </nav>
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <div class="nav-logo-mark"></div>
+          <div class="footer-logo-text">Les Microdoniens</div>
+        </div>
+        <p class="footer-tagline">Crèche parentale associative à Saint-Ouen. Un lieu bienveillant où enfants, familles et professionnels grandissent ensemble.</p>
+      </div>
+
+      <div class="footer-col">
+        <h4>La crèche</h4>
+        <ul>
+          <li><a href="index.html#espaces">Nos espaces</a></li>
+          <li><a href="index.html#pedagogie">Pédagogie</a></li>
+          <li><a href="vie.html">Vie de la crèche</a></li>
+          <li><a href="index.html#historique">Historique</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>L'association</h4>
+        <ul>
+          <li><a href="index.html#association">Présentation</a></li>
+          <li><a href="index.html#admission">Admission</a></li>
+          <li><a href="contact.html">Inscriptions</a></li>
+          <li><a href="index.html#presse">On parle de nous</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <ul>
+          <li><a href="contact.html">Nous écrire</a></li>
+          <li><a href="https://maps.google.com/?q=53+rue+Albert+Dhalenne+Saint-Ouen" target="_blank">53 rue Dhalenne, 93400</a></li>
+        </ul>
+      </div>
+    </div>
+
     <div class="footer-bottom">
       <span>© 2026 Les Microdoniens — Association loi 1901</span>
-      <span>53 rue Albert Dhalenne, Saint-Ouen 93400</span>
+      <span>Agréée PMI Seine-Saint-Denis</span>
     </div>
   </div>
 </footer>
 
+<script src="js/nav.js"></script>
 <script>
-  function toggleMenu() {
-    document.getElementById('mobileMenu').classList.toggle('open');
+  function applyFilter(filter) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    const activeBtn = document.querySelector(`.filter-btn[data-filter="${filter}"]`);
+    if (activeBtn) activeBtn.classList.add('active');
+
+    document.querySelectorAll('.activity-post').forEach(article => {
+      article.style.display = (filter === 'tout' || article.dataset.category === filter) ? '' : 'none';
+    });
   }
 
-  // filter buttons (visual only)
   document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-    });
+    btn.addEventListener('click', () => applyFilter(btn.dataset.filter));
   });
+
+  const urlFilter = new URLSearchParams(window.location.search).get('filter');
+  if (urlFilter) applyFilter(urlFilter);
 </script>
 </body>
 </html>

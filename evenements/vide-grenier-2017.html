@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vide-grenier au Joli Mai 2017 — Les Microdoniens</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/shared.css" />
+  <style>
+    .article-hero { padding-top: calc(var(--nav-h) + 56px); padding-bottom: 48px; padding-left: 24px; padding-right: 24px; max-width: 760px; margin: 0 auto; }
+    .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
+    .breadcrumb a { color: var(--text-muted); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--terracotta); }
+    .breadcrumb > span { color: var(--border); }
+    .article-tag { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; background: var(--terracotta-light); color: var(--terracotta-dark); border-radius: 50px; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 20px; }
+    h1 { font-family: 'Fraunces', serif; font-size: clamp(32px, 4.5vw, 52px); font-weight: 400; line-height: 1.1; letter-spacing: -0.02em; color: var(--charcoal); margin-bottom: 20px; }
+    .article-meta { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-muted); }
+    .article-meta-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--border); }
+    .article-visual { max-width: 760px; margin: 0 auto; padding: 0 24px 48px; }
+    .article-thumb { width: 100%; border-radius: var(--radius); aspect-ratio: 16/7; display: flex; align-items: center; justify-content: center; font-size: 80px; }
+    .thumb-green { background: linear-gradient(135deg, #d8ead9, #b8d4b9); }
+    .article-body { max-width: 760px; margin: 0 auto; padding: 0 24px 80px; }
+    .article-body p { font-size: 16px; line-height: 1.8; color: var(--text-muted); margin-bottom: 20px; }
+    .article-body p strong { color: var(--text); font-weight: 500; }
+    .article-back { max-width: 760px; margin: 0 auto; padding: 0 24px 48px; }
+    .article-back a { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; color: var(--terracotta); text-decoration: none; padding: 10px 20px; border: 1.5px solid var(--terracotta); border-radius: 50px; transition: all 0.15s; }
+    .article-back a:hover { background: var(--terracotta); color: white; }
+    footer { background: var(--charcoal); color: white; padding: 48px 24px 32px; }
+    .footer-inner { max-width: 1200px; margin: 0 auto; }
+    .footer-bottom { display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: rgba(255,255,255,0.35); border-top: 1px solid rgba(255,255,255,0.1); padding-top: 24px; }
+    .footer-nav { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-bottom: 24px; }
+    .footer-nav a { font-size: 14px; color: rgba(255,255,255,0.55); text-decoration: none; }
+    .footer-nav a:hover { color: white; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-mark"></div>
+      <div class="nav-logo-text">Les Microdoniens<span>Crèche parentale · Saint-Ouen</span></div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="../index.html">Accueil</a></li>
+      <li><a href="../vie.html">Vie de la crèche</a></li>
+      <li><a href="../association.html">L'association</a></li>
+      <li><a href="../inscriptions.html">Inscriptions 26/27</a></li>
+      <li class="nav-dropdown">
+        <button class="nav-dropdown-btn">Autres pages ▾</button>
+        <div class="nav-dropdown-menu">
+          <a href="../pedagogie.html">Pédagogie</a>
+          <a href="../evenements.html" class="active">Événements</a>
+          <a href="../historique.html">Historique</a>
+          <a href="../presse.html">On parle de nous</a>
+          <a href="../contact.html">Contact</a>
+        </div>
+      </li>
+      <li><a href="../contact.html" class="nav-cta">Contact</a></li>
+    </ul>
+    <button class="hamburger" onclick="toggleMenu()" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="../index.html" onclick="toggleMenu()">Accueil</a>
+  <a href="../vie.html" onclick="toggleMenu()">Vie de la crèche</a>
+  <a href="../association.html" onclick="toggleMenu()">L'association</a>
+  <a href="../inscriptions.html" onclick="toggleMenu()">Inscriptions 26/27</a>
+  <a href="../pedagogie.html" onclick="toggleMenu()">Pédagogie</a>
+  <a href="../evenements.html" onclick="toggleMenu()">Événements</a>
+  <a href="../historique.html" onclick="toggleMenu()">Historique</a>
+  <a href="../presse.html" onclick="toggleMenu()">On parle de nous</a>
+  <a href="../contact.html" onclick="toggleMenu()">Contact</a>
+</div>
+
+<div class="article-hero">
+  <div class="breadcrumb">
+    <a href="../index.html">Accueil</a>
+    <span>›</span>
+    <a href="../evenements.html">Événements</a>
+    <span>›</span>
+    <span>Vide-grenier au Joli Mai 2017</span>
+  </div>
+  <div class="article-tag">🤝 Solidarité</div>
+  <h1>Vide-grenier au Joli Mai</h1>
+  <div class="article-meta">
+    <time datetime="2017-10-15">15 octobre 2017</time>
+    <div class="article-meta-dot"></div>
+    <span>Le Joli Mai · Saint-Ouen</span>
+  </div>
+</div>
+
+<div class="article-visual">
+  <div class="gallery gallery-featured" style="margin-bottom:12px;">
+    <img src="../images/evenements/vide-grenier-2017-01.jpg" alt="Vide-grenier jeunesse au Joli Mai" loading="lazy">
+    <div class="gallery-stack">
+      <img src="../images/evenements/vide-grenier-2017-02.jpg" alt="Stands de vêtements et jouets" loading="lazy">
+      <img src="../images/evenements/vide-grenier-2017-03.jpg" alt="Familles au vide-grenier" loading="lazy">
+    </div>
+  </div>
+  <div class="gallery gallery-2">
+    <img src="../images/evenements/vide-grenier-2017-04.jpg" alt="Belle journée ensoleillée au parc" loading="lazy">
+    <img src="../images/evenements/troc-livres-2017-02.jpg" alt="Souvenir du Joli Mai" loading="lazy">
+  </div>
+</div>
+
+<div class="article-body">
+  <p>Les associations <strong>Graine de Tipi</strong> et <strong>Microdoniens</strong> se sont associées au <strong>Joli Mai</strong> pour organiser un vide-grenier jeunesse dimanche 15 octobre 2017. Une belle journée ensoleillée qui a réuni familles et voisins autour de stands de vêtements, jeux et puériculture.</p>
+
+  <p>Les Microdoniens ainsi que leurs familles se sont retrouvés pour un moment très convivial. De nombreux stands proposant vêtements, jeux, livres et équipements de puériculture — l'occasion de chiner et faire de bonnes affaires, et pour les gourmands, de déguster quelques douceurs au comptoir.</p>
+
+  <p>Ces rendez-vous dans l'espace public sont l'occasion de renforcer les liens entre les familles de la crèche et de s'inscrire dans la vie de quartier de Saint-Ouen.</p>
+</div>
+
+<div class="article-back">
+  <a href="../evenements.html">← Retour aux Événements</a>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <nav class="footer-nav">
+      <a href="../index.html">Accueil</a>
+      <a href="../vie.html">Vie de la crèche</a>
+      <a href="../pedagogie.html">Pédagogie</a>
+      <a href="../association.html">L'association</a>
+      <a href="../evenements.html">Événements</a>
+      <a href="../historique.html">Historique</a>
+      <a href="../presse.html">On parle de nous</a>
+      <a href="../inscriptions.html">Inscriptions 26/27</a>
+      <a href="../contact.html">Contact</a>
+    </nav>
+    <div class="footer-bottom">
+      <span>© 2026 Les Microdoniens — Association loi 1901</span>
+      <span>53 rue Albert Dhalenne, Saint-Ouen 93400</span>
+    </div>
+  </div>
+</footer>
+
+<script src="../js/nav.js"></script>
+</body>
+</html>

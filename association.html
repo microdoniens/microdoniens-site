@@ -7,47 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/shared.css" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --cream: #faf8f4; --charcoal: #1a1a1a; --text: #2d2d2d; --text-muted: #717171;
-      --border: #e4e0d8; --terracotta: #d96b3f; --terracotta-light: #f5ede7;
-      --terracotta-dark: #b8562e; --sage-light: #edf3ee; --yellow: #f5c842;
-      --radius: 16px; --shadow: 0 2px 16px rgba(0,0,0,0.07);
-      --shadow-hover: 0 8px 32px rgba(0,0,0,0.13); --nav-h: 72px;
-    }
-
-    /* ── NAV ── */
-    nav { position: fixed; top: 0; left: 0; right: 0; height: var(--nav-h); background: rgba(250,248,244,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); z-index: 100; display: flex; align-items: center; padding: 0 24px; }
-    .nav-inner { max-width: 1200px; width: 100%; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--charcoal); flex-shrink: 0; }
-    .nav-logo-mark { width: 36px; height: 36px; background: var(--terracotta); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Fraunces', serif; font-size: 16px; color: white; flex-shrink: 0; }
-    .nav-logo-text { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 400; color: var(--charcoal); }
-    .nav-logo-text span { display: block; font-size: 10px; font-family: 'DM Sans', sans-serif; font-weight: 300; color: var(--text-muted); letter-spacing: 0.04em; text-transform: uppercase; }
-    .nav-links { display: flex; align-items: center; gap: 2px; list-style: none; flex-shrink: 0; }
-    .nav-links a { display: block; padding: 7px 11px; text-decoration: none; color: var(--text); font-size: 13px; border-radius: 8px; transition: background 0.15s; white-space: nowrap; }
-    .nav-links a:hover { background: rgba(0,0,0,0.05); }
-    .nav-links a.active { font-weight: 500; color: var(--terracotta); }
-    .nav-cta { background: var(--terracotta) !important; color: white !important; font-weight: 500 !important; border-radius: 50px !important; }
-    .nav-cta:hover { background: var(--terracotta-dark) !important; }
-    /* Dropdown */
-    .nav-dropdown { position: relative; }
-    .nav-dropdown-btn { display: flex; align-items: center; gap: 4px; padding: 7px 11px; font-size: 13px; color: var(--text); background: none; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; border-radius: 8px; transition: background 0.15s; white-space: nowrap; }
-    .nav-dropdown-btn:hover { background: rgba(0,0,0,0.05); }
-    .nav-dropdown-menu { display: none; position: absolute; top: calc(100% + 8px); right: 0; background: white; border: 1.5px solid var(--border); border-radius: var(--radius); padding: 6px; min-width: 200px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); z-index: 200; }
-    .nav-dropdown:hover .nav-dropdown-menu, .nav-dropdown.open .nav-dropdown-menu { display: flex; flex-direction: column; }
-    .nav-dropdown-menu a { display: block; padding: 9px 14px; text-decoration: none; color: var(--text); font-size: 13px; border-radius: 8px; transition: background 0.15s; white-space: nowrap; }
-    .nav-dropdown-menu a:hover { background: var(--cream); }
-    .nav-dropdown-menu a.active { color: var(--terracotta); font-weight: 500; }
-    /* Hamburger */
-    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 8px; border: none; background: none; flex-shrink: 0; }
-    .hamburger span { width: 22px; height: 2px; background: var(--charcoal); border-radius: 2px; display: block; }
-    .mobile-menu { display: none; position: fixed; top: var(--nav-h); left: 0; right: 0; bottom: 0; background: var(--cream); z-index: 99; padding: 24px; overflow-y: auto; }
-    .mobile-menu.open { display: flex; flex-direction: column; gap: 4px; }
-    .mobile-menu a { display: block; padding: 16px; text-decoration: none; color: var(--text); font-size: 18px; border-bottom: 1px solid var(--border); }
-    .mobile-menu a:last-child { margin-top: 16px; background: var(--terracotta); color: white; border-radius: var(--radius); border: none; text-align: center; }
-
-
     /* ── PAGE HERO — canonical single-column header ── */
     .page-hero, .page-header {
       padding-top: calc(var(--nav-h) + 56px);
@@ -96,58 +57,7 @@
       margin-bottom: 0;
     }
 
-    
 
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    .hero-intro, 
-
-    html { scroll-behavior: smooth; }
-    body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text); -webkit-font-smoothing: antialiased; }
-    
-    
-    
-    
-    
-    .nav-logo-text span { display: block; font-size: 11px; font-family: 'DM Sans', sans-serif; font-weight: 300; color: var(--text-muted); letter-spacing: 0.04em; text-transform: uppercase; }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-
-    
     .hero-stat-row { display: flex; gap: 32px; padding-top: 32px; border-top: 1px solid var(--border); }
     .hero-stat strong { display: block; font-family: 'Fraunces', serif; font-size: 36px; font-weight: 400; color: var(--charcoal); }
     .hero-stat span { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
@@ -216,10 +126,11 @@
 
     .partners-section { background: white; padding: 80px 24px; }
     .partners-inner { max-width: 1200px; margin: 0 auto; }
-    .partners-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: 48px; }
-    .partner-card { border-radius: var(--radius); padding: 28px 24px; border: 1.5px solid var(--border); text-align: center; transition: all 0.2s; }
+    .partners-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; margin-top: 48px; }
+    .partner-card { border-radius: var(--radius); padding: 28px 24px; border: 1.5px solid var(--border); text-align: center; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; }
     .partner-card:hover { border-color: var(--terracotta); transform: translateY(-2px); }
     .partner-card-icon { font-size: 32px; margin-bottom: 12px; }
+    .partner-card-logo { height: 56px; max-width: 160px; object-fit: contain; margin-bottom: 16px; }
     .partner-card h4 { font-size: 14px; font-weight: 500; color: var(--charcoal); margin-bottom: 6px; }
     .partner-card p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
 
@@ -257,13 +168,14 @@
       .bureau-grid { grid-template-columns: repeat(2, 1fr); }
       .commissions-grid { grid-template-columns: 1fr 1fr; }
       .perm-layout { grid-template-columns: 1fr; }
-      .partners-grid { grid-template-columns: repeat(2, 1fr); }
+      .partners-grid { grid-template-columns: repeat(3, 1fr); }
       .docs-grid { grid-template-columns: 1fr; }
       .org-header { flex-direction: column; align-items: flex-start; }
     }
     @media (max-width: 600px) {
       .commissions-grid { grid-template-columns: 1fr; }
       .partners-grid { grid-template-columns: 1fr 1fr; }
+      .partner-card-logo { height: 44px; }
       .hero-stat-row { gap: 20px; }
       .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
     }
@@ -274,19 +186,20 @@
 </head>
 <body>
 
+<!-- NAV -->
 <nav>
   <div class="nav-inner">
     <a href="index.html" class="nav-logo">
-      <div class="nav-logo-mark">M</div>
+      <div class="nav-logo-mark"></div>
       <div class="nav-logo-text">Les Microdoniens<span>Crèche parentale · Saint-Ouen</span></div>
     </a>
     <ul class="nav-links">
-      <li><a href="index.html#espaces">La crèche</a></li>
+      <li><a href="index.html">Accueil</a></li>
       <li><a href="vie.html">Vie de la crèche</a></li>
       <li><a href="association.html" class="active">L'association</a></li>
-      <li><a href="inscriptions.html">Inscriptions</a></li>
+      <li><a href="inscriptions.html">Inscriptions 26/27</a></li>
       <li class="nav-dropdown">
-        <button class="nav-dropdown-btn">Plus ▾</button>
+        <button class="nav-dropdown-btn">Autres pages ▾</button>
         <div class="nav-dropdown-menu">
           <a href="pedagogie.html">Pédagogie</a>
           <a href="evenements.html">Événements</a>
@@ -301,11 +214,12 @@
   </div>
 </nav>
 
+<!-- MOBILE MENU -->
 <div class="mobile-menu" id="mobileMenu">
-  <a href="index.html#espaces" onclick="toggleMenu()">La crèche</a>
+  <a href="index.html" onclick="toggleMenu()">Accueil</a>
   <a href="vie.html" onclick="toggleMenu()">Vie de la crèche</a>
   <a href="association.html" onclick="toggleMenu()">L'association</a>
-  <a href="inscriptions.html" onclick="toggleMenu()">Inscriptions</a>
+  <a href="inscriptions.html" onclick="toggleMenu()">Inscriptions 26/27</a>
   <a href="pedagogie.html" onclick="toggleMenu()">Pédagogie</a>
   <a href="evenements.html" onclick="toggleMenu()">Événements</a>
   <a href="historique.html" onclick="toggleMenu()">Historique</a>
@@ -481,10 +395,31 @@
     <div class="section-label">Nos soutiens</div>
     <h2>Financeurs & partenaires</h2>
     <div class="partners-grid">
-      <div class="partner-card"><div class="partner-card-icon">🏙️</div><h4>Ville de Saint-Ouen</h4><p>Soutien municipal et partenariat local fort.</p></div>
-      <div class="partner-card"><div class="partner-card-icon">👶</div><h4>CAF</h4><p>Financement et barème des participations familiales.</p></div>
-      <div class="partner-card"><div class="partner-card-icon">🏛️</div><h4>Conseil Départemental 93</h4><p>Seine-Saint-Denis — soutien départemental.</p></div>
-      <div class="partner-card"><div class="partner-card-icon">🩺</div><h4>PMI Seine-St-Denis</h4><p>Protection Maternelle et Infantile — agrément et suivi.</p></div>
+      <div class="partner-card">
+        <img src="villedesaintouen.jpg" alt="Ville de Saint-Ouen" class="partner-card-logo">
+        <h4>Ville de Saint-Ouen</h4>
+        <p>Soutien municipal et partenariat local fort.</p>
+      </div>
+      <div class="partner-card">
+        <img src="caf.jpg" alt="CAF" class="partner-card-logo">
+        <h4>CAF</h4>
+        <p>Financement et barème des participations familiales.</p>
+      </div>
+      <div class="partner-card">
+        <img src="saintdenis.jpg" alt="Conseil Départemental 93" class="partner-card-logo">
+        <h4>Conseil Départemental 93</h4>
+        <p>Seine-Saint-Denis — soutien départemental.</p>
+      </div>
+      <div class="partner-card">
+        <img src="pmi.png" alt="PMI Seine-Saint-Denis" class="partner-card-logo">
+        <h4>PMI Seine-St-Denis</h4>
+        <p>Protection Maternelle et Infantile — agrément et suivi.</p>
+      </div>
+      <div class="partner-card">
+        <img src="iledefrancelong.png" alt="Région Île-de-France" class="partner-card-logo">
+        <h4>Région Île-de-France</h4>
+        <p>Soutien régional au titre de la politique petite enfance.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -519,30 +454,51 @@
 
 <footer>
   <div class="footer-inner">
-    <nav class="footer-nav">
-      <a href="index.html#espaces">La crèche</a>
-      <a href="vie.html">Vie de la crèche</a>
-      <a href="pedagogie.html">Pédagogie</a>
-      <a href="association.html">L'association</a>
-      <a href="evenements.html">Événements</a>
-      <a href="historique.html">Historique</a>
-      <a href="presse.html">On parle de nous</a>
-      <a href="inscriptions.html">Inscriptions</a>
-      <a href="contact.html">Contact</a>
-    </nav>
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <div class="nav-logo-mark"></div>
+          <div class="footer-logo-text">Les Microdoniens</div>
+        </div>
+        <p class="footer-tagline">Crèche parentale associative à Saint-Ouen. Un lieu bienveillant où enfants, familles et professionnels grandissent ensemble.</p>
+      </div>
+
+      <div class="footer-col">
+        <h4>La crèche</h4>
+        <ul>
+          <li><a href="index.html#espaces">Nos espaces</a></li>
+          <li><a href="index.html#pedagogie">Pédagogie</a></li>
+          <li><a href="vie.html">Vie de la crèche</a></li>
+          <li><a href="index.html#historique">Historique</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>L'association</h4>
+        <ul>
+          <li><a href="index.html#association">Présentation</a></li>
+          <li><a href="index.html#admission">Admission</a></li>
+          <li><a href="contact.html">Inscriptions</a></li>
+          <li><a href="index.html#presse">On parle de nous</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <ul>
+          <li><a href="contact.html">Nous écrire</a></li>
+          <li><a href="https://maps.google.com/?q=53+rue+Albert+Dhalenne+Saint-Ouen" target="_blank">53 rue Dhalenne, 93400</a></li>
+        </ul>
+      </div>
+    </div>
+
     <div class="footer-bottom">
       <span>© 2026 Les Microdoniens — Association loi 1901</span>
-      <span>53 rue Albert Dhalenne, Saint-Ouen 93400</span>
+      <span>Agréée PMI Seine-Saint-Denis</span>
     </div>
   </div>
 </footer>
 
-<script>
-  function toggleMenu() { document.getElementById('mobileMenu').classList.toggle('open'); }
-  document.addEventListener('click', e => {
-    const m = document.getElementById('mobileMenu');
-    if (m.classList.contains('open') && !e.target.closest('nav') && !e.target.closest('#mobileMenu')) m.classList.remove('open');
-  });
-</script>
+<script src="js/nav.js"></script>
 </body>
 </html>

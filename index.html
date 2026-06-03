@@ -7,113 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/shared.css" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --cream: #faf8f4;
-      --warm-white: #ffffff;
-      --charcoal: #1a1a1a;
-      --text: #2d2d2d;
-      --text-muted: #717171;
-      --border: #e4e0d8;
-      --terracotta: #d96b3f;
-      --terracotta-light: #f5ede7;
-      --terracotta-dark: #b8562e;
-      --sage: #7a9e7e;
-      --sage-light: #edf3ee;
-      --yellow: #f5c842;
-      --radius: 16px;
-      --radius-sm: 8px;
-      --shadow: 0 2px 16px rgba(0,0,0,0.08);
-      --shadow-hover: 0 8px 32px rgba(0,0,0,0.14);
-      --nav-h: 72px;
-    }
-
-    /* ── NAV ── */
-    nav { position: fixed; top: 0; left: 0; right: 0; height: var(--nav-h); background: rgba(250,248,244,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); z-index: 100; display: flex; align-items: center; padding: 0 24px; }
-    .nav-inner { max-width: 1200px; width: 100%; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--charcoal); flex-shrink: 0; }
-    .nav-logo-mark { width: 36px; height: 36px; background: var(--terracotta); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Fraunces', serif; font-size: 16px; color: white; flex-shrink: 0; }
-    .nav-logo-text { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 400; color: var(--charcoal); }
-    .nav-logo-text span { display: block; font-size: 10px; font-family: 'DM Sans', sans-serif; font-weight: 300; color: var(--text-muted); letter-spacing: 0.04em; text-transform: uppercase; }
-    .nav-links { display: flex; align-items: center; gap: 2px; list-style: none; flex-shrink: 0; }
-    .nav-links a { display: block; padding: 7px 11px; text-decoration: none; color: var(--text); font-size: 13px; border-radius: 8px; transition: background 0.15s; white-space: nowrap; }
-    .nav-links a:hover { background: rgba(0,0,0,0.05); }
-    .nav-links a.active { font-weight: 500; color: var(--terracotta); }
-    .nav-cta { background: var(--terracotta) !important; color: white !important; font-weight: 500 !important; border-radius: 50px !important; }
-    .nav-cta:hover { background: var(--terracotta-dark) !important; }
-    /* Dropdown */
-    .nav-dropdown { position: relative; }
-    .nav-dropdown-btn { display: flex; align-items: center; gap: 4px; padding: 7px 11px; font-size: 13px; color: var(--text); background: none; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; border-radius: 8px; transition: background 0.15s; white-space: nowrap; }
-    .nav-dropdown-btn:hover { background: rgba(0,0,0,0.05); }
-    .nav-dropdown-menu { display: none; position: absolute; top: calc(100% + 8px); right: 0; background: white; border: 1.5px solid var(--border); border-radius: var(--radius); padding: 6px; min-width: 200px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); z-index: 200; }
-    .nav-dropdown:hover .nav-dropdown-menu, .nav-dropdown.open .nav-dropdown-menu { display: flex; flex-direction: column; }
-    .nav-dropdown-menu a { display: block; padding: 9px 14px; text-decoration: none; color: var(--text); font-size: 13px; border-radius: 8px; transition: background 0.15s; white-space: nowrap; }
-    .nav-dropdown-menu a:hover { background: var(--cream); }
-    .nav-dropdown-menu a.active { color: var(--terracotta); font-weight: 500; }
-    /* Hamburger */
-    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 8px; border: none; background: none; flex-shrink: 0; }
-    .hamburger span { width: 22px; height: 2px; background: var(--charcoal); border-radius: 2px; display: block; }
-    .mobile-menu { display: none; position: fixed; top: var(--nav-h); left: 0; right: 0; bottom: 0; background: var(--cream); z-index: 99; padding: 24px; overflow-y: auto; }
-    .mobile-menu.open { display: flex; flex-direction: column; gap: 4px; }
-    .mobile-menu a { display: block; padding: 16px; text-decoration: none; color: var(--text); font-size: 18px; border-bottom: 1px solid var(--border); }
-    .mobile-menu a:last-child { margin-top: 16px; background: var(--terracotta); color: white; border-radius: var(--radius); border: none; text-align: center; }
-
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--cream);
-      color: var(--text);
-      -webkit-font-smoothing: antialiased;
-    }
-
-    /* ─── NAV ─── */
-    
-
-    
-
-    
-
-    
-
-    
-
-    .nav-logo-text span {
-      display: block;
-      font-size: 11px;
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 300;
-      color: var(--text-muted);
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    /* hamburger */
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
     /* ─── HERO ─── */
     .hero {
       padding-top: calc(var(--nav-h) + 64px);
@@ -229,10 +124,11 @@
       overflow: hidden;
       box-shadow: var(--shadow-hover);
       aspect-ratio: 4/3;
-      background: linear-gradient(135deg, #f5e6d3 0%, #e8d5c0 50%, #d4c4a8 100%);
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Fraunces', serif;
-      font-size: 80px;
+    }
+
+    .hero-main-card img {
+      width: 100%; height: 100%;
+      object-fit: cover;
     }
 
     .hero-badge {
@@ -327,10 +223,18 @@
     }
 
     .space-thumb {
-      height: 200px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 56px;
+      height: 220px;
+      overflow: hidden;
+      position: relative;
     }
+
+    .space-thumb img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+
+    .space-card:hover .space-thumb img { transform: scale(1.04); }
 
     .space-thumb-ruche { background: linear-gradient(135deg, #fde8d8, #f5c9a8); }
     .space-thumb-atelier { background: linear-gradient(135deg, #d8ead9, #b8d4b9); }
@@ -627,81 +531,42 @@
     .btn-ghost:hover { background: rgba(255,255,255,0.25); }
 
     /* ─── PARTENAIRES ─── */
+    .partners-strip {
+      background: white;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 40px 24px;
+      text-align: center;
+    }
+
+    .partners-label {
+      font-size: 11px; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+    }
+
     .partners-row {
-      display: flex; align-items: center; justify-content: center;
-      gap: 48px; flex-wrap: wrap;
-      opacity: 0.6; filter: grayscale(1);
-      margin-top: 48px;
+      display: flex; align-items: flex-start; justify-content: center;
+      gap: 40px; flex-wrap: wrap;
     }
 
     .partner-item {
-      font-size: 13px; font-weight: 500;
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      font-size: 11px; font-weight: 500;
       text-transform: uppercase; letter-spacing: 0.08em;
       color: var(--text-muted);
     }
 
-    /* ─── FOOTER ─── */
-    footer {
-      background: var(--charcoal);
-      color: white;
-      padding: 64px 24px 40px;
-    }
-
-    .footer-inner {
-      max-width: 1200px; margin: 0 auto;
-    }
-
-    .footer-top {
-      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
-      gap: 48px; margin-bottom: 48px;
-    }
-
-    .footer-brand {}
-
-    .footer-logo {
-      display: flex; align-items: center; gap: 10px;
-      margin-bottom: 16px;
-    }
-
-    .footer-logo 
-
-    .footer-logo-text {
-      font-family: 'Fraunces', serif;
-      font-size: 16px; color: white;
-    }
-
-    .footer-tagline {
-      font-size: 14px; color: rgba(255,255,255,0.45);
-      line-height: 1.7; max-width: 260px;
-    }
-
-    .footer-col h4 {
-      font-size: 12px; font-weight: 500;
-      text-transform: uppercase; letter-spacing: 0.1em;
-      color: rgba(255,255,255,0.4);
-      margin-bottom: 16px;
-    }
-
-    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-
-    .footer-col a {
-      font-size: 14px; color: rgba(255,255,255,0.65);
-      text-decoration: none; transition: color 0.15s;
-    }
-
-    .footer-col a:hover { color: white; }
-
-    .footer-bottom {
-      border-top: 1px solid rgba(255,255,255,0.1);
-      padding-top: 24px;
-      display: flex; align-items: center; justify-content: space-between;
-      font-size: 13px; color: rgba(255,255,255,0.35);
+    .partner-logo {
+      height: 48px;
+      width: auto;
+      max-width: 130px;
+      object-fit: contain;
     }
 
     /* ─── RESPONSIVE ─── */
     @media (max-width: 900px) {
-      
-      
 
       .hero {
         grid-template-columns: 1fr;
@@ -718,14 +583,11 @@
       .asso-grid { grid-template-columns: 1fr; }
       .admission-grid { grid-template-columns: 1fr; }
       .activity-grid { grid-template-columns: 1fr 1fr; }
-      .footer-top { grid-template-columns: 1fr 1fr; gap: 32px; }
     }
 
     @media (max-width: 600px) {
       .activity-grid { grid-template-columns: 1fr; }
       .hero-stats { gap: 20px; }
-      .footer-top { grid-template-columns: 1fr; }
-      .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
       .inscriptions-bg .hero-actions { justify-content: center; }
     }
 
@@ -737,6 +599,192 @@
 
     .hero-text { animation: fadeUp 0.6s ease both; }
     .hero-visual { animation: fadeUp 0.6s 0.15s ease both; }
+
+    /* ─── SPACE CARD clickable ─── */
+    .space-card { cursor: pointer; }
+
+    .space-card-explore {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: 500;
+      color: var(--terracotta);
+      margin-top: 12px;
+    }
+
+    /* ─── SPACE MODAL ─── */
+    .space-modal {
+      position: fixed; inset: 0; z-index: 1000;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.25s;
+    }
+
+    .space-modal.is-open {
+      opacity: 1; pointer-events: all;
+    }
+
+    .space-modal-overlay {
+      position: absolute; inset: 0;
+      background: rgba(20, 18, 16, 0.82);
+      backdrop-filter: blur(4px);
+    }
+
+    .space-modal-inner {
+      position: relative; z-index: 1;
+      background: white;
+      border-radius: 24px;
+      overflow-y: auto;
+      width: min(680px, 92vw);
+      max-height: 90vh;
+      display: flex; flex-direction: column;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.35);
+      transform: translateY(16px) scale(0.97);
+      transition: transform 0.28s cubic-bezier(0.34,1.4,0.64,1), opacity 0.25s;
+    }
+
+    .space-modal.is-open .space-modal-inner {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-close {
+      position: absolute; top: 16px; right: 16px; z-index: 10;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(0,0,0,0.45);
+      color: white;
+      font-size: 18px; line-height: 1;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s;
+    }
+
+    .modal-close:hover { background: rgba(0,0,0,0.7); }
+
+    /* Fixed-height carousel — never causes layout shifts */
+    .modal-carousel {
+      position: relative;
+      height: 380px;
+      flex-shrink: 0;
+      background: #111;
+      overflow: hidden;
+    }
+
+    .carousel-img {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: opacity 0.22s ease;
+    }
+
+    .carousel-img.fading { opacity: 0; }
+
+    .carousel-prev, .carousel-next {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,255,255,0.9);
+      color: var(--charcoal);
+      font-size: 22px; line-height: 1;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      transition: background 0.15s, transform 0.15s;
+      z-index: 5;
+    }
+
+    .carousel-prev:hover, .carousel-next:hover {
+      background: white;
+      transform: translateY(-50%) scale(1.08);
+    }
+
+    .carousel-prev { left: 14px; }
+    .carousel-next { right: 14px; }
+
+    .modal-caption {
+      padding: 24px 28px 28px;
+      flex-shrink: 0;
+      min-height: 130px;
+    }
+
+    .modal-space-name {
+      font-family: 'Fraunces', serif;
+      font-size: 24px; font-weight: 400;
+      font-style: italic;
+      color: var(--charcoal);
+      margin-bottom: 8px;
+    }
+
+    .modal-space-desc {
+      font-size: 14px; color: var(--text-muted);
+      line-height: 1.65;
+      margin-bottom: 16px;
+    }
+
+    .modal-dots {
+      display: flex; gap: 6px; justify-content: center;
+    }
+
+    .modal-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+      border: none; padding: 0;
+    }
+
+    .modal-dot.active {
+      background: var(--terracotta);
+      transform: scale(1.3);
+    }
+
+    /* ─── PEDAGOGY VALUE ITEMS ─── */
+    .value-item {
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .value-item.active {
+      border-color: var(--terracotta);
+      background: var(--terracotta-light);
+    }
+
+    .value-item.active .value-icon {
+      background: var(--terracotta);
+    }
+
+    /* ─── PEDAGOGY IMAGE GRID ─── */
+    .pedagogy-image-grid {
+      border-radius: 24px;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 4px;
+      height: 480px;
+      background: var(--cream);
+    }
+
+    .pedagogy-grid-item {
+      overflow: hidden;
+    }
+
+    .pedagogy-grid-item img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease, opacity 0.3s;
+    }
+
+    .pedagogy-grid-item img:hover { transform: scale(1.04); }
+
+    .pedagogy-image-grid.fading .pedagogy-grid-item img {
+      opacity: 0;
+    }
+
+    @media (max-width: 900px) {
+      .pedagogy-image-grid { height: 320px; }
+    }
   </style>
 </head>
 <body>
@@ -745,16 +793,16 @@
 <nav>
   <div class="nav-inner">
     <a href="index.html" class="nav-logo">
-      <div class="nav-logo-mark">M</div>
+      <div class="nav-logo-mark"></div>
       <div class="nav-logo-text">Les Microdoniens<span>Crèche parentale · Saint-Ouen</span></div>
     </a>
     <ul class="nav-links">
-      <li><a href="index.html#espaces" class="active">La crèche</a></li>
+      <li><a href="index.html" class="active">Accueil</a></li>
       <li><a href="vie.html">Vie de la crèche</a></li>
       <li><a href="association.html">L'association</a></li>
-      <li><a href="inscriptions.html">Inscriptions</a></li>
+      <li><a href="inscriptions.html">Inscriptions 26/27</a></li>
       <li class="nav-dropdown">
-        <button class="nav-dropdown-btn">Plus ▾</button>
+        <button class="nav-dropdown-btn">Autres pages ▾</button>
         <div class="nav-dropdown-menu">
           <a href="pedagogie.html">Pédagogie</a>
           <a href="evenements.html">Événements</a>
@@ -771,10 +819,10 @@
 
 <!-- MOBILE MENU -->
 <div class="mobile-menu" id="mobileMenu">
-  <a href="index.html#espaces" onclick="toggleMenu()">La crèche</a>
+  <a href="index.html" onclick="toggleMenu()">Accueil</a>
   <a href="vie.html" onclick="toggleMenu()">Vie de la crèche</a>
   <a href="association.html" onclick="toggleMenu()">L'association</a>
-  <a href="inscriptions.html" onclick="toggleMenu()">Inscriptions</a>
+  <a href="inscriptions.html" onclick="toggleMenu()">Inscriptions 26/27</a>
   <a href="pedagogie.html" onclick="toggleMenu()">Pédagogie</a>
   <a href="evenements.html" onclick="toggleMenu()">Événements</a>
   <a href="historique.html" onclick="toggleMenu()">Historique</a>
@@ -791,7 +839,7 @@
       Les Microdoniens accueillent une vingtaine d'enfants de 6 mois à 3 ans dans un cadre bienveillant, co-construit par les familles et les professionnels.
     </p>
     <div class="hero-actions">
-      <a href="contact.html" class="btn btn-primary">Inscriptions 2026/27 →</a>
+      <a href="inscriptions.html" class="btn btn-primary">Inscriptions 2026/27 →</a>
       <a href="#espaces" class="btn btn-outline">Découvrir la crèche</a>
     </div>
 
@@ -813,7 +861,9 @@
 
   <div class="hero-visual">
     <div class="hero-tag">🌱 Ouvert 8h15 — 18h30</div>
-    <div class="hero-main-card">🐝</div>
+    <div class="hero-main-card">
+      <img src="images/espaces/ruche/ruche-01.jpg" alt="La Ruche — espace de vie des Microdoniens" />
+    </div>
     <div class="hero-badge">
       <div class="badge-icon">🏡</div>
       <div class="badge-text">
@@ -832,27 +882,36 @@
     <p class="section-subtitle">Chaque espace répond à un besoin spécifique du développement de l'enfant — jouer, bouger, explorer.</p>
 
     <div class="spaces-grid">
-      <div class="space-card">
-        <div class="space-thumb space-thumb-ruche">🐝</div>
+      <div class="space-card" data-space="ruche">
+        <div class="space-thumb space-thumb-ruche">
+          <img src="images/espaces/ruche/ruche-01.jpg" alt="La Ruche" />
+        </div>
         <div class="space-body">
           <div class="space-name">La Ruche</div>
           <p class="space-desc">L'espace de vie principal de la structure : les enfants y sont accueillis, jouent, dorment, mangent et vivent leur quotidien d'enfant.</p>
+          <div class="space-card-explore">Voir les photos →</div>
         </div>
       </div>
 
-      <div class="space-card">
-        <div class="space-thumb space-thumb-atelier">🎨</div>
+      <div class="space-card" data-space="atelier">
+        <div class="space-thumb space-thumb-atelier">
+          <img src="images/espaces/atelier/atelier-01.jpg" alt="L'Atelier" />
+        </div>
         <div class="space-body">
           <div class="space-name">L'Atelier</div>
           <p class="space-desc">Dédié à la motricité, aux jeux d'eau et aux ateliers avec des intervenants extérieurs. Un espace de découverte et d'expérimentation.</p>
+          <div class="space-card-explore">Voir les photos →</div>
         </div>
       </div>
 
-      <div class="space-card">
-        <div class="space-thumb space-thumb-jardin">🌿</div>
+      <div class="space-card" data-space="jardin">
+        <div class="space-thumb space-thumb-jardin">
+          <img src="images/espaces/jardin/jardin-01.jpg" alt="Le Jardin" />
+        </div>
         <div class="space-body">
           <div class="space-name">Le Jardin</div>
           <p class="space-desc">À l'entrée de la Ruche, un espace de jeux et d'expérimentations à l'air libre. Jardinage, nature et liberté au cœur de Saint-Ouen.</p>
+          <div class="space-card-explore">Voir les photos →</div>
         </div>
       </div>
     </div>
@@ -869,28 +928,28 @@
         <p class="section-subtitle">Notre approche repose sur quatre principes fondamentaux, construits avec les familles et les professionnels.</p>
 
         <div class="pedagogy-values">
-          <div class="value-item">
+          <div class="value-item active" data-category="securite">
             <div class="value-icon">🛡️</div>
             <div class="value-text">
               <strong>Sécurité affective et matérielle</strong>
               <p>Un environnement stable et sécurisant comme fondation du développement de l'enfant.</p>
             </div>
           </div>
-          <div class="value-item">
+          <div class="value-item" data-category="collectivite">
             <div class="value-icon">🤝</div>
             <div class="value-text">
               <strong>Vie en collectivité</strong>
               <p>Apprendre à vivre ensemble, partager et coopérer dès le plus jeune âge.</p>
             </div>
           </div>
-          <div class="value-item">
+          <div class="value-item" data-category="autonomie">
             <div class="value-icon">🌱</div>
             <div class="value-text">
               <strong>Apprentissage de l'autonomie</strong>
               <p>Encourager l'enfant à faire par lui-même, à son rythme, dans un cadre bienveillant.</p>
             </div>
           </div>
-          <div class="value-item">
+          <div class="value-item" data-category="individualite">
             <div class="value-icon">✨</div>
             <div class="value-text">
               <strong>Respect de l'individualité</strong>
@@ -900,7 +959,14 @@
         </div>
       </div>
 
-      <div class="pedagogy-visual">🎭</div>
+      <div class="pedagogy-image-grid" id="pedagogyGrid">
+        <div class="pedagogy-grid-item"><img src="images/vie/jeux-bebes-01.jpeg" alt="" /></div>
+        <div class="pedagogy-grid-item"><img src="images/vie/prendre-soin-care-01.jpeg" alt="" /></div>
+        <div class="pedagogy-grid-item"><img src="images/vie/balade-bebes-01.jpeg" alt="" /></div>
+        <div class="pedagogy-grid-item"><img src="images/vie/sieste-lyrique-01.jpeg" alt="" /></div>
+        <div class="pedagogy-grid-item"><img src="images/vie/musique-a-la-creche-01.jpeg" alt="" /></div>
+        <div class="pedagogy-grid-item"><img src="images/vie/jeux-sensori-moteurs-01.jpeg" alt="" /></div>
+      </div>
     </div>
   </div>
 </section>
@@ -930,15 +996,35 @@
       </div>
     </div>
 
-    <div class="partners-row">
-      <span class="partner-item">Ville de Saint-Ouen</span>
-      <span class="partner-item">CAF</span>
-      <span class="partner-item">Conseil Départemental 93</span>
-      <span class="partner-item">PMI Seine-St-Denis</span>
-      <span class="partner-item">Île-de-France</span>
-    </div>
   </div>
 </section>
+
+<!-- PARTENAIRES -->
+<div class="partners-strip">
+  <p class="partners-label">Financé et agréé par</p>
+  <div class="partners-row">
+    <span class="partner-item">
+      <img src="villedesaintouen.jpg" alt="Ville de Saint-Ouen" class="partner-logo">
+      Ville de Saint-Ouen
+    </span>
+    <span class="partner-item">
+      <img src="caf.jpg" alt="CAF" class="partner-logo">
+      CAF
+    </span>
+    <span class="partner-item">
+      <img src="saintdenis.jpg" alt="Conseil Départemental 93" class="partner-logo">
+      Conseil Départemental 93
+    </span>
+    <span class="partner-item">
+      <img src="pmi.png" alt="PMI Seine-St-Denis" class="partner-logo">
+      PMI Seine-St-Denis
+    </span>
+    <span class="partner-item">
+      <img src="iledefrancelong.png" alt="Île-de-France" class="partner-logo">
+      Île-de-France
+    </span>
+  </div>
+</div>
 
 <!-- ADMISSION -->
 <section id="admission">
@@ -1102,7 +1188,7 @@
     <div class="footer-top">
       <div class="footer-brand">
         <div class="footer-logo">
-          <div class="nav-logo-mark">M</div>
+          <div class="nav-logo-mark"></div>
           <div class="footer-logo-text">Les Microdoniens</div>
         </div>
         <p class="footer-tagline">Crèche parentale associative à Saint-Ouen. Un lieu bienveillant où enfants, familles et professionnels grandissent ensemble.</p>
@@ -1144,19 +1230,199 @@
   </div>
 </footer>
 
+<script src="js/nav.js"></script>
+
+<!-- SPACE MODAL -->
+<div id="spaceModal" class="space-modal" role="dialog" aria-modal="true">
+  <div class="space-modal-overlay" id="modalOverlay"></div>
+  <div class="space-modal-inner">
+    <button class="modal-close" id="modalClose" aria-label="Fermer">✕</button>
+    <div class="modal-carousel">
+      <button class="carousel-prev" id="carouselPrev" aria-label="Photo précédente">‹</button>
+      <img class="carousel-img" id="carouselImg" src="" alt="" />
+      <button class="carousel-next" id="carouselNext" aria-label="Photo suivante">›</button>
+    </div>
+    <div class="modal-caption">
+      <div class="modal-space-name" id="modalName"></div>
+      <p class="modal-space-desc" id="modalDesc"></p>
+      <div class="modal-dots" id="modalDots"></div>
+    </div>
+  </div>
+</div>
+
 <script>
-  function toggleMenu() {
-    const m = document.getElementById('mobileMenu');
-    m.classList.toggle('open');
+(function () {
+  /* ─── Space carousel data ─── */
+  const SPACES = {
+    ruche: {
+      name: 'La Ruche',
+      desc: "L'espace de vie principal de la structure : les enfants y sont accueillis, jouent, dorment, mangent et vivent leur quotidien d'enfant.",
+      images: [
+        'images/espaces/ruche/ruche-01.jpg',
+        'images/espaces/ruche/ruche-02.jpg',
+        'images/espaces/ruche/ruche-03.jpg',
+        'images/espaces/ruche/ruche-04.jpg',
+        'images/espaces/ruche/ruche-05.jpg',
+        'images/espaces/ruche/ruche-06.jpg',
+      ]
+    },
+    atelier: {
+      name: "L'Atelier",
+      desc: "Dédié à la motricité, aux jeux d'eau et aux ateliers avec des intervenants extérieurs. Un espace de découverte et d'expérimentation.",
+      images: [
+        'images/espaces/atelier/atelier-01.jpg',
+        'images/espaces/atelier/atelier-02.jpg',
+        'images/espaces/atelier/atelier-03.jpg',
+        'images/espaces/atelier/atelier-04.jpg',
+      ]
+    },
+    jardin: {
+      name: 'Le Jardin',
+      desc: "À l'entrée de la Ruche, un espace de jeux et d'expérimentations à l'air libre. Jardinage, nature et liberté au cœur de Saint-Ouen.",
+      images: [
+        'images/espaces/jardin/jardin-01.jpg',
+        'images/espaces/jardin/jardin-02.jpg',
+        'images/espaces/jardin/jardin-03.jpg',
+        'images/espaces/jardin/jardin-04.jpg',
+      ]
+    }
+  };
+
+  const modal    = document.getElementById('spaceModal');
+  const overlay  = document.getElementById('modalOverlay');
+  const closeBtn = document.getElementById('modalClose');
+  const img      = document.getElementById('carouselImg');
+  const prevBtn  = document.getElementById('carouselPrev');
+  const nextBtn  = document.getElementById('carouselNext');
+  const nameEl   = document.getElementById('modalName');
+  const descEl   = document.getElementById('modalDesc');
+  const dotsEl   = document.getElementById('modalDots');
+
+  let currentImages = [];
+  let currentIndex  = 0;
+
+  function buildDots(count) {
+    dotsEl.innerHTML = '';
+    for (let i = 0; i < count; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'modal-dot' + (i === 0 ? ' active' : '');
+      btn.setAttribute('aria-label', 'Photo ' + (i + 1));
+      btn.addEventListener('click', () => goTo(i));
+      dotsEl.appendChild(btn);
+    }
   }
 
-  // close on outside click
-  document.addEventListener('click', (e) => {
-    const m = document.getElementById('mobileMenu');
-    if (m.classList.contains('open') && !e.target.closest('nav') && !e.target.closest('#mobileMenu')) {
-      m.classList.remove('open');
-    }
+  function updateDots(index) {
+    dotsEl.querySelectorAll('.modal-dot').forEach((d, i) => {
+      d.classList.toggle('active', i === index);
+    });
+  }
+
+  function goTo(index) {
+    currentIndex = (index + currentImages.length) % currentImages.length;
+    img.classList.add('fading');
+    setTimeout(() => {
+      img.src = currentImages[currentIndex];
+      img.classList.remove('fading');
+    }, 120);
+    updateDots(currentIndex);
+  }
+
+  function openModal(spaceKey) {
+    const data = SPACES[spaceKey];
+    if (!data) return;
+    currentImages = data.images;
+    currentIndex  = 0;
+    nameEl.textContent = data.name;
+    descEl.textContent = data.desc;
+    img.src = currentImages[0];
+    buildDots(currentImages.length);
+    document.body.style.overflow = 'hidden';
+    modal.classList.add('is-open');
+  }
+
+  function closeModal() {
+    modal.classList.remove('is-open');
+    document.body.style.overflow = '';
+  }
+
+  prevBtn.addEventListener('click', () => goTo(currentIndex - 1));
+  nextBtn.addEventListener('click', () => goTo(currentIndex + 1));
+  closeBtn.addEventListener('click', closeModal);
+  overlay.addEventListener('click', closeModal);
+
+  document.addEventListener('keydown', (e) => {
+    if (!modal.classList.contains('is-open')) return;
+    if (e.key === 'Escape') closeModal();
+    if (e.key === 'ArrowLeft')  goTo(currentIndex - 1);
+    if (e.key === 'ArrowRight') goTo(currentIndex + 1);
   });
+
+  document.querySelectorAll('.space-card[data-space]').forEach((card) => {
+    card.addEventListener('click', () => openModal(card.dataset.space));
+  });
+
+  /* ─── Pedagogy grid ─── */
+  const PEDAGOGY_IMAGES = {
+    securite: [
+      'images/vie/jeux-bebes-01.jpeg',
+      'images/vie/prendre-soin-care-01.jpeg',
+      'images/vie/balade-bebes-01.jpeg',
+      'images/vie/sieste-lyrique-01.jpeg',
+      'images/vie/musique-a-la-creche-01.jpeg',
+      'images/vie/jeux-sensori-moteurs-01.jpeg',
+    ],
+    collectivite: [
+      'images/vie/les-9-ans-01.jpeg',
+      'images/vie/sortie-cinema-2021-01.jpeg',
+      'images/vie/escale-marocaine-01.jpg',
+      'images/vie/voyage-autour-monde-02.jpg',
+      'images/vie/sortie-fin-annee-01.jpeg',
+      'images/vie/sortie-mediatheque-01.jpg',
+    ],
+    autonomie: [
+      'images/vie/motricite-libre-01.jpeg',
+      'images/vie/liberte-motrice-01.jpeg',
+      'images/vie/le-jeu-01.jpg',
+      'images/vie/besoin-naturel-01.jpeg',
+      'images/vie/nature-vie-enfant-01.jpeg',
+      'images/vie/ferme-tiligolo-01.jpg',
+    ],
+    individualite: [
+      'images/vie/creativite-enfant-01.jpeg',
+      'images/vie/ateliers-creatifs-luciana-01.jpg',
+      'images/vie/peinture-vendredi-01.jpg',
+      'images/vie/eveil-musical-01.png',
+      'images/vie/escargots-papier-mache-01.jpg',
+      'images/vie/creche-tout-un-art-01.jpeg',
+    ],
+  };
+
+  const grid      = document.getElementById('pedagogyGrid');
+  const gridImgs  = grid ? Array.from(grid.querySelectorAll('.pedagogy-grid-item img')) : [];
+
+  function setPedagogyCategory(category) {
+    const imgs = PEDAGOGY_IMAGES[category];
+    if (!imgs || !grid) return;
+
+    grid.classList.add('fading');
+    setTimeout(() => {
+      gridImgs.forEach((el, i) => {
+        el.src = imgs[i] || '';
+        el.alt = '';
+      });
+      grid.classList.remove('fading');
+    }, 180);
+
+    document.querySelectorAll('.value-item[data-category]').forEach((item) => {
+      item.classList.toggle('active', item.dataset.category === category);
+    });
+  }
+
+  document.querySelectorAll('.value-item[data-category]').forEach((item) => {
+    item.addEventListener('click', () => setPedagogyCategory(item.dataset.category));
+  });
+})();
 </script>
 </body>
 </html>

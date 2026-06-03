@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sieste lyrique — Les Microdoniens</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/shared.css" />
+  <style>
+    .article-hero { padding-top: calc(var(--nav-h) + 56px); padding-bottom: 48px; padding-left: 24px; padding-right: 24px; max-width: 760px; margin: 0 auto; }
+    .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
+    .breadcrumb a { color: var(--text-muted); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--terracotta); }
+    .breadcrumb > span { color: var(--border); }
+    .article-tag { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; background: var(--terracotta-light); color: var(--terracotta-dark); border-radius: 50px; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 20px; }
+    h1 { font-family: 'Fraunces', serif; font-size: clamp(32px, 4.5vw, 52px); font-weight: 400; line-height: 1.1; letter-spacing: -0.02em; color: var(--charcoal); margin-bottom: 20px; }
+    .article-meta { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-muted); }
+    .article-meta-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--border); }
+    .article-visual { max-width: 760px; margin: 0 auto; padding: 0 24px 48px; }
+    .article-thumb { width: 100%; border-radius: var(--radius); aspect-ratio: 16/7; display: flex; align-items: center; justify-content: center; font-size: 80px; }
+    .article-body { max-width: 760px; margin: 0 auto; padding: 0 24px 80px; }
+    .article-body p { font-size: 16px; line-height: 1.8; color: var(--text-muted); margin-bottom: 20px; }
+    .article-body p strong { color: var(--text); font-weight: 500; }
+    .article-body p em { font-style: italic; }
+    .article-body h2 { font-family: 'Fraunces', serif; font-size: clamp(20px, 2.5vw, 26px); font-weight: 400; color: var(--charcoal); margin: 36px 0 14px; }
+    .article-body ul { list-style: none; margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px; }
+    .article-body ul li { padding-left: 20px; position: relative; font-size: 16px; line-height: 1.7; color: var(--text-muted); }
+    .article-body ul li::before { content: ''; position: absolute; left: 0; top: 11px; width: 6px; height: 6px; border-radius: 50%; background: var(--terracotta); }
+    .article-body blockquote { background: var(--charcoal); border-radius: var(--radius); padding: 28px 36px; margin: 28px 0; }
+    .article-body blockquote p { font-family: 'Fraunces', serif; font-size: 18px; font-style: italic; color: rgba(255,255,255,0.85); line-height: 1.55; margin: 0; }
+    .article-back { max-width: 760px; margin: 0 auto; padding: 0 24px 48px; }
+    .article-back a { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; color: var(--terracotta); text-decoration: none; padding: 10px 20px; border: 1.5px solid var(--terracotta); border-radius: 50px; transition: all 0.15s; }
+    .article-back a:hover { background: var(--terracotta); color: white; }
+    footer { background: var(--charcoal); color: white; padding: 48px 24px 32px; }
+    .footer-inner { max-width: 1200px; margin: 0 auto; }
+    .footer-bottom { display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: rgba(255,255,255,0.35); border-top: 1px solid rgba(255,255,255,0.1); padding-top: 24px; }
+    .footer-nav { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-bottom: 24px; }
+    .footer-nav a { font-size: 14px; color: rgba(255,255,255,0.55); text-decoration: none; }
+    .footer-nav a:hover { color: white; }
+    .thumb-orange { background: linear-gradient(135deg, #fde8d8, #f5c9a8); }
+    .thumb-green  { background: linear-gradient(135deg, #d8ead9, #b8d4b9); }
+    .thumb-blue   { background: linear-gradient(135deg, #d8e8f0, #b8ccd8); }
+    .thumb-yellow { background: linear-gradient(135deg, #fef3c7, #fde68a); }
+    .thumb-pink   { background: linear-gradient(135deg, #fce7f3, #fbcfe8); }
+    .thumb-purple { background: linear-gradient(135deg, #ede9fe, #ddd6fe); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-mark">M</div>
+      <div class="nav-logo-text">Les Microdoniens<span>Crèche parentale · Saint-Ouen</span></div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="../index.html">Accueil</a></li>
+      <li><a href="../vie.html" class="active">Vie de la crèche</a></li>
+      <li><a href="../association.html">L'association</a></li>
+      <li><a href="../inscriptions.html">Inscriptions 26/27</a></li>
+      <li class="nav-dropdown">
+        <button class="nav-dropdown-btn">Autres pages ▾</button>
+        <div class="nav-dropdown-menu">
+          <a href="../pedagogie.html">Pédagogie</a>
+          <a href="../evenements.html">Événements</a>
+          <a href="../historique.html">Historique</a>
+          <a href="../presse.html">On parle de nous</a>
+          <a href="../contact.html">Contact</a>
+        </div>
+      </li>
+      <li><a href="../contact.html" class="nav-cta">Contact</a></li>
+    </ul>
+    <button class="hamburger" onclick="toggleMenu()" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="../index.html" onclick="toggleMenu()">Accueil</a>
+  <a href="../vie.html" onclick="toggleMenu()">Vie de la crèche</a>
+  <a href="../association.html" onclick="toggleMenu()">L'association</a>
+  <a href="../inscriptions.html" onclick="toggleMenu()">Inscriptions 26/27</a>
+  <a href="../pedagogie.html" onclick="toggleMenu()">Pédagogie</a>
+  <a href="../evenements.html" onclick="toggleMenu()">Événements</a>
+  <a href="../historique.html" onclick="toggleMenu()">Historique</a>
+  <a href="../presse.html" onclick="toggleMenu()">On parle de nous</a>
+  <a href="../contact.html" onclick="toggleMenu()">Contact</a>
+</div>
+
+<div class="article-hero">
+  <div class="breadcrumb">
+    <a href="../index.html">Accueil</a>
+    <span>›</span>
+    <a href="../vie.html">La vie de la crèche</a>
+    <span>›</span>
+    <span>Sieste lyrique</span>
+  </div>
+  <div class="article-tag">📚 Culture</div>
+  <h1>Sieste lyrique</h1>
+  <div class="article-meta">
+    <time datetime="2022-10-03">Octobre 2022</time>
+    <div class="article-meta-dot"></div>
+    <span>Intervenant extérieur · Les Microdoniens</span>
+  </div>
+</div>
+
+<div class="article-visual">
+  <div class="gallery gallery-2">
+    <img src="../images/vie/sieste-lyrique-01.jpeg" alt="" loading="lazy">
+    <img src="../images/vie/sieste-lyrique-02.jpeg" alt="" loading="lazy">
+  </div>
+</div>
+  <!-- IMAGE: replace the div above with <img src="../images/PHOTO.jpg" alt="..." class="article-thumb" style="object-fit:cover;width:100%;border-radius:var(--radius);"> when photos are available -->
+</div>
+
+<div class="article-body">
+  <p>Nous avons eu la chance de recevoir <strong>Clara Schmidt</strong>, artiste lyrique, membre du collectif <em>Saint Ouen sur scène</em>.</p>
+  <p>Elle a proposé une <em>« sieste lyrique »</em> avec 6 berceuses en 6 langues différentes, juste avant la sieste des enfants. Un moment poétique et rare, où la voix humaine, dans toute sa diversité, a bercé les tout-petits dans un silence attentif.</p>
+  <p>Un moment emblématique de l'ouverture culturelle portée par Les Microdoniens : inviter le monde dans la crèche, faire entendre aux enfants d'autres langues, d'autres mélodies, d'autres façons d'être au monde.</p>
+</div>
+
+<div class="article-back">
+  <a href="../vie.html">← Retour à La vie de la crèche</a>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <nav class="footer-nav">
+      <a href="../index.html">Accueil</a>
+      <a href="../vie.html">Vie de la crèche</a>
+      <a href="../pedagogie.html">Pédagogie</a>
+      <a href="../association.html">L'association</a>
+      <a href="../evenements.html">Événements</a>
+      <a href="../historique.html">Historique</a>
+      <a href="../presse.html">On parle de nous</a>
+      <a href="../inscriptions.html">Inscriptions 26/27</a>
+      <a href="../contact.html">Contact</a>
+    </nav>
+    <div class="footer-bottom">
+      <span>© 2026 Les Microdoniens — Association loi 1901</span>
+      <span>53 rue Albert Dhalenne, Saint-Ouen 93400</span>
+    </div>
+  </div>
+</footer>
+
+<script src="../js/nav.js"></script>
+</body>
+</html>

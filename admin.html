@@ -41,6 +41,49 @@
       overflow: hidden;
     }
 
+    /* ── PASSWORD OVERLAY ── */
+    .pw-overlay {
+      position: fixed; inset: 0;
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9999;
+    }
+    .pw-overlay.hidden { display: none; }
+
+    .pw-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 36px 40px;
+      width: 360px;
+    }
+
+    .pw-brand {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .pw-input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 11px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-family: 'DM Sans', sans-serif;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .pw-input:focus { border-color: var(--terracotta); }
+    .pw-input.error { border-color: var(--red); }
+    .pw-label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; display: block; }
+    .pw-error {
+      display: none; color: var(--red); font-size: 12px;
+      margin-top: 8px; text-align: center;
+    }
+    .pw-error.show { display: block; }
+
     /* ── LAYOUT ── */
     .app { display: grid; grid-template-columns: 260px 1fr; height: 100vh; }
 
@@ -200,6 +243,38 @@
     }
     .page-row:hover .page-row-edit { opacity: 1; }
 
+    /* ONBOARDING BANNER */
+    .onboarding-banner {
+      background: linear-gradient(135deg, rgba(217,107,63,0.12), rgba(217,107,63,0.06));
+      border: 1px solid rgba(217,107,63,0.3);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 24px;
+    }
+    .onboarding-banner h3 {
+      font-family: 'Fraunces', serif;
+      font-size: 18px; font-weight: 400;
+      color: var(--text); margin-bottom: 8px;
+    }
+    .onboarding-banner p { font-size: 13px; color: var(--text-muted); line-height: 1.7; margin-bottom: 14px; }
+    .onboarding-steps {
+      display: flex; flex-direction: column; gap: 6px;
+      margin-bottom: 16px;
+    }
+    .onboarding-step {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 13px; color: var(--text-muted);
+    }
+    .onboarding-num {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--terracotta-dim);
+      color: var(--terracotta);
+      font-size: 11px; font-weight: 600;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
     /* PROMPT AREA */
     .prompt-area {
       background: var(--surface);
@@ -328,7 +403,7 @@
       border: 1px solid var(--border);
       border-radius: 12px; border-top-left-radius: 4px;
       font-size: 13px; color: var(--text-muted);
-      max-width: 200px;
+      max-width: 240px;
     }
     .thinking-dots span {
       display: inline-block; width: 6px; height: 6px;
@@ -382,7 +457,27 @@
 </head>
 <body>
 
-<div class="app">
+<!-- PASSWORD OVERLAY -->
+<div id="pwOverlay" class="pw-overlay">
+  <div class="pw-card">
+    <div class="pw-brand">
+      <div class="brand-dot">M</div>
+      <div>
+        <div style="font-family:'Fraunces',serif;font-size:18px;color:var(--text)">Les Microdoniens</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:2px">Tableau de bord · Accès sécurisé</div>
+      </div>
+    </div>
+    <label class="pw-label">Mot de passe</label>
+    <input type="password" id="pwInput" class="pw-input" placeholder="••••••••••••"
+      onkeydown="if(event.key==='Enter')checkPassword()" autofocus />
+    <p id="pwError" class="pw-error">Mot de passe incorrect</p>
+    <button onclick="checkPassword()" class="btn btn-primary" style="width:100%;margin-top:14px;justify-content:center;padding:10px 14px">
+      Accéder →
+    </button>
+  </div>
+</div>
+
+<div class="app" id="app" style="display:none">
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
@@ -402,6 +497,25 @@
       <button class="sidebar-item" onclick="showView('editor', this)">
         <span class="item-icon">✏️</span> Éditeur IA
         <span class="item-badge">Claude</span>
+      </button>
+      <button class="sidebar-item" onclick="showView('editor', this); setEditorMode('new')">
+        <span class="item-icon">🎨</span> Nouvel article vie
+      </button>
+      <button class="sidebar-item" onclick="showView('editor', this); setEditorMode('new-event')">
+        <span class="item-icon">🎉</span> Nouvel événement
+      </button>
+      <button class="sidebar-item" onclick="showView('editor', this); setEditorMode('new-publication')">
+        <span class="item-icon">📰</span> Nouvelle publication
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Gérer les inscriptions</div>
+      <button class="sidebar-item" onclick="showView('editor', this); setEditorMode('open-inscriptions')" style="color:var(--terracotta)">
+        <span class="item-icon">🎊</span> Ouvrir les inscriptions
+      </button>
+      <button class="sidebar-item" onclick="showView('editor', this); setEditorMode('close-inscriptions')">
+        <span class="item-icon">🔒</span> Fermer les inscriptions
       </button>
     </div>
 
@@ -428,8 +542,8 @@
       <button class="sidebar-item" onclick="editPage('presse.html', 'On parle de nous', this)">
         <span class="item-icon">📰</span> On parle de nous
       </button>
-      <button class="sidebar-item" onclick="editPage('inscriptions.html', 'Inscriptions', this)">
-        <span class="item-icon">📝</span> Inscriptions
+      <button class="sidebar-item" onclick="editPage('inscriptions.html', 'Inscriptions 26/27', this)">
+        <span class="item-icon">📝</span> Inscriptions 26/27
       </button>
       <button class="sidebar-item" onclick="editPage('contact.html', 'Contact', this)">
         <span class="item-icon">📬</span> Contact
@@ -453,6 +567,8 @@
       <div class="topbar-title" id="topbarTitle">Tableau de bord</div>
       <div class="topbar-actions">
         <a id="previewSiteBtn" href="#" target="_blank" class="btn btn-ghost">🔗 Voir le site</a>
+        <button class="btn btn-ghost" onclick="showView('editor', null); setEditorMode('new-publication')">📰 Publication</button>
+        <button class="btn btn-ghost" onclick="showView('editor', null); setEditorMode('new-event')">🎉 Événement</button>
         <button class="btn btn-primary" onclick="showView('editor', null); setEditorMode('new')">+ Nouvel article</button>
       </div>
     </div>
@@ -475,7 +591,7 @@
           <div class="dash-card">
             <div class="dash-card-label">Statut</div>
             <div class="dash-card-value" style="font-size:22px; color: var(--green)">✓ Live</div>
-            <div class="dash-card-sub">microdoniens.netlify.app</div>
+            <div class="dash-card-sub" id="dashSiteUrl">microdoniens.netlify.app</div>
           </div>
         </div>
 
@@ -509,9 +625,9 @@
             <div class="page-status">Live</div>
             <div class="page-row-edit">Éditer →</div>
           </div>
-          <div class="page-row" onclick="editPage('inscriptions.html','Inscriptions',null)">
+          <div class="page-row" onclick="editPage('inscriptions.html','Inscriptions 26/27',null)">
             <div class="page-row-icon">📝</div>
-            <div class="page-row-name">Inscriptions</div>
+            <div class="page-row-name">Inscriptions 26/27</div>
             <div class="page-row-file">inscriptions.html</div>
             <div class="page-status">Live</div>
             <div class="page-row-edit">Éditer →</div>
@@ -527,19 +643,19 @@
           <div class="prompt-context-bar">
             <span>Contexte :</span>
             <div id="contextTags" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
-            <span id="noContext" style="color:var(--text-dim);font-size:12px;">Aucune page sélectionnée — Claude va créer un nouvel élément</span>
+            <span id="noContext" style="color:var(--text-dim);font-size:12px;">Aucune page — Claude va créer un nouvel article</span>
           </div>
 
           <div class="prompt-input-wrap">
             <textarea id="promptInput" rows="3"
-              placeholder="Ex: Ajoute un article sur la sortie à la médiathèque du 10 avril. Les enfants ont découvert l'exposition Lucie Félix..."
+              placeholder="Ex: Ajoute un article sur la sortie à la médiathèque du 10 avril. Les enfants ont découvert l'exposition Lucie Félix…"
               onkeydown="handleKey(event)"></textarea>
             <div class="prompt-actions">
-              <label class="attach-btn" title="Joindre une image ou un PDF">
+              <label class="attach-btn" title="Joindre des photos">
                 📎
-                <input type="file" style="display:none" multiple accept="image/*,.pdf" onchange="handleFiles(this.files)">
+                <input type="file" style="display:none" multiple accept="image/*" onchange="handleFiles(this.files)">
               </label>
-              <button class="send-btn" id="sendBtn" onclick="sendPrompt()" title="Envoyer (Ctrl+Enter)">↑</button>
+              <button class="send-btn" id="sendBtn" onclick="sendPrompt()" title="Envoyer (Ctrl+Entrée)">↑</button>
             </div>
           </div>
 
@@ -547,17 +663,42 @@
         </div>
 
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="btn btn-ghost" onclick="quickPrompt('Ajoute un nouvel article dans la vie de la crèche')">+ Article vie de la crèche</button>
-          <button class="btn btn-ghost" onclick="quickPrompt('Mets à jour les informations des inscriptions')">Mettre à jour les inscriptions</button>
-          <button class="btn btn-ghost" onclick="quickPrompt('Ajoute un événement à venir dans la page événements')">+ Événement</button>
-          <button class="btn btn-ghost" onclick="quickPrompt('Crée une nouvelle page pour')">Nouvelle page</button>
+          <button class="btn btn-ghost" onclick="setEditorMode('new')">+ Article vie de la crèche</button>
+          <button class="btn btn-ghost" onclick="setEditorMode('new-event')">🎉 Nouvel événement</button>
+          <button class="btn btn-ghost" onclick="setEditorMode('new-publication')">📰 Nouvelle publication</button>
+          <button class="btn btn-ghost" onclick="setEditorMode('open-inscriptions')" style="color:var(--terracotta);border-color:var(--terracotta)">🎊 Ouvrir les inscriptions</button>
+          <button class="btn btn-ghost" onclick="setEditorMode('close-inscriptions')">🔒 Fermer les inscriptions</button>
         </div>
       </div>
 
       <!-- SETTINGS VIEW -->
       <div class="view" id="view-settings">
+        <div id="onboardingBanner" class="onboarding-banner" style="display:none">
+          <h3>Bienvenue dans le tableau de bord 👋</h3>
+          <p>Avant de commencer, configure les 5 informations ci-dessous. C'est la seule fois que tu en auras besoin.</p>
+          <div class="onboarding-steps">
+            <div class="onboarding-step"><div class="onboarding-num">1</div> Clé Anthropic (pour que Claude fonctionne)</div>
+            <div class="onboarding-step"><div class="onboarding-num">2</div> Token GitHub (pour publier les modifications)</div>
+            <div class="onboarding-step"><div class="onboarding-num">3</div> Nom du repo GitHub</div>
+            <div class="onboarding-step"><div class="onboarding-num">4</div> URL du site en ligne</div>
+            <div class="onboarding-step"><div class="onboarding-num">5</div> Mot de passe admin (optionnel, remplace "microdoniens")</div>
+          </div>
+        </div>
+
         <div class="settings-section">
-          <h3>🔑 Connexions API</h3>
+          <h3>🤖 Claude (Anthropic)</h3>
+
+          <div class="setting-row">
+            <div class="setting-label">
+              <strong>Clé API Anthropic</strong>
+              <span>Commence par sk-ant-… — sur console.anthropic.com</span>
+            </div>
+            <input type="password" class="setting-input" id="anthropicKey" placeholder="sk-ant-api03-…" />
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h3>🔑 GitHub</h3>
 
           <div class="setting-row">
             <div class="setting-label">
@@ -578,7 +719,7 @@
           <div class="setting-row">
             <div class="setting-label">
               <strong>Branche principale</strong>
-              <span>La branche qui déclenche le deploy Netlify</span>
+              <span>La branche qui déclenche le déploiement Netlify</span>
             </div>
             <input type="text" class="setting-input" id="githubBranch" placeholder="main" />
           </div>
@@ -586,9 +727,21 @@
           <div class="setting-row">
             <div class="setting-label">
               <strong>URL du site live</strong>
-              <span>Pour le bouton "Voir le site"</span>
+              <span>Pour le bouton "Voir le site" et les URLs des photos</span>
             </div>
             <input type="text" class="setting-input" id="siteUrl" placeholder="https://microdoniens.netlify.app" />
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h3>🔒 Sécurité</h3>
+
+          <div class="setting-row">
+            <div class="setting-label">
+              <strong>Mot de passe admin</strong>
+              <span>Laisse vide pour garder "microdoniens"</span>
+            </div>
+            <input type="password" class="setting-input" id="adminPassword" placeholder="microdoniens" />
           </div>
         </div>
 
@@ -620,45 +773,97 @@
 const state = {
   view: 'dashboard',
   config: {},
-  context: [], // pages being edited
+  context: [],
   conversation: [],
   attachments: [],
   pendingHtml: null,
   pendingFile: null,
+  pendingVieHtml: null,
+  pendingEvenementsHtml: null,
+  pendingPresseHtml: null,
+  pendingIndexHtml: null,
+  currentPageHtml: null,
+  _indexHtmlForContext: null,
+  isNewArticle: false,
+  isNewEvent: false,
+  isNewPublication: false,
+  isOpeningInscriptions: false,
+  isClosingInscriptions: false,
   isThinking: false,
 };
 
 // ── INIT ──
 function init() {
-  // Load saved config
   try {
     const saved = localStorage.getItem('microd_config');
-    if (saved) {
-      state.config = JSON.parse(saved);
-      document.getElementById('githubToken').value = state.config.githubToken || '';
-      document.getElementById('githubRepo').value = state.config.githubRepo || '';
-      document.getElementById('githubBranch').value = state.config.githubBranch || 'main';
-      document.getElementById('siteUrl').value = state.config.siteUrl || '';
-    }
+    if (saved) state.config = JSON.parse(saved);
   } catch(e) {}
 
-  updateStatusDot();
-  updateSiteLink();
+  // Check session unlock
+  if (sessionStorage.getItem('microd_unlocked') === '1') {
+    unlockApp(false);
+  }
+  // (password overlay is shown by default via HTML)
 
-  // Set last update
   const lu = localStorage.getItem('microd_lastupdate');
   if (lu) document.getElementById('lastUpdate').textContent = lu;
 }
 
+// ── PASSWORD ──
+function checkPassword() {
+  const input = document.getElementById('pwInput');
+  const expected = state.config.adminPassword || 'microdoniens';
+  if (input.value === expected) {
+    input.classList.remove('error');
+    document.getElementById('pwError').classList.remove('show');
+    sessionStorage.setItem('microd_unlocked', '1');
+    unlockApp(true);
+  } else {
+    input.classList.add('error');
+    document.getElementById('pwError').classList.add('show');
+    input.value = '';
+    input.focus();
+  }
+}
+
+function unlockApp(isFirstUnlock) {
+  document.getElementById('pwOverlay').classList.add('hidden');
+  document.getElementById('app').style.display = 'grid';
+
+  // Populate settings fields
+  document.getElementById('anthropicKey').value = state.config.anthropicKey || '';
+  document.getElementById('githubToken').value = state.config.githubToken || '';
+  document.getElementById('githubRepo').value = state.config.githubRepo || '';
+  document.getElementById('githubBranch').value = state.config.githubBranch || 'main';
+  document.getElementById('siteUrl').value = state.config.siteUrl || '';
+  document.getElementById('adminPassword').value = '';
+
+  updateStatusDot();
+  updateSiteLink();
+
+  // Onboarding: redirect to settings if missing critical config
+  if (!state.config.anthropicKey || !state.config.githubToken) {
+    document.getElementById('onboardingBanner').style.display = 'block';
+    showView('settings', null);
+  }
+}
+
+// ── STATUS ──
 function updateStatusDot() {
   const dot = document.getElementById('statusDot');
   const label = document.getElementById('statusLabel');
   const sub = document.getElementById('statusSub');
-  const hasConfig = state.config.githubToken && state.config.githubRepo;
-  if (hasConfig) {
+  const hasAll = state.config.githubToken && state.config.githubRepo && state.config.anthropicKey;
+  const hasPartial = state.config.githubToken || state.config.anthropicKey;
+
+  if (hasAll) {
     dot.className = 'config-dot dot-ok';
     label.textContent = state.config.githubRepo;
     sub.textContent = 'Connecté ✓';
+  } else if (hasPartial) {
+    dot.className = 'config-dot dot-warn';
+    label.textContent = 'Config incomplète';
+    sub.textContent = 'Cliquer pour finir';
   } else {
     dot.className = 'config-dot dot-warn';
     label.textContent = 'Non configuré';
@@ -668,9 +873,11 @@ function updateStatusDot() {
 
 function updateSiteLink() {
   const btn = document.getElementById('previewSiteBtn');
+  const urlEl = document.getElementById('dashSiteUrl');
   if (state.config.siteUrl) {
     btn.href = state.config.siteUrl;
     btn.style.opacity = '1';
+    if (urlEl) urlEl.textContent = state.config.siteUrl.replace('https://', '');
   } else {
     btn.href = '#';
     btn.style.opacity = '0.5';
@@ -694,30 +901,119 @@ function resetEditor() {
   state.attachments = [];
   state.pendingHtml = null;
   state.pendingFile = null;
+  state.pendingVieHtml = null;
+  state.pendingEvenementsHtml = null;
+  state.pendingPresseHtml = null;
+  state.pendingIndexHtml = null;
+  state.currentPageHtml = null;
+  state._indexHtmlForContext = null;
+  state.isNewArticle = false;
+  state.isNewEvent = false;
+  state.isNewPublication = false;
+  state.isOpeningInscriptions = false;
+  state.isClosingInscriptions = false;
   document.getElementById('conversation').innerHTML = '';
   document.getElementById('promptInput').value = '';
   renderAttachments();
 }
 
-function editPage(file, name, btn) {
+async function editPage(file, name, btn) {
   showView('editor', btn);
   document.getElementById('topbarTitle').textContent = 'Éditer : ' + name;
-
-  // Always reset when switching pages
   resetEditor();
-
   state.context = [{ file, name }];
+  state.isNewArticle = false;
   renderContextTags();
 
-  addAiMessage(`Je vais t'aider à modifier la page **${name}** (\`${file}\`).\n\nDis-moi ce que tu veux changer — tu peux coller du texte, joindre des photos, ou simplement décrire ce que tu veux. Je génère les modifications et tu valides avant de publier.`);
+  addAiMessage(`Je vais t'aider à modifier la page **${name}** (\`${file}\`).\n\nDis-moi ce que tu veux changer — tu peux coller du texte, joindre des photos, ou simplement décrire. Je génère les modifications et tu valides avant de publier.`);
+
+  // Prefetch the current page HTML in the background
+  if (state.config.githubToken && state.config.githubRepo) {
+    showThinkingLabel('Chargement de la page…');
+    try {
+      state.currentPageHtml = await fetchFileFromGitHub(file);
+      hideThinking();
+      addAiMessage('✓ Page chargée. Je connais son contenu actuel.');
+    } catch(e) {
+      hideThinking();
+      addAiMessage('⚠️ Je n\'ai pas pu charger la page depuis GitHub (vérifie ta configuration). Je ferai quand même de mon mieux.');
+    }
+  }
 }
 
-function setEditorMode(mode) {
+async function setEditorMode(mode) {
   if (mode === 'new') {
     resetEditor();
     state.context = [];
+    state.isNewArticle = true;
+    state.isNewEvent = false;
     renderContextTags();
-    addAiMessage(`Je suis prêt à créer un nouvel article ou une nouvelle page.\n\nDécris ce que tu veux — sujet, contenu, images à intégrer. Tu pourras prévisualiser avant de mettre en ligne.`);
+    addAiMessage(`Je suis prêt à créer un **nouvel article** pour la section "Vie de la crèche".\n\nDécris l'activité ou la sortie — sujet, date, ce qui s'est passé, photos si tu en as. Je crée l'article et l'ajoute automatiquement à la liste.`);
+  } else if (mode === 'new-event') {
+    resetEditor();
+    state.context = [];
+    state.isNewArticle = false;
+    state.isNewEvent = true;
+    state.isNewPublication = false;
+    renderContextTags();
+    addAiMessage(`Je suis prêt à créer un **nouvel événement** pour la page Événements.\n\nDécris l'événement — nom, date, lieu, ce qui s'est passé, photos si tu en as. Je crée la page détail et l'ajoute automatiquement à la liste des événements.`);
+  } else if (mode === 'new-publication') {
+    resetEditor();
+    state.context = [];
+    state.isNewArticle = false;
+    state.isNewEvent = false;
+    state.isNewPublication = true;
+    renderContextTags();
+    addAiMessage(`Je suis prêt à créer une **nouvelle publication presse** pour la page "On parle de nous".\n\nDécris la parution — source (journal, TV, site…), date, titre de l'article, contenu, et joins l'image scannée si tu en as une. Je crée la page détail et l'ajoute automatiquement à la revue de presse.`);
+  } else if (mode === 'close-inscriptions') {
+    resetEditor();
+    state.context = [{ file: 'inscriptions.html', name: 'Inscriptions 26/27' }];
+    state.isClosingInscriptions = true;
+    renderContextTags();
+
+    addAiMessage(`🔒 **Fermeture des inscriptions**\n\nJe vais mettre à jour le site pour indiquer que les inscriptions sont fermées.\n\nJ'ai besoin de quelques informations :\n\n1. **Année scolaire qui vient de fermer** — ex : 2026/2027\n2. **Prochaine session d'inscription** — ex : mars 2027 (pour que les familles sachent quand revenir)\n3. **Message spécifique** — une liste d'attente ? une autre info à communiquer ? (optionnel)`);
+
+    if (state.config.githubToken && state.config.githubRepo) {
+      showThinkingLabel('Chargement des pages…');
+      try {
+        const [inscHtml, idxHtml] = await Promise.all([
+          fetchFileFromGitHub('inscriptions.html'),
+          fetchFileFromGitHub('index.html'),
+        ]);
+        state.currentPageHtml = inscHtml;
+        state._indexHtmlForContext = idxHtml;
+        hideThinking();
+        addAiMessage('✓ Pages chargées. Donne-moi les informations ci-dessus et je génère les modifications.');
+      } catch(e) {
+        hideThinking();
+        addAiMessage('⚠️ Je n\'ai pas pu charger les pages depuis GitHub. Donne-moi les informations et je ferai de mon mieux.');
+      }
+    }
+  } else if (mode === 'open-inscriptions') {
+    resetEditor();
+    state.context = [{ file: 'inscriptions.html', name: 'Inscriptions' }];
+    state.isOpeningInscriptions = true;
+    renderContextTags();
+
+    addAiMessage(`🎊 **Ouverture des inscriptions**\n\nJe vais mettre à jour la page inscriptions et l'accueil du site avec toutes les nouvelles informations.\n\nJ'ai besoin de ces informations (réponds tout d'un coup ou une par une) :\n\n1. **Année scolaire** — ex : 2027/2028\n2. **Date limite naissance** — ex : 31 mars 2027 (âge minimum 6 mois en septembre)\n3. **Date limite de dépôt des dossiers** — ex : avant le 8 mars 2027\n4. **Date(s) des portes ouvertes** — ex : 15 mars 2027\n5. **Date(s) des entretiens de recrutement** — ex : 29 mars 2027\n6. **Date de l'entretien avec la responsable technique** (si différent des entretiens collectifs)\n7. **Places disponibles** — nombre de places bébés / moyens / grands pour l'année`);
+
+    if (state.config.githubToken && state.config.githubRepo) {
+      showThinkingLabel('Chargement des pages…');
+      try {
+        const [inscHtml, idxHtml] = await Promise.all([
+          fetchFileFromGitHub('inscriptions.html'),
+          fetchFileFromGitHub('index.html'),
+        ]);
+        state.currentPageHtml = inscHtml;
+        state.pendingIndexHtml = null;
+        state._indexHtmlForContext = idxHtml;
+        hideThinking();
+        addAiMessage('✓ Pages chargées. Donne-moi les informations ci-dessus et je génère les modifications.');
+      } catch(e) {
+        hideThinking();
+        addAiMessage('⚠️ Je n\'ai pas pu charger les pages depuis GitHub. Je ferai de mon mieux avec les informations que tu me donneras.');
+      }
+    }
   }
 }
 
@@ -746,9 +1042,7 @@ function removeContext(i) {
 
 // ── ATTACHMENTS ──
 function handleFiles(files) {
-  Array.from(files).forEach(f => {
-    state.attachments.push(f);
-  });
+  Array.from(files).forEach(f => state.attachments.push(f));
   renderAttachments();
 }
 
@@ -781,101 +1075,273 @@ function quickPrompt(text) {
   document.getElementById('promptInput').focus();
 }
 
+// ── GITHUB FILE FETCH ──
+async function fetchFileFromGitHub(filename) {
+  const { githubToken, githubRepo, githubBranch } = state.config;
+  const branch = githubBranch || 'main';
+  const res = await fetch(
+    `https://api.github.com/repos/${githubRepo}/contents/${filename}?ref=${branch}`,
+    { headers: { 'Authorization': `token ${githubToken}`, 'Accept': 'application/vnd.github.v3+json' } }
+  );
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  // Decode base64, handling UTF-8
+  return decodeURIComponent(escape(atob(data.content.replace(/\n/g, ''))));
+}
+
+// ── IMAGE UTILITIES ──
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      // Strip the data:image/...;base64, prefix
+      const base64 = reader.result.split(',')[1];
+      resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// Upload an image to GitHub and return its Netlify URL
+async function uploadImageToGitHub(file) {
+  const { githubToken, githubRepo, githubBranch, siteUrl } = state.config;
+  const branch = githubBranch || 'main';
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '-').toLowerCase();
+  const path = `images/vie/${Date.now()}-${safeName}`;
+  const base64 = await fileToBase64(file);
+
+  const res = await fetch(`https://api.github.com/repos/${githubRepo}/contents/${path}`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `token ${githubToken}`,
+      'Content-Type': 'application/json',
+      'Accept': 'application/vnd.github.v3+json',
+    },
+    body: JSON.stringify({
+      message: `📸 Upload photo ${safeName}`,
+      content: base64,
+      branch,
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.message || 'Upload échoué');
+  }
+  const netlifyBase = (siteUrl || '').replace(/\/$/, '');
+  return `${netlifyBase}/${path}`;
+}
+
 // ── SEND PROMPT ──
 async function sendPrompt() {
   const input = document.getElementById('promptInput');
-  const prompt = input.value.trim();
-  if (!prompt || state.isThinking) return;
+  const userText = input.value.trim();
+  if (!userText || state.isThinking) return;
 
-  const contextInfo = state.context.length > 0
-    ? `Page ciblée : ${state.context.map(c => c.file).join(', ')}`
-    : 'Mode : création d\'un nouvel élément';
+  if (!state.config.anthropicKey) {
+    showToast('Clé Anthropic manquante — va dans la Configuration', 'err');
+    showView('settings', null);
+    return;
+  }
 
-  // Add user message
-  addUserMessage(prompt, state.attachments.map(f => f.name));
-  input.value = '';
   const attachmentsCopy = [...state.attachments];
+  addUserMessage(userText, attachmentsCopy.map(f => f.name));
+  input.value = '';
   state.attachments = [];
   renderAttachments();
 
-  // Show thinking
   state.isThinking = true;
   document.getElementById('sendBtn').disabled = true;
-  showThinking();
 
   try {
-    // Build the system prompt
-    const systemPrompt = `Tu es l'assistant de gestion du site web des Microdoniens, une crèche parentale à Saint-Ouen. 
-    
-Le site est fait en HTML/CSS/JS pur, avec un design Airbnb-style : police Fraunces (titres) et DM Sans (texte), couleur principale terracotta (#d96b3f), fond crème (#faf8f4).
+    let photoUrls = [];
+    let imageData = []; // [{base64, mediaType}]
 
-${contextInfo}
-
-Quand l'utilisateur te demande de modifier ou créer du contenu :
-1. Génère le HTML complet et valide
-2. Explique brièvement ce que tu as fait
-3. Termine toujours par "PREVIEW_READY" suivi du HTML dans une balise <html-output>...</html-output>
-
-Si l'utilisateur dit "publie", "c'est bon", "mets en ligne" ou similaire, réponds "PUBLISH_CONFIRMED".
-
-Réponds toujours en français. Sois concis et chaleureux.`;
-
-    // Build messages for API
-    const messages = [
-      ...state.conversation.slice(-6).map(m => ({
-        role: m.role,
-        content: m.content
-      })),
-      {
-        role: 'user',
-        content: prompt + (attachmentsCopy.length ? `\n\n[Fichiers joints : ${attachmentsCopy.map(f=>f.name).join(', ')}]` : '')
+    // 1. Upload images to GitHub and collect vision data
+    if (attachmentsCopy.length > 0) {
+      showThinkingLabel('Upload des photos…');
+      for (const file of attachmentsCopy) {
+        try {
+          const [url, b64] = await Promise.all([
+            state.config.githubToken ? uploadImageToGitHub(file) : Promise.resolve(null),
+            fileToBase64(file),
+          ]);
+          if (url) photoUrls.push({ file: file.name, url });
+          const mediaType = file.type || 'image/jpeg';
+          imageData.push({ base64: b64, mediaType });
+        } catch(e) {
+          // Upload failed but we still have the image for Claude vision
+          const b64 = await fileToBase64(file);
+          imageData.push({ base64: b64, mediaType: file.type || 'image/jpeg' });
+          showToast(`Photo ${file.name} : upload échoué (sera visible sur le site après publication manuelle)`, 'err');
+        }
       }
+      hideThinking();
+    }
+
+    // 2. For new articles/events/publications, fetch the index page for context
+    let vieHtml = '';
+    let evenementsHtml = '';
+    let presseHtml = '';
+    if (state.isNewArticle && state.config.githubToken) {
+      showThinkingLabel('Chargement des données du site…');
+      try {
+        vieHtml = await fetchFileFromGitHub('vie.html');
+      } catch(e) {
+        // non-blocking
+      }
+      hideThinking();
+    }
+    if (state.isNewEvent && state.config.githubToken) {
+      showThinkingLabel('Chargement des données du site…');
+      try {
+        evenementsHtml = await fetchFileFromGitHub('evenements.html');
+      } catch(e) {
+        // non-blocking
+      }
+      hideThinking();
+    }
+    if (state.isNewPublication && state.config.githubToken) {
+      showThinkingLabel('Chargement des données du site…');
+      try {
+        presseHtml = await fetchFileFromGitHub('presse.html');
+      } catch(e) {
+        // non-blocking
+      }
+      hideThinking();
+    }
+
+    // 3. Show Claude thinking
+    showThinkingLabel('Claude réfléchit…');
+
+    // 4. Build system prompt
+    let systemPrompt = '';
+
+    if (state.isNewArticle) {
+      systemPrompt = buildNewArticleSystemPrompt(vieHtml, photoUrls);
+    } else if (state.isNewEvent) {
+      systemPrompt = buildNewEventSystemPrompt(evenementsHtml, photoUrls);
+    } else if (state.isNewPublication) {
+      systemPrompt = buildNewPublicationSystemPrompt(presseHtml, photoUrls);
+    } else if (state.isOpeningInscriptions) {
+      systemPrompt = buildOpenInscriptionsSystemPrompt(state.currentPageHtml, state._indexHtmlForContext);
+    } else if (state.isClosingInscriptions) {
+      systemPrompt = buildCloseInscriptionsSystemPrompt(state.currentPageHtml, state._indexHtmlForContext);
+    } else {
+      const pageName = state.context[0]?.name || 'cette page';
+      const filename = state.context[0]?.file || '';
+      systemPrompt = buildEditSystemPrompt(pageName, filename, state.currentPageHtml, photoUrls);
+    }
+
+    // 5. Build messages array
+    const history = state.conversation.slice(-6).map(m => ({
+      role: m.role,
+      content: m.content,
+    }));
+
+    // Build last user message (with images if any)
+    let lastUserContent;
+    if (imageData.length > 0) {
+      lastUserContent = [
+        ...imageData.map(img => ({
+          type: 'image',
+          source: { type: 'base64', media_type: img.mediaType, data: img.base64 },
+        })),
+        { type: 'text', text: userText },
+      ];
+    } else {
+      lastUserContent = userText;
+    }
+
+    const messages = [
+      ...history,
+      { role: 'user', content: lastUserContent },
     ];
 
+    // 6. Call Anthropic API
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': state.config.anthropicKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-opus-4-5',
         max_tokens: 8000,
         system: systemPrompt,
         messages,
-      })
+      }),
     });
 
     if (!response.ok) {
       const err = await response.json();
-      throw new Error(err.error?.message || 'Erreur API');
+      throw new Error(err.error?.message || `Erreur API (${response.status})`);
     }
 
     const data = await response.json();
     const reply = data.content[0].text;
-
     hideThinking();
 
-    // Store in conversation
-    state.conversation.push({ role: 'user', content: prompt });
+    // Store in conversation (text only for history)
+    state.conversation.push({ role: 'user', content: userText });
     state.conversation.push({ role: 'assistant', content: reply });
 
-    // Check for HTML output
+    // 7. Parse response
     const htmlMatch = reply.match(/<html-output>([\s\S]*?)<\/html-output>/);
-    const cleanReply = reply.replace(/<html-output>[\s\S]*?<\/html-output>/, '').replace('PREVIEW_READY', '').trim();
+    const vieUpdateMatch = reply.match(/<vie-update>([\s\S]*?)<\/vie-update>/);
+    const evenementsUpdateMatch = reply.match(/<evenements-update>([\s\S]*?)<\/evenements-update>/);
+    const presseUpdateMatch = reply.match(/<presse-update>([\s\S]*?)<\/presse-update>/);
+    const indexUpdateMatch = reply.match(/<index-update>([\s\S]*?)<\/index-update>/);
+    const articleFileMatch = reply.match(/ARTICLE_FILE:\s*(vie\/[^\s<]+\.html)/);
+    const eventFileMatch = reply.match(/EVENT_FILE:\s*(evenements\/[^\s<]+\.html)/);
+    const publicationFileMatch = reply.match(/PUBLICATION_FILE:\s*(presse\/[^\s<]+\.html)/);
+
+    const cleanReply = reply
+      .replace(/<html-output>[\s\S]*?<\/html-output>/, '')
+      .replace(/<vie-update>[\s\S]*?<\/vie-update>/, '')
+      .replace(/<evenements-update>[\s\S]*?<\/evenements-update>/, '')
+      .replace(/<presse-update>[\s\S]*?<\/presse-update>/, '')
+      .replace(/<index-update>[\s\S]*?<\/index-update>/, '')
+      .replace(/ARTICLE_FILE:[^\n]*\n?/, '')
+      .replace(/EVENT_FILE:[^\n]*\n?/, '')
+      .replace(/PUBLICATION_FILE:[^\n]*\n?/, '')
+      .replace('PREVIEW_READY', '')
+      .trim();
 
     if (reply.includes('PUBLISH_CONFIRMED')) {
-      addAiMessage('✅ Publication confirmée ! Je mets le site à jour...');
+      addAiMessage('Publication confirmée ! Je mets le site à jour…');
       if (state.pendingHtml && state.pendingFile) {
-        await publishToGitHub(state.pendingFile, state.pendingHtml);
+        await publishAll();
       }
     } else if (htmlMatch) {
       state.pendingHtml = htmlMatch[1].trim();
-      state.pendingFile = state.context[0]?.file || 'nouveau-article.html';
-      addAiMessage(cleanReply);
+      state.pendingVieHtml = vieUpdateMatch ? vieUpdateMatch[1].trim() : null;
+      state.pendingEvenementsHtml = evenementsUpdateMatch ? evenementsUpdateMatch[1].trim() : null;
+      state.pendingPresseHtml = presseUpdateMatch ? presseUpdateMatch[1].trim() : null;
+      state.pendingIndexHtml = indexUpdateMatch ? indexUpdateMatch[1].trim() : null;
+
+      if (state.isNewArticle && articleFileMatch) {
+        state.pendingFile = articleFileMatch[1].trim();
+      } else if (state.isNewEvent && eventFileMatch) {
+        state.pendingFile = eventFileMatch[1].trim();
+      } else if (state.isNewPublication && publicationFileMatch) {
+        state.pendingFile = publicationFileMatch[1].trim();
+      } else {
+        state.pendingFile = state.context[0]?.file || 'nouveau-article.html';
+      }
+
+      if (cleanReply) addAiMessage(cleanReply);
       showPreview(state.pendingHtml, state.pendingFile);
+      if (state.pendingIndexHtml) {
+        addAiMessage('✓ index.html sera également mis à jour lors de la publication.');
+      }
     } else {
       addAiMessage(reply);
     }
 
-  } catch (err) {
+  } catch(err) {
     hideThinking();
     addAiMessage(`⚠️ Erreur : ${err.message}\n\nVérifie ta configuration dans les paramètres.`);
     showToast('Erreur : ' + err.message, 'err');
@@ -885,12 +1351,343 @@ Réponds toujours en français. Sois concis et chaleureux.`;
   document.getElementById('sendBtn').disabled = false;
 }
 
+// ── SYSTEM PROMPTS ──
+function buildEditSystemPrompt(pageName, filename, currentHtml, photoUrls) {
+  const photoSection = photoUrls.length > 0
+    ? `\nPHOTOS UPLOADÉES (URLs à utiliser dans le HTML) :\n${photoUrls.map(p => `- ${p.file} → ${p.url}`).join('\n')}\n`
+    : '';
+
+  const htmlSection = currentHtml
+    ? `\nHTML ACTUEL DE LA PAGE :\n\`\`\`html\n${currentHtml}\n\`\`\`\n`
+    : '\n(HTML non disponible — génère le HTML complet en respectant le style du site.)\n';
+
+  return `Tu es l'assistant de gestion du site des Microdoniens, une crèche parentale à Saint-Ouen.
+
+Le site est en HTML/CSS/JS pur. Design : police Fraunces (titres), DM Sans (texte), couleur terracotta #d96b3f, fond crème #faf8f4.
+
+MODE : Modification de la page "${pageName}" (${filename})
+${htmlSection}${photoSection}
+RÈGLES :
+- Modifie uniquement ce qui est demandé, conserve le reste tel quel
+- Si des photos ont été uploadées, intègre-les avec les URLs fournies dans les balises <img>
+- Réponds en français, de façon concise et chaleureuse
+- Explique brièvement ce que tu as modifié
+- Termine TOUJOURS par :
+  PREVIEW_READY
+  <html-output>
+  [HTML complet de la page modifiée]
+  </html-output>
+
+Si l'utilisateur dit "publie", "c'est bon", "mets en ligne" ou similaire, réponds "PUBLISH_CONFIRMED".`;
+}
+
+function buildNewArticleSystemPrompt(vieHtml, photoUrls) {
+  const photoSection = photoUrls.length > 0
+    ? `\nPHOTOS UPLOADÉES (URLs à utiliser dans le HTML) :\n${photoUrls.map(p => `- ${p.file} → ${p.url}`).join('\n')}\n`
+    : '';
+
+  const vieSection = vieHtml
+    ? `\nHTML ACTUEL DE VIE.HTML (pour y ajouter la carte du nouvel article) :\n\`\`\`html\n${vieHtml}\n\`\`\`\n`
+    : '';
+
+  return `Tu es l'assistant de gestion du site des Microdoniens, une crèche parentale à Saint-Ouen.
+
+Le site est en HTML/CSS/JS pur. Design : police Fraunces (titres), DM Sans (texte), couleur terracotta #d96b3f, fond crème #faf8f4.
+
+MODE : Création d'un nouvel article pour la section "Vie de la crèche"
+
+STRUCTURE D'UN ARTICLE (base à utiliser) :
+- Fichier : vie/[slug-kebab-case].html
+- Utilise ../css/shared.css et ../js/nav.js
+- Structure : nav, breadcrumb, titre (h1 Fraunces), galerie photos, corps de l'article
+- Classes galerie disponibles : gallery-2, gallery-3, gallery-4, gallery-featured
+- Miniature de secours si pas de photo : <div class="post-thumb thumb-orange">EMOJI</div>
+${photoSection}${vieSection}
+CARTE À AJOUTER DANS VIE.HTML (structure d'une entrée existante) :
+<article class="activity-post" data-category="CATEGORIE">
+  <div class="post-thumb thumb-COLOR">EMOJI</div>   <!-- ou <img> si photo disponible -->
+  <div class="post-body">
+    <div class="post-tag">EMOJI CATÉGORIE</div>
+    <a href="vie/SLUG.html"><h2>TITRE</h2></a>
+    <p>RÉSUMÉ COURT (2-3 phrases)</p>
+    <div class="post-meta"><span>DATE</span></div>
+  </div>
+</article>
+
+Catégories disponibles : Musique, Créativité, Nature, Motricité, Culture, Découvertes
+
+RÈGLES DE SORTIE (respecte exactement ce format) :
+1. Explique brièvement ce que tu as créé (1-2 phrases)
+2. Indique le nom du fichier :
+   ARTICLE_FILE: vie/[slug].html
+3. L'article complet :
+   PREVIEW_READY
+   <html-output>
+   [HTML complet de l'article vie/[slug].html]
+   </html-output>
+4. Vie.html mis à jour avec la carte en tête de liste (si vie.html était fourni) :
+   <vie-update>
+   [HTML complet de vie.html mis à jour]
+   </vie-update>
+
+Réponds en français.`;
+}
+
+function buildNewEventSystemPrompt(evenementsHtml, photoUrls) {
+  const photoSection = photoUrls.length > 0
+    ? `\nPHOTOS UPLOADÉES (URLs à utiliser dans le HTML) :\n${photoUrls.map(p => `- ${p.file} → ${p.url}`).join('\n')}\n`
+    : '';
+
+  const evenementsSection = evenementsHtml
+    ? `\nHTML ACTUEL DE EVENEMENTS.HTML (pour y ajouter la carte du nouvel événement) :\n\`\`\`html\n${evenementsHtml}\n\`\`\`\n`
+    : '';
+
+  return `Tu es l'assistant de gestion du site des Microdoniens, une crèche parentale à Saint-Ouen.
+
+Le site est en HTML/CSS/JS pur. Design : police Fraunces (titres), DM Sans (texte), couleur terracotta #d96b3f, fond crème #faf8f4.
+
+MODE : Création d'un nouvel événement pour la section "Événements"
+
+STRUCTURE D'UN ÉVÉNEMENT (base à utiliser) :
+- Fichier : evenements/[slug-kebab-case].html
+- Utilise ../css/shared.css et ../js/nav.js (chemins relatifs depuis evenements/)
+- Breadcrumb : Accueil → Événements → TITRE DE L'ÉVÉNEMENT (liens vers ../index.html et ../evenements.html)
+- Nav : lien evenements.html avec class="active" (dans le dropdown "Autres pages")
+- Structure : nav, breadcrumb, article-tag (type d'événement), h1 (titre), article-meta (date + lieu), visual (emoji placeholder), article-body (texte)
+- Bouton retour : "← Retour aux Événements" pointant vers ../evenements.html
+- Miniature emoji si pas de photo : <div class="article-thumb thumb-COLOR">EMOJI</div>
+- Couleurs disponibles : thumb-orange, thumb-green, thumb-blue, thumb-yellow, thumb-pink, thumb-dark
+${photoSection}${evenementsSection}
+CARTE À AJOUTER DANS EVENEMENTS.HTML (structure d'une entrée existante dans #eventsGrid) :
+<div class="event-card" data-year="YYYY" data-href="evenements/SLUG.html" onclick="location.href=this.dataset.href">
+  <div class="event-thumb et-COLOR">EMOJI</div>
+  <div class="event-body">
+    <div class="event-tag tag-TYPE">TYPE</div>
+    <h3><a href="evenements/SLUG.html">TITRE</a></h3>
+    <div class="event-date">DATE LISIBLE</div>
+    <p>RÉSUMÉ COURT (2-3 phrases)</p>
+  </div>
+</div>
+
+Classes de couleur thumb : et-orange, et-green, et-blue, et-yellow, et-pink, et-dark
+Classes de tag : tag-fete, tag-sport, tag-solidarite, tag-culture, tag-vie
+
+RÈGLES DE SORTIE (respecte exactement ce format) :
+1. Explique brièvement ce que tu as créé (1-2 phrases)
+2. Indique le nom du fichier :
+   EVENT_FILE: evenements/[slug].html
+3. L'événement complet :
+   PREVIEW_READY
+   <html-output>
+   [HTML complet de evenements/[slug].html]
+   </html-output>
+4. Evenements.html mis à jour avec la carte en tête du grid (si evenements.html était fourni) :
+   <evenements-update>
+   [HTML complet de evenements.html mis à jour]
+   </evenements-update>
+
+Réponds en français.`;
+}
+
+function buildNewPublicationSystemPrompt(presseHtml, photoUrls) {
+  const photoSection = photoUrls.length > 0
+    ? `\nPHOTOS UPLOADÉES (URLs à utiliser dans le HTML) :\n${photoUrls.map(p => `- ${p.file} → ${p.url}`).join('\n')}\n`
+    : '';
+
+  const presseSection = presseHtml
+    ? `\nHTML ACTUEL DE PRESSE.HTML (pour y ajouter la carte de la nouvelle publication) :\n\`\`\`html\n${presseHtml}\n\`\`\`\n`
+    : '';
+
+  return `Tu es l'assistant de gestion du site des Microdoniens, une crèche parentale à Saint-Ouen.
+
+Le site est en HTML/CSS/JS pur. Design : police Fraunces (titres), DM Sans (texte), couleur terracotta #d96b3f, fond crème #faf8f4.
+
+MODE : Création d'une nouvelle publication pour la section "On parle de nous"
+
+STRUCTURE D'UNE PUBLICATION (base à utiliser) :
+- Fichier : presse/[slug-kebab-case].html
+- Utilise ../css/shared.css et ../js/nav.js (chemins relatifs depuis presse/)
+- Breadcrumb : Accueil → On parle de nous → TITRE (liens vers ../index.html et ../presse.html)
+- Nav : lien presse.html avec class="active" (dans le dropdown "Autres pages")
+- Structure : nav, breadcrumb, article-tag (type de média), source-label (nom du média), h1 (titre de l'article), article-meta (date + numéro), visual (image scannée ou emoji), source-box (encadré source), article-body (texte)
+- Bouton retour : "← Retour à la revue de presse" pointant vers ../presse.html
+- Types de tag disponibles : tag-presse (📰 Presse), tag-tv (📺 Télévision), tag-asso (🤝 Association / Presse spécialisée), tag-web (🌐 Web)
+- Image scannée : <img src="../images/presse/FICHIER.jpg" alt="..." class="press-scan" loading="lazy">
+- Paire d'images : <div class="press-scan-pair"><img ...><img ...></div>
+- Emoji placeholder si pas d'image : <div class="article-thumb thumb-COLOR">EMOJI</div>
+${photoSection}${presseSection}
+STYLES CSS NÉCESSAIRES DANS LA PAGE (copie depuis les autres pages presse/) :
+.article-hero { padding-top: calc(var(--nav-h) + 56px); ... }
+.press-scan { width: 100%; border-radius: var(--radius); display: block; box-shadow: var(--shadow); }
+.press-scan-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.source-box { background: white; border: 1.5px solid var(--border); border-radius: var(--radius); padding: 20px 24px; ... }
+/* Et tous les styles article-body, blockquote, article-back, footer, etc. */
+
+ENTRÉE À AJOUTER DANS PRESSE.HTML (.coverage-list dans la section #older-section) :
+<div class="coverage-item" onclick="location.href='presse/SLUG.html'">
+  <div class="cov-icon cov-COLOR">EMOJI</div>
+  <div>
+    <div class="cov-source">NOM DU MÉDIA</div>
+    <div class="cov-title">TITRE DE L'ARTICLE</div>
+    <div class="cov-date">DATE</div>
+  </div>
+  <div class="cov-badge badge-TYPE">TYPE</div>
+</div>
+
+Classes disponibles :
+- Icône couleur : cov-orange, cov-blue, cov-green, cov-yellow
+- Badge type : badge-presse, badge-tv, badge-asso, badge-web
+
+RÈGLES DE SORTIE (respecte exactement ce format) :
+1. Explique brièvement ce que tu as créé (1-2 phrases)
+2. Indique le nom du fichier :
+   PUBLICATION_FILE: presse/[slug].html
+3. La publication complète :
+   PREVIEW_READY
+   <html-output>
+   [HTML complet de presse/[slug].html]
+   </html-output>
+4. Presse.html mis à jour avec la nouvelle entrée dans la coverage-list (si presse.html était fourni) :
+   <presse-update>
+   [HTML complet de presse.html mis à jour]
+   </presse-update>
+
+Réponds en français.`;
+}
+
+function buildOpenInscriptionsSystemPrompt(inscriptionsHtml, indexHtml) {
+  const inscSection = inscriptionsHtml
+    ? `\nHTML ACTUEL DE INSCRIPTIONS.HTML :\n\`\`\`html\n${inscriptionsHtml}\n\`\`\`\n`
+    : '\n(HTML de inscriptions.html non disponible — génère une mise à jour cohérente avec le style du site.)\n';
+
+  const idxSection = indexHtml
+    ? `\nHTML ACTUEL DE INDEX.HTML :\n\`\`\`html\n${indexHtml}\n\`\`\`\n`
+    : '';
+
+  return `Tu es l'assistant de gestion du site des Microdoniens, une crèche parentale à Saint-Ouen.
+
+Le site est en HTML/CSS/JS pur. Design : police Fraunces (titres), DM Sans (texte), couleur terracotta #d96b3f, fond crème #faf8f4.
+
+MODE : Ouverture des inscriptions — mise à jour annuelle du site
+${inscSection}${idxSection}
+TON RÔLE :
+Tu dois collecter les informations nécessaires à la mise à jour des inscriptions, puis générer le HTML mis à jour pour deux fichiers : inscriptions.html et index.html.
+
+INFORMATIONS À COLLECTER (si pas encore toutes fournies, pose les questions manquantes) :
+1. Année scolaire visée (ex : 2027/2028)
+2. Date limite de naissance de l'enfant (ex : 31 mars 2027 — pour avoir 6 mois minimum en septembre)
+3. Date limite de dépôt des dossiers / ouverture des candidatures (ex : avant le 8 mars 2027)
+4. Date(s) des portes ouvertes (ex : 15 mars 2027)
+5. Date(s) des entretiens de recrutement collectifs (ex : 29 mars 2027)
+6. Date de l'entretien avec la responsable technique (ex : semaine du 5 avril — ou "même jour que les entretiens")
+7. Nombre de places disponibles : bébés (6 mois–1 an) / moyens (1–2 ans) / grands (2–3 ans)
+
+Une fois que tu as TOUTES ces informations, génère les deux fichiers mis à jour.
+
+CE QUE TU DOIS METTRE À JOUR DANS INSCRIPTIONS.HTML :
+- <title> → "Inscriptions YY/YY — Les Microdoniens"
+- <nav> et menu mobile → lien inscriptions actif avec label "Inscriptions YY/YY"
+- Breadcrumb → "Inscriptions YY/YY"
+- Eyebrow → "Rentrée septembre AAAA"
+- <h1> → "Inscriptions<br><em>YY/YY</em>"
+- Texte hero (hero-intro) → remplacer année et état (ouvertes ou fermées)
+- Bannière status → passer à status-open (point vert animé) avec texte "Inscriptions YY/YY ouvertes" + date limite dossier
+- Bouton CTA hero → "Candidater pour YY/YY →" pointant vers contact.html
+- Timeline (4 étapes) :
+  • Étape 1 (📝) : "Avant le [date limite dossier]" — Candidature en ligne
+  • Étape 2 (🏠) : "[date portes ouvertes]" — Journée portes ouvertes
+  • Étape 3 (🤝) : "[date entretiens]" — Entretiens de recrutement
+  • Étape 4 (👶) : Période d'adaptation (juillet–septembre, garder tel quel sauf si précisé)
+- Conditions → "Enfant né avant le [date limite naissance]"
+- FAQ :
+  • Réponse sur l'âge → mettre à jour la date limite de naissance et l'année
+  • Réponse sur les places → mettre à jour le nombre de places et l'année
+  • Réponse sur les dates → mettre à jour les mois/dates mentionnés
+- Section CTA bas de page → mettre à jour l'année
+
+CE QUE TU DOIS METTRE À JOUR DANS INDEX.HTML :
+- Bouton CTA hero "Inscriptions AAAA/AA →" → mettre à jour l'année, pointer vers inscriptions.html
+- Section inscriptions (.inscriptions-bg ou équivalent) → mettre à jour le titre de section, le texte d'intro, les boutons
+
+RÈGLES :
+- Si l'entretien avec la responsable technique est une information distincte, ajoute-le dans la FAQ ou en note dans la timeline étape 3
+- Les inscriptions sont ouvertes : utilise status-open (point vert) dans la bannière
+- Si tu n'as pas encore toutes les informations, pose les questions manquantes AVANT de générer le HTML
+- Quand tu génères, explique brièvement ce que tu as mis à jour (2-3 lignes)
+- Réponds en français, de façon concise et chaleureuse
+
+RÈGLES DE SORTIE (une fois toutes les infos collectées) :
+PREVIEW_READY
+<html-output>
+[HTML complet de inscriptions.html mis à jour]
+</html-output>
+<index-update>
+[HTML complet de index.html mis à jour]
+</index-update>
+
+Si l'utilisateur dit "publie", "c'est bon", "mets en ligne" ou similaire, réponds "PUBLISH_CONFIRMED".`;
+}
+
+function buildCloseInscriptionsSystemPrompt(inscriptionsHtml, indexHtml) {
+  const inscSection = inscriptionsHtml
+    ? `\nHTML ACTUEL DE INSCRIPTIONS.HTML :\n\`\`\`html\n${inscriptionsHtml}\n\`\`\`\n`
+    : '\n(HTML de inscriptions.html non disponible — génère une mise à jour cohérente avec le style du site.)\n';
+
+  const idxSection = indexHtml
+    ? `\nHTML ACTUEL DE INDEX.HTML :\n\`\`\`html\n${indexHtml}\n\`\`\`\n`
+    : '';
+
+  return `Tu es l'assistant de gestion du site des Microdoniens, une crèche parentale à Saint-Ouen.
+
+Le site est en HTML/CSS/JS pur. Design : police Fraunces (titres), DM Sans (texte), couleur terracotta #d96b3f, fond crème #faf8f4.
+
+MODE : Fermeture des inscriptions — mise à jour annuelle du site
+${inscSection}${idxSection}
+TON RÔLE :
+Tu dois collecter quelques informations puis mettre à jour inscriptions.html et index.html pour indiquer que les inscriptions sont désormais fermées.
+
+INFORMATIONS À COLLECTER (si pas encore fournies) :
+1. Année scolaire qui vient de fermer (ex : 2026/2027)
+2. Date de la prochaine session d'inscription (ex : mars 2027)
+3. Message optionnel : liste d'attente possible ? autre info pour les familles ?
+
+CE QUE TU DOIS METTRE À JOUR DANS INSCRIPTIONS.HTML :
+- Bannière status → passer à status-closed (point rouge) avec texte "Inscriptions [année] fermées" + "La prochaine session d'inscription ouvrira en [mois année]."
+- Texte hero (hero-intro) → indiquer que les inscriptions pour [année] sont fermées, orienter vers la prochaine session
+- Bouton CTA hero → "Nous contacter pour [prochaine année] →" pointant vers contact.html
+- Section CTA bas de page → mettre à jour le texte pour la prochaine session
+- Si message optionnel : l'intégrer dans le hero ou la FAQ selon le contenu
+
+CE QUE TU DOIS METTRE À JOUR DANS INDEX.HTML :
+- Section inscriptions → indiquer que les inscriptions sont fermées, mentionner la prochaine session
+- CTA de la section inscriptions → pointer vers contact.html et indiquer l'année prochaine
+
+RÈGLES :
+- Ne modifie PAS la timeline (les dates restent visibles comme référence pour les prochaines inscriptions)
+- Ne modifie PAS les conditions d'éligibilité ni l'engagement parental
+- Si tu n'as pas encore toutes les informations nécessaires, pose les questions avant de générer
+- Réponds en français, de façon concise et chaleureuse
+
+RÈGLES DE SORTIE (une fois toutes les infos collectées) :
+PREVIEW_READY
+<html-output>
+[HTML complet de inscriptions.html mis à jour]
+</html-output>
+<index-update>
+[HTML complet de index.html mis à jour]
+</index-update>
+
+Si l'utilisateur dit "publie", "c'est bon", "mets en ligne" ou similaire, réponds "PUBLISH_CONFIRMED".`;
+}
+
 // ── CONVERSATION UI ──
 function addUserMessage(text, files) {
   const conv = document.getElementById('conversation');
   const msg = document.createElement('div');
   msg.className = 'msg msg-user';
-  const filesHtml = files.length ? `<div style="font-size:11px;color:var(--text-dim);margin-top:4px;">${files.map(f=>`📎 ${f}`).join(' ')}</div>` : '';
+  const filesHtml = files.length
+    ? `<div style="font-size:11px;color:var(--text-dim);margin-top:4px;">${files.map(f => `📎 ${f}`).join(' ')}</div>`
+    : '';
   msg.innerHTML = `
     <div class="msg-avatar avatar-user">👤</div>
     <div class="msg-bubble bubble-user">${escHtml(text)}${filesHtml}</div>`;
@@ -902,7 +1699,6 @@ function addAiMessage(text) {
   const conv = document.getElementById('conversation');
   const msg = document.createElement('div');
   msg.className = 'msg';
-  // Simple markdown: **bold**, `code`, newlines
   const html = text
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
     .replace(/`([^`]+)`/g, '<code>$1</code>')
@@ -914,7 +1710,8 @@ function addAiMessage(text) {
   msg.scrollIntoView({ behavior: 'smooth', block: 'end' });
 }
 
-function showThinking() {
+function showThinkingLabel(label) {
+  hideThinking();
   const conv = document.getElementById('conversation');
   const el = document.createElement('div');
   el.className = 'msg';
@@ -922,7 +1719,7 @@ function showThinking() {
   el.innerHTML = `
     <div class="msg-avatar avatar-ai">🤖</div>
     <div class="thinking">
-      Claude réfléchit
+      ${escHtml(label)}
       <div class="thinking-dots"><span></span><span></span><span></span></div>
     </div>`;
   conv.appendChild(el);
@@ -935,17 +1732,70 @@ function hideThinking() {
 }
 
 // ── PREVIEW ──
+const SHARED_CSS = `*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --cream: #faf8f4; --warm-white: #ffffff; --charcoal: #1a1a1a;
+  --text: #2d2d2d; --text-muted: #717171; --border: #e4e0d8;
+  --terracotta: #d96b3f; --terracotta-light: #f5ede7; --terracotta-dark: #b8562e;
+  --sage: #7a9e7e; --sage-light: #edf3ee; --yellow: #f5c842;
+  --radius: 16px; --radius-sm: 8px;
+  --shadow: 0 2px 16px rgba(0,0,0,0.08); --nav-h: 0px;
+}
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text); -webkit-font-smoothing: antialiased; padding-top: 0 !important; }
+nav, .mobile-menu, footer { display: none !important; }
+.gallery { display: grid; gap: 12px; border-radius: var(--radius); overflow: hidden; }
+.gallery-2 { grid-template-columns: 1fr 1fr; }
+.gallery-3 { grid-template-columns: 1fr 1fr 1fr; }
+.gallery-4 { grid-template-columns: 1fr 1fr; }
+.gallery-featured { grid-template-columns: 2fr 1fr; }
+.gallery-featured .gallery-stack { display: grid; grid-template-rows: 1fr 1fr; gap: 12px; }
+.gallery img, .gallery .gallery-img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: var(--radius-sm); display: block; }
+@media (max-width: 600px) {
+  .gallery-3 { grid-template-columns: 1fr 1fr; }
+  .gallery-featured { grid-template-columns: 1fr; }
+}`;
+
+function resolvePreviewHtml(html) {
+  // Remove nav, mobile menu, footer — not needed for preview
+  let out = html
+    .replace(/<nav[\s\S]*?<\/nav>/i, '')
+    .replace(/<div[^>]+class="mobile-menu"[\s\S]*?<\/div>/i, '')
+    .replace(/<footer[\s\S]*?<\/footer>/i, '');
+
+  // Remove external stylesheet and nav.js script links
+  out = out
+    .replace(/<link[^>]+shared\.css[^>]*>/gi, '')
+    .replace(/<script[^>]+nav\.js[^>]*>.*?<\/script>/gi, '');
+
+  // Inject shared CSS inline + Google Fonts
+  const fonts = '<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">';
+  const style = `<style>${SHARED_CSS}</style>`;
+  out = out.replace(/<\/head>/i, `${fonts}${style}</head>`);
+
+  // Replace remaining relative image paths with Netlify URLs if available
+  const base = (state.config.siteUrl || '').replace(/\/$/, '');
+  if (base) {
+    out = out.replace(/src="\.\.\/images\//g, `src="${base}/images/`);
+  }
+
+  return out;
+}
+
 function showPreview(html, filename) {
   const conv = document.getElementById('conversation');
   const card = document.createElement('div');
   card.className = 'preview-card';
-  const blob = new Blob([html], { type: 'text/html' });
+  const previewHtml = resolvePreviewHtml(html);
+  const blob = new Blob([previewHtml], { type: 'text/html' });
   const url = URL.createObjectURL(blob);
+  const isNew = state.isNewArticle || state.isNewEvent;
+  const publishLabel = isNew ? '🚀 Publier l\'article' : '🚀 Publier sur le site';
   card.innerHTML = `
     <div class="preview-card-bar">
       <div class="preview-card-title">
         <div class="dot"></div>
-        Prévisualisation — ${filename}
+        Prévisualisation — ${escHtml(filename)}
       </div>
       <div class="preview-card-actions">
         <a href="${url}" target="_blank" class="btn btn-ghost" style="font-size:12px;">Ouvrir ↗</a>
@@ -956,7 +1806,7 @@ function showPreview(html, filename) {
       <p>Tu es satisfait·e ? <strong>Dis-le à Claude</strong> ou clique sur Publier.</p>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-ghost" onclick="this.closest('.preview-card').remove()">Annuler</button>
-        <button class="btn btn-green" onclick="confirmPublish('${filename}')">🚀 Publier sur le site</button>
+        <button class="btn btn-green" onclick="confirmPublish('${escHtml(filename)}')">${publishLabel}</button>
       </div>
     </div>`;
   conv.appendChild(card);
@@ -969,84 +1819,126 @@ function confirmPublish(filename) {
     showView('settings', null);
     return;
   }
-  publishToGitHub(filename, state.pendingHtml);
+  publishAll();
 }
 
 // ── GITHUB PUBLISH ──
-async function publishToGitHub(filename, html) {
-  if (!state.config.githubToken || !state.config.githubRepo) {
-    showToast('Token GitHub manquant — va dans les paramètres', 'err');
-    return;
-  }
+async function pushFileToGitHub(filename, html, commitMsg) {
+  const { githubToken, githubRepo, githubBranch } = state.config;
+  const branch = githubBranch || 'main';
+  const headers = {
+    'Authorization': `token ${githubToken}`,
+    'Content-Type': 'application/json',
+    'Accept': 'application/vnd.github.v3+json',
+  };
 
-  showToast('Publication en cours...', 'info');
-
+  // Get current SHA (needed for updates)
+  let sha = null;
   try {
-    const repo = state.config.githubRepo;
-    const branch = state.config.githubBranch || 'main';
-    const token = state.config.githubToken;
-    const headers = {
-      'Authorization': `token ${token}`,
-      'Content-Type': 'application/json',
-      'Accept': 'application/vnd.github.v3+json',
-    };
+    const getRes = await fetch(`https://api.github.com/repos/${githubRepo}/contents/${filename}?ref=${branch}`, { headers });
+    if (getRes.ok) sha = (await getRes.json()).sha;
+  } catch(e) {}
 
-    // Get current file SHA (needed for update)
-    let sha = null;
-    try {
-      const getRes = await fetch(`https://api.github.com/repos/${repo}/contents/${filename}?ref=${branch}`, { headers });
-      if (getRes.ok) {
-        const data = await getRes.json();
-        sha = data.sha;
-      }
-    } catch(e) {}
+  const content = btoa(unescape(encodeURIComponent(html)));
+  const putRes = await fetch(`https://api.github.com/repos/${githubRepo}/contents/${filename}`, {
+    method: 'PUT', headers,
+    body: JSON.stringify({ message: commitMsg, content, branch, ...(sha ? { sha } : {}) }),
+  });
 
-    // Encode content as base64
-    const content = btoa(unescape(encodeURIComponent(html)));
+  if (!putRes.ok) {
+    const err = await putRes.json();
+    throw new Error(err.message);
+  }
+}
 
-    const body = {
-      message: `✏️ Mise à jour ${filename} via tableau de bord`,
-      content,
-      branch,
-      ...(sha ? { sha } : {}),
-    };
+async function publishAll() {
+  showToast('Publication en cours…', 'info');
+  try {
+    // Push main file
+    await pushFileToGitHub(
+      state.pendingFile,
+      state.pendingHtml,
+      `✏️ Mise à jour ${state.pendingFile} via tableau de bord`
+    );
 
-    const putRes = await fetch(`https://api.github.com/repos/${repo}/contents/${filename}`, {
-      method: 'PUT', headers,
-      body: JSON.stringify(body),
-    });
-
-    if (!putRes.ok) {
-      const err = await putRes.json();
-      throw new Error(err.message);
+    // Push vie.html update if new article
+    if (state.pendingVieHtml) {
+      await pushFileToGitHub(
+        'vie.html',
+        state.pendingVieHtml,
+        `📰 Ajout article "${state.pendingFile}" dans vie.html`
+      );
     }
 
-    const now = new Date().toLocaleString('fr-FR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+    // Push evenements.html update if new event
+    if (state.pendingEvenementsHtml) {
+      await pushFileToGitHub(
+        'evenements.html',
+        state.pendingEvenementsHtml,
+        `🎉 Ajout événement "${state.pendingFile}" dans evenements.html`
+      );
+    }
+
+    // Push presse.html update if new publication
+    if (state.pendingPresseHtml) {
+      await pushFileToGitHub(
+        'presse.html',
+        state.pendingPresseHtml,
+        `📰 Ajout publication "${state.pendingFile}" dans presse.html`
+      );
+    }
+
+    // Push index.html update if opening inscriptions
+    if (state.pendingIndexHtml) {
+      await pushFileToGitHub(
+        'index.html',
+        state.pendingIndexHtml,
+        `🎊 Ouverture inscriptions — mise à jour index.html`
+      );
+    }
+
+    const now = new Date().toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
     localStorage.setItem('microd_lastupdate', now);
     document.getElementById('lastUpdate').textContent = now;
 
-    showToast(`✓ ${filename} publié ! Site live dans ~30 secondes.`, 'ok');
-    addAiMessage(`🚀 **Publié !** \`${filename}\` est maintenant en ligne. Le site se mettra à jour dans environ 30 secondes.\n\nTu peux vérifier sur ${state.config.siteUrl || 'ton URL Netlify'}.`);
+    const hasIndexUpdate = state.pendingVieHtml || state.pendingEvenementsHtml || state.pendingPresseHtml || state.pendingIndexHtml;
+    const label = state.pendingIndexHtml
+      ? `inscriptions.html et index.html publiés ! Site live dans ~30 secondes.`
+      : hasIndexUpdate
+        ? `Article publié et ajouté à la liste ! Site live dans ~30 secondes.`
+        : `\`${state.pendingFile}\` publié ! Site live dans ~30 secondes.`;
+
+    showToast(`✓ ${state.pendingIndexHtml ? 'Inscriptions mises à jour !' : hasIndexUpdate ? 'Publié et ajouté à la liste !' : state.pendingFile + ' publié !'}`, 'ok');
+    addAiMessage(`🚀 **Publié !** ${label}\n\nTu peux vérifier sur ${state.config.siteUrl || 'ton URL Netlify'}.`);
+
     state.pendingHtml = null;
     state.pendingFile = null;
+    state.pendingVieHtml = null;
+    state.pendingEvenementsHtml = null;
+    state.pendingPresseHtml = null;
+    state.pendingIndexHtml = null;
 
-  } catch (err) {
+  } catch(err) {
     showToast('Erreur publication : ' + err.message, 'err');
-    addAiMessage(`⚠️ Erreur lors de la publication : **${err.message}**\n\nVérifie que ton token GitHub a bien les droits d'écriture sur le repo.`);
+    addAiMessage(`⚠️ Erreur lors de la publication : **${err.message}**\n\nVérifie que ton token GitHub a les droits d'écriture sur le repo.`);
   }
 }
 
 // ── SETTINGS ──
 function saveSettings() {
+  const newPassword = document.getElementById('adminPassword').value.trim();
   state.config = {
+    anthropicKey: document.getElementById('anthropicKey').value.trim(),
     githubToken: document.getElementById('githubToken').value.trim(),
     githubRepo: document.getElementById('githubRepo').value.trim(),
     githubBranch: document.getElementById('githubBranch').value.trim() || 'main',
     siteUrl: document.getElementById('siteUrl').value.trim(),
+    adminPassword: newPassword || state.config.adminPassword || 'microdoniens',
   };
   localStorage.setItem('microd_config', JSON.stringify(state.config));
   updateStatusDot();
   updateSiteLink();
+  document.getElementById('onboardingBanner').style.display = 'none';
   showToast('Configuration sauvegardée ✓', 'ok');
 }
 
@@ -1060,6 +1952,7 @@ function showToast(msg, type) {
 
 // ── UTILS ──
 function escHtml(str) {
+  if (!str) return '';
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
