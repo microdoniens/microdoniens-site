@@ -782,6 +782,8 @@ const state = {
   pendingEvenementsHtml: null,
   pendingPresseHtml: null,
   pendingIndexHtml: null,
+  pendingListCard: null,
+  pendingListType: null,
   currentPageHtml: null,
   _indexHtmlForContext: null,
   isNewArticle: false,
@@ -905,6 +907,8 @@ function resetEditor() {
   state.pendingEvenementsHtml = null;
   state.pendingPresseHtml = null;
   state.pendingIndexHtml = null;
+  state.pendingListCard = null;
+  state.pendingListType = null;
   state.currentPageHtml = null;
   state._indexHtmlForContext = null;
   state.isNewArticle = false;
@@ -1183,10 +1187,14 @@ async function sendPrompt() {
     let vieHtml = '';
     let evenementsHtml = '';
     let presseHtml = '';
+    let exampleHtml = '';
     if (state.isNewArticle && state.config.githubToken) {
       showThinkingLabel('Chargement des données du site…');
       try {
-        vieHtml = await fetchFileFromGitHub('vie.html');
+        [vieHtml, exampleHtml] = await Promise.all([
+          fetchFileFromGitHub('vie.html'),
+          fetchFileFromGitHub('vie/sortie-mediatheque.html').catch(() => ''),
+        ]);
       } catch(e) {
         // non-blocking
       }
@@ -1195,7 +1203,10 @@ async function sendPrompt() {
     if (state.isNewEvent && state.config.githubToken) {
       showThinkingLabel('Chargement des données du site…');
       try {
-        evenementsHtml = await fetchFileFromGitHub('evenements.html');
+        [evenementsHtml, exampleHtml] = await Promise.all([
+          fetchFileFromGitHub('evenements.html'),
+          fetchFileFromGitHub('evenements/fresque-collective.html').catch(() => ''),
+        ]);
       } catch(e) {
         // non-blocking
       }
@@ -1204,7 +1215,10 @@ async function sendPrompt() {
     if (state.isNewPublication && state.config.githubToken) {
       showThinkingLabel('Chargement des données du site…');
       try {
-        presseHtml = await fetchFileFromGitHub('presse.html');
+        [presseHtml, exampleHtml] = await Promise.all([
+          fetchFileFromGitHub('presse.html'),
+          fetchFileFromGitHub('presse/parisien-2015.html').catch(() => ''),
+        ]);
       } catch(e) {
         // non-blocking
       }
@@ -1218,11 +1232,11 @@ async function sendPrompt() {
     let systemPrompt = '';
 
     if (state.isNewArticle) {
-      systemPrompt = buildNewArticleSystemPrompt(vieHtml, photoUrls);
+      systemPrompt = buildNewArticleSystemPrompt(vieHtml, photoUrls, exampleHtml);
     } else if (state.isNewEvent) {
-      systemPrompt = buildNewEventSystemPrompt(evenementsHtml, photoUrls);
+      systemPrompt = buildNewEventSystemPrompt(evenementsHtml, photoUrls, exampleHtml);
     } else if (state.isNewPublication) {
-      systemPrompt = buildNewPublicationSystemPrompt(presseHtml, photoUrls);
+      systemPrompt = buildNewPublicationSystemPrompt(presseHtml, photoUrls, exampleHtml);
     } else if (state.isOpeningInscriptions) {
       systemPrompt = buildOpenInscriptionsSystemPrompt(state.currentPageHtml, state._indexHtmlForContext);
     } else if (state.isClosingInscriptions) {
@@ -1290,6 +1304,7 @@ async function sendPrompt() {
 
     // 7. Parse response
     const htmlMatch = reply.match(/<html-output>([\s\S]*?)<\/html-output>/);
+    const listCardMatch = reply.match(/<list-card>([\s\S]*?)<\/list-card>/);
     const vieUpdateMatch = reply.match(/<vie-update>([\s\S]*?)<\/vie-update>/);
     const evenementsUpdateMatch = reply.match(/<evenements-update>([\s\S]*?)<\/evenements-update>/);
     const presseUpdateMatch = reply.match(/<presse-update>([\s\S]*?)<\/presse-update>/);
@@ -1300,6 +1315,7 @@ async function sendPrompt() {
 
     const cleanReply = reply
       .replace(/<html-output>[\s\S]*?<\/html-output>/, '')
+      .replace(/<list-card>[\s\S]*?<\/list-card>/, '')
       .replace(/<vie-update>[\s\S]*?<\/vie-update>/, '')
       .replace(/<evenements-update>[\s\S]*?<\/evenements-update>/, '')
       .replace(/<presse-update>[\s\S]*?<\/presse-update>/, '')
@@ -1324,6 +1340,11 @@ async function sendPrompt() {
       state.pendingEvenementsHtml = evenementsUpdateMatch ? evenementsUpdateMatch[1].trim() : null;
       state.pendingPresseHtml = presseUpdateMatch ? presseUpdateMatch[1].trim() : null;
       state.pendingIndexHtml = indexUpdateMatch ? indexUpdateMatch[1].trim() : null;
+      state.pendingListCard = listCardMatch ? listCardMatch[1].trim() : null;
+      state.pendingListType = state.isNewArticle ? 'vie'
+        : state.isNewEvent ? 'evenements'
+        : state.isNewPublication ? 'presse'
+        : null;
 
       if (state.isNewArticle && articleFileMatch) {
         state.pendingFile = articleFileMatch[1].trim();
@@ -1394,13 +1415,20 @@ RÈGLES :
 Si l'utilisateur dit "publie", "c'est bon", "mets en ligne" ou similaire, réponds "PUBLISH_CONFIRMED".`;
 }
 
-function buildNewArticleSystemPrompt(vieHtml, photoUrls) {
+function buildNewArticleSystemPrompt(vieHtml, photoUrls, exampleHtml) {
   const photoSection = photoUrls.length > 0
     ? `\nPHOTOS UPLOADÉES (URLs à utiliser dans le HTML) :\n${photoUrls.map(p => `- ${p.file} → ${p.url}`).join('\n')}\n`
     : '';
 
-  const vieSection = vieHtml
-    ? `\nHTML ACTUEL DE VIE.HTML (pour y ajouter la carte du nouvel article) :\n\`\`\`html\n${vieHtml}\n\`\`\`\n`
+  // Give Claude a couple of real cards from vie.html as the card model
+  const cardExamples = (vieHtml.match(/<article class="activity-post"[\s\S]*?<\/article>/gi) || [])
+    .slice(0, 2).join('\n');
+  const cardSection = cardExamples
+    ? `\nEXEMPLES RÉELS DE CARTES (copie EXACTEMENT cette structure pour la carte) :\n\`\`\`html\n${cardExamples}\n\`\`\`\n`
+    : '';
+
+  const exampleSection = exampleHtml
+    ? `\nEXEMPLE COMPLET D'UNE PAGE ARTICLE EXISTANTE (copie EXACTEMENT cette structure, ce HEAD, cette nav, ce breadcrumb, ces styles — change seulement le contenu) :\n\`\`\`html\n${exampleHtml}\n\`\`\`\n`
     : '';
 
   return `Tu es l'assistant de gestion du site des Microdoniens, une crèche parentale à Saint-Ouen.
@@ -1409,52 +1437,46 @@ Le site est en HTML/CSS/JS pur. Design : police Fraunces (titres), DM Sans (text
 
 MODE : Création d'un nouvel article pour la section "Vie de la crèche"
 
-STRUCTURE D'UN ARTICLE (base à utiliser) :
-- Fichier : vie/[slug-kebab-case].html
-- Utilise ../css/shared.css et ../js/nav.js
-- Structure : nav, breadcrumb, titre (h1 Fraunces), galerie photos, corps de l'article
+STRUCTURE D'UN ARTICLE :
+- Fichier : vie/[slug-kebab-case].html (chemins relatifs ../css/shared.css, ../js/nav.js, ../images/…)
+- Reproduis EXACTEMENT la structure de l'exemple complet ci-dessous (head, nav, breadcrumb, galerie, corps, footer).
 - Classes galerie disponibles : gallery-2, gallery-3, gallery-4, gallery-featured
-- Miniature de secours si pas de photo : <div class="post-thumb thumb-orange">EMOJI</div>
-${photoSection}${vieSection}
-CARTE À AJOUTER DANS VIE.HTML (structure d'une entrée existante) :
-<article class="activity-post" data-category="CATEGORIE">
-  <div class="post-thumb thumb-COLOR">EMOJI</div>   <!-- ou <img> si photo disponible -->
-  <div class="post-body">
-    <div class="post-tag">EMOJI CATÉGORIE</div>
-    <a href="vie/SLUG.html"><h2>TITRE</h2></a>
-    <p>RÉSUMÉ COURT (2-3 phrases)</p>
-    <div class="post-meta"><span>DATE</span></div>
-  </div>
-</article>
-
-Catégories disponibles : Musique, Créativité, Nature, Motricité, Culture, Découvertes
-
-RÈGLES DE SORTIE — OBLIGATOIRE, respecte exactement ce format sans exception :
-1. Explique brièvement ce que tu as créé (1-2 phrases)
-2. Indique le nom du fichier :
+- Catégories disponibles : Musique, Créativité, Nature, Motricité, Culture, Découvertes
+${photoSection}${exampleSection}${cardSection}
+RÈGLES DE SORTIE — respecte EXACTEMENT ce format, sans exception :
+1. Une explication très courte (1-2 phrases max, AUCUN HTML dans le texte).
+2. Le nom du fichier :
    ARTICLE_FILE: vie/[slug].html
-3. L'article complet :
+3. La page complète de l'article :
    PREVIEW_READY
    <html-output>
-   [HTML complet de l'article vie/[slug].html]
+   [HTML complet de vie/[slug].html]
    </html-output>
-4. ⚠️ OBLIGATOIRE — vie.html mis à jour avec la carte du nouvel article insérée EN TÊTE de liste (juste après l'ouverture du conteneur des articles). Tu DOIS toujours inclure ce bloc, même si vie.html n'était pas fourni (génère une entrée cohérente) :
-   <vie-update>
-   [HTML complet de vie.html mis à jour]
-   </vie-update>
+4. ⚠️ OBLIGATOIRE — UNIQUEMENT la carte (l'élément <article class="activity-post">…</article>) à ajouter, avec le bon lien vers vie/[slug].html. N'inclus SURTOUT PAS toute la page vie.html, seulement la carte :
+   <list-card>
+   <article class="activity-post" data-category="...">
+     ...
+   </article>
+   </list-card>
 
-Ne termine JAMAIS ta réponse sans le bloc <vie-update>. C'est indispensable pour que l'article apparaisse sur le site.
-⚠️ N'écris JAMAIS de HTML brut dans ton texte de réponse. Tout le HTML doit être UNIQUEMENT dans les balises <html-output> et <vie-update>. Ton texte d'explication doit tenir en 1-2 phrases maximum.
+Ne termine JAMAIS ta réponse sans le bloc <list-card>. C'est indispensable pour que l'article apparaisse dans la liste.
+⚠️ N'écris JAMAIS de HTML brut dans ton texte de réponse — tout le HTML va UNIQUEMENT dans <html-output> et <list-card>.
 Réponds en français.`;
 }
 
-function buildNewEventSystemPrompt(evenementsHtml, photoUrls) {
+function buildNewEventSystemPrompt(evenementsHtml, photoUrls, exampleHtml) {
   const photoSection = photoUrls.length > 0
     ? `\nPHOTOS UPLOADÉES (URLs à utiliser dans le HTML) :\n${photoUrls.map(p => `- ${p.file} → ${p.url}`).join('\n')}\n`
     : '';
 
-  const evenementsSection = evenementsHtml
-    ? `\nHTML ACTUEL DE EVENEMENTS.HTML (pour y ajouter la carte du nouvel événement) :\n\`\`\`html\n${evenementsHtml}\n\`\`\`\n`
+  const cardExamples = (evenementsHtml.match(/<div class="event-card[\s\S]*?<\/div>\s*<\/div>/gi) || [])
+    .slice(0, 2).join('\n');
+  const cardSection = cardExamples
+    ? `\nEXEMPLES RÉELS DE CARTES (copie EXACTEMENT cette structure pour la carte) :\n\`\`\`html\n${cardExamples}\n\`\`\`\n`
+    : '';
+
+  const exampleSection = exampleHtml
+    ? `\nEXEMPLE COMPLET D'UNE PAGE ÉVÉNEMENT EXISTANTE (copie EXACTEMENT cette structure, ce HEAD, cette nav, ce breadcrumb, ces styles — change seulement le contenu) :\n\`\`\`html\n${exampleHtml}\n\`\`\`\n`
     : '';
 
   return `Tu es l'assistant de gestion du site des Microdoniens, une crèche parentale à Saint-Ouen.
@@ -1463,56 +1485,46 @@ Le site est en HTML/CSS/JS pur. Design : police Fraunces (titres), DM Sans (text
 
 MODE : Création d'un nouvel événement pour la section "Événements"
 
-STRUCTURE D'UN ÉVÉNEMENT (base à utiliser) :
-- Fichier : evenements/[slug-kebab-case].html
-- Utilise ../css/shared.css et ../js/nav.js (chemins relatifs depuis evenements/)
-- Breadcrumb : Accueil → Événements → TITRE DE L'ÉVÉNEMENT (liens vers ../index.html et ../evenements.html)
-- Nav : lien evenements.html avec class="active" (dans le dropdown "Autres pages")
-- Structure : nav, breadcrumb, article-tag (type d'événement), h1 (titre), article-meta (date + lieu), visual (emoji placeholder), article-body (texte)
-- Bouton retour : "← Retour aux Événements" pointant vers ../evenements.html
-- Miniature emoji si pas de photo : <div class="article-thumb thumb-COLOR">EMOJI</div>
-- Couleurs disponibles : thumb-orange, thumb-green, thumb-blue, thumb-yellow, thumb-pink, thumb-dark
-${photoSection}${evenementsSection}
-CARTE À AJOUTER DANS EVENEMENTS.HTML (structure d'une entrée existante dans #eventsGrid) :
-<div class="event-card" data-year="YYYY" data-href="evenements/SLUG.html" onclick="location.href=this.dataset.href">
-  <div class="event-thumb et-COLOR">EMOJI</div>
-  <div class="event-body">
-    <div class="event-tag tag-TYPE">TYPE</div>
-    <h3><a href="evenements/SLUG.html">TITRE</a></h3>
-    <div class="event-date">DATE LISIBLE</div>
-    <p>RÉSUMÉ COURT (2-3 phrases)</p>
-  </div>
-</div>
-
-Classes de couleur thumb : et-orange, et-green, et-blue, et-yellow, et-pink, et-dark
-Classes de tag : tag-fete, tag-sport, tag-solidarite, tag-culture, tag-vie
-
-RÈGLES DE SORTIE — OBLIGATOIRE, respecte exactement ce format sans exception :
-1. Explique brièvement ce que tu as créé (1-2 phrases)
-2. Indique le nom du fichier :
+STRUCTURE D'UN ÉVÉNEMENT :
+- Fichier : evenements/[slug-kebab-case].html (chemins relatifs ../css/shared.css, ../js/nav.js, ../images/…)
+- Reproduis EXACTEMENT la structure de l'exemple complet ci-dessous.
+- Couleurs thumb : et-orange, et-green, et-blue, et-yellow, et-pink, et-dark
+- Classes de tag : tag-fete, tag-sport, tag-solidarite, tag-culture, tag-vie
+${photoSection}${exampleSection}${cardSection}
+RÈGLES DE SORTIE — respecte EXACTEMENT ce format, sans exception :
+1. Une explication très courte (1-2 phrases max, AUCUN HTML dans le texte).
+2. Le nom du fichier :
    EVENT_FILE: evenements/[slug].html
-3. L'événement complet :
+3. La page complète de l'événement :
    PREVIEW_READY
    <html-output>
    [HTML complet de evenements/[slug].html]
    </html-output>
-4. ⚠️ OBLIGATOIRE — evenements.html mis à jour avec la carte du nouvel événement insérée EN TÊTE du grid (#eventsGrid). Tu DOIS toujours inclure ce bloc, même si evenements.html n'était pas fourni (génère une entrée cohérente) :
-   <evenements-update>
-   [HTML complet de evenements.html mis à jour]
-   </evenements-update>
+4. ⚠️ OBLIGATOIRE — UNIQUEMENT la carte (l'élément <div class="event-card">…</div>) à ajouter, avec le bon lien vers evenements/[slug].html. N'inclus SURTOUT PAS toute la page evenements.html, seulement la carte :
+   <list-card>
+   <div class="event-card" data-year="..." data-href="evenements/[slug].html" onclick="location.href=this.dataset.href">
+     ...
+   </div>
+   </list-card>
 
-Ne termine JAMAIS ta réponse sans le bloc <evenements-update>. C'est indispensable pour que l'événement apparaisse sur le site.
-⚠️ N'écris JAMAIS de HTML brut dans ton texte de réponse. Tout le HTML doit être UNIQUEMENT dans les balises <html-output> et <evenements-update>. Ton texte d'explication doit tenir en 1-2 phrases maximum.
+Ne termine JAMAIS ta réponse sans le bloc <list-card>. C'est indispensable pour que l'événement apparaisse dans la liste.
+⚠️ N'écris JAMAIS de HTML brut dans ton texte de réponse — tout le HTML va UNIQUEMENT dans <html-output> et <list-card>.
 Réponds en français.`;
 }
 
-function buildNewPublicationSystemPrompt(presseHtml, photoUrls) {
+function buildNewPublicationSystemPrompt(presseHtml, photoUrls, exampleHtml) {
   const photoSection = photoUrls.length > 0
     ? `\nPHOTOS UPLOADÉES (URLs à utiliser dans le HTML) :\n${photoUrls.map(p => `- ${p.file} → ${p.url}`).join('\n')}\n`
     : '';
 
-  const presseSection = presseHtml
-    ? `\nHTML ACTUEL DE PRESSE.HTML (pour y ajouter la carte de la nouvelle publication) :\n\`\`\`html\n${presseHtml}\n\`\`\`\n`
+  const cardExamples = (presseHtml.match(/<div class="coverage-item"[\s\S]*?<\/div>\s*<\/div>/gi) || [])
+    .slice(0, 2).join('\n');
+  const cardSection = cardExamples
+    ? `\nEXEMPLES RÉELS D'ENTRÉES (copie EXACTEMENT cette structure pour l'entrée coverage-item) :\n\`\`\`html\n${cardExamples}\n\`\`\`\n`
+    : '';
+
+  const exampleSection = exampleHtml
+    ? `\nEXEMPLE COMPLET D'UNE PAGE PRESSE EXISTANTE (copie EXACTEMENT cette structure, ce HEAD, cette nav, ce breadcrumb, ces styles — change seulement le contenu) :\n\`\`\`html\n${exampleHtml}\n\`\`\`\n`
     : '';
 
   return `Tu es l'assistant de gestion du site des Microdoniens, une crèche parentale à Saint-Ouen.
@@ -1521,56 +1533,31 @@ Le site est en HTML/CSS/JS pur. Design : police Fraunces (titres), DM Sans (text
 
 MODE : Création d'une nouvelle publication pour la section "On parle de nous"
 
-STRUCTURE D'UNE PUBLICATION (base à utiliser) :
-- Fichier : presse/[slug-kebab-case].html
-- Utilise ../css/shared.css et ../js/nav.js (chemins relatifs depuis presse/)
-- Breadcrumb : Accueil → On parle de nous → TITRE (liens vers ../index.html et ../presse.html)
-- Nav : lien presse.html avec class="active" (dans le dropdown "Autres pages")
-- Structure : nav, breadcrumb, article-tag (type de média), source-label (nom du média), h1 (titre de l'article), article-meta (date + numéro), visual (image scannée ou emoji), source-box (encadré source), article-body (texte)
-- Bouton retour : "← Retour à la revue de presse" pointant vers ../presse.html
-- Types de tag disponibles : tag-presse (📰 Presse), tag-tv (📺 Télévision), tag-asso (🤝 Association / Presse spécialisée), tag-web (🌐 Web)
+STRUCTURE D'UNE PUBLICATION :
+- Fichier : presse/[slug-kebab-case].html (chemins relatifs ../css/shared.css, ../js/nav.js, ../images/…)
+- Reproduis EXACTEMENT la structure de l'exemple complet ci-dessous (head, styles, nav, breadcrumb, source-box, corps, footer).
+- Types de tag : tag-presse (📰 Presse), tag-tv (📺 Télévision), tag-asso (🤝), tag-web (🌐)
 - Image scannée : <img src="../images/presse/FICHIER.jpg" alt="..." class="press-scan" loading="lazy">
-- Paire d'images : <div class="press-scan-pair"><img ...><img ...></div>
-- Emoji placeholder si pas d'image : <div class="article-thumb thumb-COLOR">EMOJI</div>
-${photoSection}${presseSection}
-STYLES CSS NÉCESSAIRES DANS LA PAGE (copie depuis les autres pages presse/) :
-.article-hero { padding-top: calc(var(--nav-h) + 56px); ... }
-.press-scan { width: 100%; border-radius: var(--radius); display: block; box-shadow: var(--shadow); }
-.press-scan-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.source-box { background: white; border: 1.5px solid var(--border); border-radius: var(--radius); padding: 20px 24px; ... }
-/* Et tous les styles article-body, blockquote, article-back, footer, etc. */
-
-ENTRÉE À AJOUTER DANS PRESSE.HTML (.coverage-list dans la section #older-section) :
-<div class="coverage-item" onclick="location.href='presse/SLUG.html'">
-  <div class="cov-icon cov-COLOR">EMOJI</div>
-  <div>
-    <div class="cov-source">NOM DU MÉDIA</div>
-    <div class="cov-title">TITRE DE L'ARTICLE</div>
-    <div class="cov-date">DATE</div>
-  </div>
-  <div class="cov-badge badge-TYPE">TYPE</div>
-</div>
-
-Classes disponibles :
-- Icône couleur : cov-orange, cov-blue, cov-green, cov-yellow
-- Badge type : badge-presse, badge-tv, badge-asso, badge-web
-
-RÈGLES DE SORTIE — OBLIGATOIRE, respecte exactement ce format sans exception :
-1. Explique brièvement ce que tu as créé (1-2 phrases)
-2. Indique le nom du fichier :
+- Entrée coverage-item : icône cov-orange/cov-blue/cov-green/cov-yellow, badge badge-presse/badge-tv/badge-asso/badge-web
+${photoSection}${exampleSection}${cardSection}
+RÈGLES DE SORTIE — respecte EXACTEMENT ce format, sans exception :
+1. Une explication très courte (1-2 phrases max, AUCUN HTML dans le texte).
+2. Le nom du fichier :
    PUBLICATION_FILE: presse/[slug].html
-3. La publication complète :
+3. La page complète de la publication :
    PREVIEW_READY
    <html-output>
    [HTML complet de presse/[slug].html]
    </html-output>
-4. ⚠️ OBLIGATOIRE — presse.html mis à jour avec la nouvelle entrée insérée EN TÊTE de la coverage-list. Tu DOIS toujours inclure ce bloc, même si presse.html n'était pas fourni (génère une entrée cohérente) :
-   <presse-update>
-   [HTML complet de presse.html mis à jour]
-   </presse-update>
+4. ⚠️ OBLIGATOIRE — UNIQUEMENT l'entrée (l'élément <div class="coverage-item">…</div>) à ajouter, avec le bon lien vers presse/[slug].html. N'inclus SURTOUT PAS toute la page presse.html, seulement l'entrée :
+   <list-card>
+   <div class="coverage-item" onclick="location.href='presse/[slug].html'">
+     ...
+   </div>
+   </list-card>
 
-Ne termine JAMAIS ta réponse sans le bloc <presse-update>. C'est indispensable pour que la publication apparaisse sur le site.
-⚠️ N'écris JAMAIS de HTML brut dans ton texte de réponse. Tout le HTML doit être UNIQUEMENT dans les balises <html-output> et <presse-update>. Ton texte d'explication doit tenir en 1-2 phrases maximum.
+Ne termine JAMAIS ta réponse sans le bloc <list-card>. C'est indispensable pour que la publication apparaisse dans la liste.
+⚠️ N'écris JAMAIS de HTML brut dans ton texte de réponse — tout le HTML va UNIQUEMENT dans <html-output> et <list-card>.
 Réponds en français.`;
 }
 
@@ -1811,9 +1798,18 @@ function showPreview(html, filename) {
   const isNew = state.isNewArticle || state.isNewEvent;
   const publishLabel = isNew ? '🚀 Publier l\'article' : '🚀 Publier sur le site';
   card.innerHTML = `
+    <div class="preview-card-bar">
+      <div class="preview-card-title">
+        <div class="dot"></div>
+        Prévisualisation — ${escHtml(filename)}
+      </div>
+      <div class="preview-card-actions">
+        <a href="${url}" target="_blank" class="btn btn-ghost" style="font-size:12px;">Ouvrir ↗</a>
+      </div>
+    </div>
     <iframe class="preview-iframe" src="${url}"></iframe>
     <div class="publish-bar">
-      <p><strong>${escHtml(filename)}</strong></p>
+      <p>Tu es satisfait·e ? <strong>Dis-le à Claude</strong> ou clique sur Publier.</p>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-ghost" onclick="this.closest('.preview-card').remove()">Annuler</button>
         <button class="btn btn-green" onclick="confirmPublish('${escHtml(filename)}')">${publishLabel}</button>
@@ -1870,38 +1866,32 @@ function extractTitleFromHtml(html) {
   return 'Nouvel article';
 }
 
-// Build a minimal article card to prepend to vie.html as fallback
-async function buildFallbackVieUpdate(articleFile, articleHtml) {
-  const title = extractTitleFromHtml(articleHtml);
-  const today = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+// Map list type → { file, container regex } describing where to insert the card
+const LIST_TARGETS = {
+  vie:         { file: 'vie.html',         re: /(<div[^>]+class="[^"]*activities-list[^"]*"[^>]*>)/i },
+  evenements:  { file: 'evenements.html',  re: /(<div[^>]+id="eventsGrid"[^>]*>)/i },
+  presse:      { file: 'presse.html',      re: /(<div[^>]+class="[^"]*coverage-list[^"]*"[^>]*>)/i },
+};
 
-  let vieHtml = '';
+// Insert a card snippet at the top of the list container in a freshly-fetched
+// list page, and push it. Robust replacement for full-page regeneration.
+async function insertCardAndPush(type, card) {
+  const target = LIST_TARGETS[type];
+  if (!target || !card) return false;
+
+  let listHtml;
   try {
-    vieHtml = await fetchFileFromGitHub('vie.html');
+    listHtml = await fetchFileFromGitHub(target.file);
   } catch(e) {
-    return null;
+    return false;
   }
 
-  const card = `
-    <article class="activity-post" data-category="Découvertes">
-      <div class="post-thumb thumb-orange">🌱</div>
-      <div class="post-body">
-        <div class="post-tag">🌱 Vie de la crèche</div>
-        <a href="${articleFile}"><h2>${title}</h2></a>
-        <p>Retrouvez le récit de cette activité sur la page dédiée.</p>
-        <div class="post-meta"><span>${today}</span></div>
-      </div>
-    </article>`;
+  const m = listHtml.match(target.re);
+  if (!m) return false;
 
-  // Find the activities-list container (the real class used in vie.html)
-  const containerMatch = vieHtml.match(/(<div[^>]+class="[^"]*activities-list[^"]*"[^>]*>)/i)
-    || vieHtml.match(/(<div[^>]+class="[^"]*activity-grid[^"]*"[^>]*>)/i)
-    || vieHtml.match(/(<section[^>]+id="[^"]*articles[^"]*"[^>]*>)/i);
-
-  if (containerMatch) {
-    return vieHtml.replace(containerMatch[0], containerMatch[0] + '\n' + card);
-  }
-  return null;
+  const updated = listHtml.replace(m[0], m[0] + '\n' + card + '\n');
+  await pushFileToGitHub(target.file, updated, `📰 Ajout "${state.pendingFile}" dans ${target.file}`);
+  return true;
 }
 
 async function publishAll() {
@@ -1914,41 +1904,34 @@ async function publishAll() {
       `✏️ Mise à jour ${state.pendingFile} via tableau de bord`
     );
 
-    // Push vie.html update if new article
-    if (state.pendingVieHtml) {
-      await pushFileToGitHub(
-        'vie.html',
-        state.pendingVieHtml,
-        `📰 Ajout article "${state.pendingFile}" dans vie.html`
-      );
-    } else if (state.isNewArticle && state.pendingFile) {
-      // Fallback: Claude didn't include <vie-update> — build a minimal card and push
-      addAiMessage('⚠️ Le bloc vie.html n\'était pas dans la réponse. Génération d\'une carte de secours…');
-      const fallback = await buildFallbackVieUpdate(state.pendingFile, state.pendingHtml);
-      if (fallback) {
-        await pushFileToGitHub('vie.html', fallback, `📰 Ajout article "${state.pendingFile}" dans vie.html (secours)`);
-        addAiMessage('✓ vie.html mis à jour avec une carte de secours.');
-      } else {
-        addAiMessage('⚠️ Impossible de mettre à jour vie.html automatiquement. L\'article est publié mais n\'apparaîtra pas dans la liste sans mise à jour manuelle.');
-      }
+    // Update the relevant list page (vie / evenements / presse).
+    // Preferred path: insert the small card snippet client-side into the
+    // freshly-fetched list page (reliable, token-cheap).
+    // Backward-compat: if Claude returned a full <…-update> page, use it.
+    let listUpdated = false;
+
+    if (state.pendingListCard && state.pendingListType) {
+      listUpdated = await insertCardAndPush(state.pendingListType, state.pendingListCard);
     }
 
-    // Push evenements.html update if new event
-    if (state.pendingEvenementsHtml) {
-      await pushFileToGitHub(
-        'evenements.html',
-        state.pendingEvenementsHtml,
-        `🎉 Ajout événement "${state.pendingFile}" dans evenements.html`
-      );
+    if (!listUpdated && state.pendingVieHtml) {
+      await pushFileToGitHub('vie.html', state.pendingVieHtml, `📰 Ajout article "${state.pendingFile}" dans vie.html`);
+      listUpdated = true;
+    }
+    if (!listUpdated && state.pendingEvenementsHtml) {
+      await pushFileToGitHub('evenements.html', state.pendingEvenementsHtml, `🎉 Ajout événement "${state.pendingFile}" dans evenements.html`);
+      listUpdated = true;
+    }
+    if (!listUpdated && state.pendingPresseHtml) {
+      await pushFileToGitHub('presse.html', state.pendingPresseHtml, `📰 Ajout publication "${state.pendingFile}" dans presse.html`);
+      listUpdated = true;
     }
 
-    // Push presse.html update if new publication
-    if (state.pendingPresseHtml) {
-      await pushFileToGitHub(
-        'presse.html',
-        state.pendingPresseHtml,
-        `📰 Ajout publication "${state.pendingFile}" dans presse.html`
-      );
+    // If this was a new article/event/publication but the list page could not
+    // be updated, warn clearly so the user knows it won't appear in the list.
+    const isNewItem = state.isNewArticle || state.isNewEvent || state.isNewPublication;
+    if (isNewItem && !listUpdated) {
+      addAiMessage('⚠️ La page principale (liste) n\'a pas pu être mise à jour automatiquement. La page existe mais n\'apparaîtra pas dans la liste — dis-le moi et je réessaie.');
     }
 
     // Push index.html update if opening inscriptions
@@ -1964,14 +1947,14 @@ async function publishAll() {
     localStorage.setItem('microd_lastupdate', now);
     document.getElementById('lastUpdate').textContent = now;
 
-    const hasIndexUpdate = state.pendingVieHtml || state.pendingEvenementsHtml || state.pendingPresseHtml || state.pendingIndexHtml;
+    const addedToList = listUpdated;
     const label = state.pendingIndexHtml
       ? `inscriptions.html et index.html publiés ! Site live dans ~30 secondes.`
-      : hasIndexUpdate
-        ? `Article publié et ajouté à la liste ! Site live dans ~30 secondes.`
+      : addedToList
+        ? `Publié et ajouté à la liste ! Site live dans ~30 secondes.`
         : `\`${state.pendingFile}\` publié ! Site live dans ~30 secondes.`;
 
-    showToast(`✓ ${state.pendingIndexHtml ? 'Inscriptions mises à jour !' : hasIndexUpdate ? 'Publié et ajouté à la liste !' : state.pendingFile + ' publié !'}`, 'ok');
+    showToast(`✓ ${state.pendingIndexHtml ? 'Inscriptions mises à jour !' : addedToList ? 'Publié et ajouté à la liste !' : state.pendingFile + ' publié !'}`, 'ok');
     addAiMessage(`🚀 **Publié !** ${label}\n\nTu peux vérifier sur ${state.config.siteUrl || 'ton URL Netlify'}.`);
 
     state.pendingHtml = null;
@@ -1980,6 +1963,8 @@ async function publishAll() {
     state.pendingEvenementsHtml = null;
     state.pendingPresseHtml = null;
     state.pendingIndexHtml = null;
+    state.pendingListCard = null;
+    state.pendingListType = null;
 
   } catch(err) {
     showToast('Erreur publication : ' + err.message, 'err');
