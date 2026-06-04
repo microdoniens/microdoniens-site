@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nouvelle visite de la ferme Tiligolo — Les Microdoniens</title>
+  <title>La ferme du Tiligolo revient aux Microdoniens — Les Microdoniens</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
@@ -37,12 +37,12 @@
     }
     h1 {
       font-family: 'Fraunces', serif;
-      font-size: clamp(32px, 4.5vw, 48px);
+      font-size: clamp(32px, 5vw, 48px);
       font-weight: 400;
       line-height: 1.15;
       letter-spacing: -0.02em;
       color: var(--charcoal);
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
     h1 em { font-style: italic; color: var(--terracotta); }
     .article-meta {
@@ -54,27 +54,34 @@
       border-radius: 50%; background: var(--border);
     }
 
-    .article-hero {
-      max-width: 900px;
-      margin: 0 auto 48px;
-      padding: 0 24px;
+    .article-gallery {
+      padding: 0 24px 48px;
+      max-width: 1000px;
+      margin: 0 auto;
     }
-    .article-hero .hero-placeholder {
+    .gallery-4 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    .gallery-4 img {
+      width: 100%;
+      aspect-ratio: 4/3;
+      object-fit: cover;
       border-radius: var(--radius);
-      aspect-ratio: 16/9;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 96px;
-      background: linear-gradient(135deg, #d8ead9, #b8d4b9);
+    }
+    @media (max-width: 600px) {
+      .gallery-4 { grid-template-columns: 1fr; }
     }
 
     .article-content {
-      max-width: 680px;
-      margin: 0 auto;
       padding: 0 24px 80px;
+      max-width: 720px;
+      margin: 0 auto;
     }
     .article-content p {
       font-size: 17px;
-      line-height: 1.8;
+      line-height: 1.85;
       color: var(--text);
       margin-bottom: 24px;
     }
@@ -84,7 +91,7 @@
       float: left;
       line-height: 0.8;
       margin-right: 12px;
-      margin-top: 6px;
+      margin-top: 8px;
       color: var(--terracotta);
     }
     .article-content h2 {
@@ -97,7 +104,7 @@
     .article-content ul {
       margin: 0 0 24px 24px;
       color: var(--text);
-      line-height: 1.8;
+      line-height: 1.85;
     }
     .article-content li {
       margin-bottom: 8px;
@@ -112,23 +119,25 @@
       font-family: 'Fraunces', serif;
       font-size: 20px;
       font-style: italic;
-      color: rgba(255,255,255,0.85);
+      color: rgba(255,255,255,0.9);
       line-height: 1.5;
       margin: 0;
     }
 
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
+    .article-nav {
+      display: flex;
+      justify-content: space-between;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 40px;
+    }
+    .article-nav a {
       font-size: 14px;
-      font-weight: 500;
       color: var(--terracotta);
       text-decoration: none;
-      margin-top: 48px;
-      transition: gap 0.2s;
+      font-weight: 500;
     }
-    .back-link:hover { gap: 12px; }
+    .article-nav a:hover { text-decoration: underline; }
 
     footer {
       background: var(--charcoal); color: white;
@@ -145,6 +154,7 @@
 </head>
 <body>
 
+<!-- NAV -->
 <nav>
   <div class="nav-inner">
     <a href="../index.html" class="nav-logo">
@@ -172,6 +182,7 @@
   </div>
 </nav>
 
+<!-- MOBILE MENU -->
 <div class="mobile-menu" id="mobileMenu">
   <a href="../index.html" onclick="toggleMenu()">Accueil</a>
   <a href="../vie.html" onclick="toggleMenu()">Vie de la crèche</a>
@@ -190,45 +201,57 @@
     <span>›</span>
     <a href="../vie.html">Vie de la crèche</a>
     <span>›</span>
-    <span>Ferme Tiligolo</span>
+    <span>La ferme du Tiligolo revient</span>
   </div>
   <div class="article-tag">🌍 Découvertes</div>
-  <h1>La ferme Tiligolo <em>revient</em> aux Microdoniens&nbsp;!</h1>
+  <h1>La ferme du Tiligolo <em>revient aux Microdoniens</em></h1>
   <div class="article-meta">
-    <span>Janvier 2025</span>
+    <span>Printemps 2025</span>
     <div class="article-meta-dot"></div>
-    <span>Le Jardin</span>
+    <span>Le Jardin · Les Microdoniens</span>
   </div>
 </header>
 
-<div class="article-hero">
-  <div class="hero-placeholder">🐷</div>
+<div class="article-gallery">
+  <div class="gallery-4">
+    <img src="../images/vie/ferme-tiligolo-2025-01.jpg" alt="Les enfants découvrent les chèvres de la ferme du Tiligolo" />
+    <img src="../images/vie/ferme-tiligolo-2025-02.jpg" alt="Le cochon de la ferme fait la joie des petits Microdoniens" />
+    <img src="../images/vie/ferme-tiligolo-2025-03.jpg" alt="Poules et coqs en liberté dans le jardin de la crèche" />
+    <img src="../images/vie/ferme-tiligolo-2025-04.jpg" alt="Un enfant caresse un lapin sous le soleil" />
+  </div>
 </div>
 
 <article class="article-content">
-  <p>Quelle joie de retrouver nos amis de la ferme Tiligolo ! Pour la deuxième fois, la ferme itinérante a posé ses valises dans le jardin de la crèche, transformant notre petit coin de verdure en véritable ferme pédagogique le temps d'une journée ensoleillée.</p>
+  <p>Six ans après sa première visite, la ferme du Tiligolo a de nouveau posé ses enclos dans le jardin des Microdoniens. Un bel après-midi ensoleillé qui a transformé notre crèche en véritable ferme urbaine, pour le plus grand bonheur de nos petits curieux.</p>
 
-  <p>Les enfants ont pu découvrir — ou redécouvrir pour certains — une ribambelle d'animaux de la ferme. Cochons, chèvres, coqs et poules ont investi notre jardin, sous le regard émerveillé des petits Microdoniens.</p>
+  <p>Dès l'installation des animaux, l'excitation était palpable. Les yeux écarquillés, les enfants ont découvert — ou retrouvé pour certains — ces compagnons à poils et à plumes venus leur rendre visite. Chèvres facétieuses, cochon débonnaire, poules caquetantes, coqs fiers et lapins tout doux : un véritable bestiaire à portée de main.</p>
 
-  <h2>Une journée sous le signe de la découverte</h2>
+  <h2>Une rencontre sensorielle</h2>
 
-  <p>Accompagnés par les fermiers passionnés de la ferme Tiligolo, les enfants ont pu approcher les animaux en toute sécurité. Caresser le pelage doux des chèvres, observer le groin curieux des cochons, écouter le chant du coq… autant de sensations nouvelles qui éveillent les sens et la curiosité.</p>
+  <p>Toucher la laine rêche d'une chèvre, sentir le museau humide d'un lapin, écouter le chant du coq résonner dans le jardin… Cette deuxième édition a offert aux enfants une expérience sensorielle complète. Les plus jeunes, d'abord impressionnés, se sont rapidement enhardis, guidés par les fermiers bienveillants et les professionnelles attentives.</p>
 
   <div class="article-quote">
-    <p>« Toucher, sentir, écouter, observer… la rencontre avec les animaux est une expérience sensorielle complète qui marque durablement les enfants. »</p>
+    <p>« Regarde, il a des grandes oreilles ! Et lui, il fait "bêêêê" ! » — les mots des enfants, émerveillés par leurs nouveaux amis d'un jour.</p>
   </div>
 
-  <p>Cette visite s'inscrit parfaitement dans notre projet pédagogique d'ouverture sur le monde et de sensibilisation à la nature. Même en pleine ville, à Saint-Ouen, nous offrons aux enfants la possibilité de créer un lien avec le vivant et de comprendre d'où viennent les œufs du petit-déjeuner ou le lait de leur biberon.</p>
+  <p>Le cochon, véritable star de l'après-midi, a suscité une curiosité sans bornes. Son groin fouilleur et ses grognements attendrissants ont provoqué éclats de rire et questions sans fin. <em>« Pourquoi il fait ce bruit ? »</em>, <em>« Est-ce qu'il a froid ? »</em>, <em>« Il mange quoi ? »</em> — autant d'occasions d'apprendre en s'amusant.</p>
 
-  <h2>Un moment partagé</h2>
+  <h2>Le respect du vivant</h2>
 
-  <p>Parents de permanence, professionnelles et enfants ont tous participé à cette journée exceptionnelle. Les plus grands ont posé mille questions aux fermiers, tandis que les plus petits observaient avec des yeux ronds ces drôles de créatures venues leur rendre visite.</p>
+  <p>Au-delà de la découverte, cette journée s'inscrit dans notre projet pédagogique de sensibilisation à la nature et au vivant. Apprendre à approcher un animal avec douceur, à respecter son espace, à observer sans brusquer : des apprentissages fondamentaux qui commencent dès le plus jeune âge.</p>
 
-  <p>Le beau soleil de cette journée a rendu l'expérience encore plus magique. Le jardin de la crèche, habituellement terrain de jeux et de jardinage, s'est métamorphosé en petit paradis champêtre.</p>
+  <p>Les poules, installées dans un petit enclos près du potager, ont particulièrement fasciné le groupe des grands. Certains ont même eu la chance de tenir un œuf fraîchement pondu — un moment de magie pure, suspendu dans le temps.</p>
 
-  <p>Merci à la ferme Tiligolo pour cette belle aventure — et rendez-vous l'année prochaine pour de nouvelles rencontres animales !</p>
+  <h2>Un rendez-vous qui devient tradition</h2>
 
-  <a href="../vie.html?filter=Découvertes" class="back-link">← Retour aux découvertes</a>
+  <p>Cette deuxième édition confirme ce que nous pressentions : la ferme du Tiligolo aux Microdoniens, c'est un rendez-vous qui fait sens. Faire venir la ferme à la ville, offrir aux enfants urbains une fenêtre sur le monde rural, créer des souvenirs de tendresse et de découverte — voilà ce qui nous anime.</p>
+
+  <p>Merci à l'équipe du Tiligolo pour sa patience et sa pédagogie, aux parents présents pour ce bel après-midi partagé, et surtout aux enfants pour leur émerveillement contagieux. Rendez-vous pour une troisième édition ?</p>
+
+  <div class="article-nav">
+    <a href="../vie.html">← Retour à la vie de la crèche</a>
+    <a href="ferme-tiligolo.html">Voir la 1ère édition (2019) →</a>
+  </div>
 </article>
 
 <footer>
