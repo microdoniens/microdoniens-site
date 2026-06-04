@@ -1308,6 +1308,9 @@ async function sendPrompt() {
       .replace(/EVENT_FILE:[^\n]*\n?/, '')
       .replace(/PUBLICATION_FILE:[^\n]*\n?/, '')
       .replace('PREVIEW_READY', '')
+      // Strip any raw HTML blocks Claude may have echoed in its text (<!DOCTYPE … </html>)
+      .replace(/<!DOCTYPE[\s\S]*?<\/html>/gi, '')
+      .replace(/<html[\s\S]*?<\/html>/gi, '')
       .trim();
 
     if (reply.includes('PUBLISH_CONFIRMED')) {
@@ -1441,6 +1444,7 @@ RÈGLES DE SORTIE — OBLIGATOIRE, respecte exactement ce format sans exception 
    </vie-update>
 
 Ne termine JAMAIS ta réponse sans le bloc <vie-update>. C'est indispensable pour que l'article apparaisse sur le site.
+⚠️ N'écris JAMAIS de HTML brut dans ton texte de réponse. Tout le HTML doit être UNIQUEMENT dans les balises <html-output> et <vie-update>. Ton texte d'explication doit tenir en 1-2 phrases maximum.
 Réponds en français.`;
 }
 
@@ -1498,6 +1502,7 @@ RÈGLES DE SORTIE — OBLIGATOIRE, respecte exactement ce format sans exception 
    </evenements-update>
 
 Ne termine JAMAIS ta réponse sans le bloc <evenements-update>. C'est indispensable pour que l'événement apparaisse sur le site.
+⚠️ N'écris JAMAIS de HTML brut dans ton texte de réponse. Tout le HTML doit être UNIQUEMENT dans les balises <html-output> et <evenements-update>. Ton texte d'explication doit tenir en 1-2 phrases maximum.
 Réponds en français.`;
 }
 
@@ -1565,6 +1570,7 @@ RÈGLES DE SORTIE — OBLIGATOIRE, respecte exactement ce format sans exception 
    </presse-update>
 
 Ne termine JAMAIS ta réponse sans le bloc <presse-update>. C'est indispensable pour que la publication apparaisse sur le site.
+⚠️ N'écris JAMAIS de HTML brut dans ton texte de réponse. Tout le HTML doit être UNIQUEMENT dans les balises <html-output> et <presse-update>. Ton texte d'explication doit tenir en 1-2 phrases maximum.
 Réponds en français.`;
 }
 
