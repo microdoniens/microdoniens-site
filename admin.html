@@ -395,6 +395,40 @@
     .publish-bar p { font-size: 13px; color: var(--text-muted); }
     .publish-bar strong { color: var(--text); }
 
+    /* CHILD PAGE PICKER */
+    .page-picker {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin: 4px 0 8px 38px;
+    }
+    .page-picker-head {
+      padding: 10px 14px;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      font-size: 12px; color: var(--text-muted);
+    }
+    .page-picker-search {
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--text); padding: 6px 10px; border-radius: var(--radius-sm);
+      font-size: 12px; font-family: 'DM Sans', sans-serif; outline: none; width: 170px;
+      flex-shrink: 0;
+    }
+    .page-picker-search:focus { border-color: var(--terracotta); }
+    .page-picker-list { max-height: 280px; overflow-y: auto; padding: 6px; display: flex; flex-direction: column; gap: 2px; }
+    .page-picker-item {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding: 9px 12px; border-radius: var(--radius-sm);
+      background: none; border: none; cursor: pointer; width: 100%; text-align: left;
+      font-family: 'DM Sans', sans-serif; transition: background 0.15s;
+    }
+    .page-picker-item:hover { background: var(--surface2); }
+    .ppi-name { font-size: 13px; color: var(--text); }
+    .ppi-file { font-size: 11px; color: var(--text-dim); }
+    .page-picker-empty { padding: 14px; font-size: 12px; color: var(--text-dim); text-align: center; }
+
     /* LOADING */
     .thinking {
       display: flex; align-items: center; gap: 10px;
@@ -921,6 +955,78 @@ function resetEditor() {
   renderAttachments();
 }
 
+// Parent listing pages → their child-page directory
+const CHILD_DIRS = {
+  'vie.html':        { dir: 'vie',        label: 'articles' },
+  'evenements.html': { dir: 'evenements', label: 'événements' },
+  'presse.html':     { dir: 'presse',     label: 'publications' },
+};
+
+// List the child .html pages of a directory from GitHub
+async function listChildPages(dir) {
+  const { githubToken, githubRepo, githubBranch } = state.config;
+  const branch = githubBranch || 'main';
+  const res = await fetch(
+    `https://api.github.com/repos/${githubRepo}/contents/${dir}?ref=${branch}`,
+    { headers: { 'Authorization': `token ${githubToken}`, 'Accept': 'application/vnd.github.v3+json' } }
+  );
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  return data
+    .filter(f => f.type === 'file' && f.name.endsWith('.html') && !f.name.startsWith('_'))
+    .map(f => `${dir}/${f.name}`)
+    .sort();
+}
+
+// Turn "vie/sortie-mediatheque.html" → "Sortie mediatheque"
+function prettifyPageName(file) {
+  const base = file.split('/').pop().replace(/\.html$/, '');
+  const words = base.split('-');
+  return words.map((w, i) => i === 0 ? w.charAt(0).toUpperCase() + w.slice(1) : w).join(' ');
+}
+
+function renderChildPicker(children, dirLabel) {
+  const conv = document.getElementById('conversation');
+  const card = document.createElement('div');
+  card.className = 'page-picker';
+  const itemsHtml = children.map(c => {
+    const name = prettifyPageName(c);
+    return `<button class="page-picker-item" data-file="${escHtml(c)}" data-name="${escHtml(name)}" onclick="editPage(this.dataset.file, this.dataset.name, null)">
+      <span class="ppi-name">${escHtml(name)}</span>
+      <span class="ppi-file">${escHtml(c)}</span>
+    </button>`;
+  }).join('');
+  card.innerHTML = `
+    <div class="page-picker-head">
+      <span>📄 ${children.length} ${escHtml(dirLabel)} — choisis une sous-page à modifier</span>
+      <input class="page-picker-search" placeholder="Rechercher…" oninput="filterChildPicker(this)">
+    </div>
+    <div class="page-picker-list">${itemsHtml}</div>`;
+  conv.appendChild(card);
+  card.scrollIntoView({ behavior: 'smooth', block: 'end' });
+}
+
+function filterChildPicker(input) {
+  const q = input.value.toLowerCase();
+  const picker = input.closest('.page-picker');
+  let visible = 0;
+  picker.querySelectorAll('.page-picker-item').forEach(it => {
+    const txt = (it.dataset.name + ' ' + it.dataset.file).toLowerCase();
+    const show = txt.includes(q);
+    it.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  let empty = picker.querySelector('.page-picker-empty');
+  if (visible === 0 && !empty) {
+    empty = document.createElement('div');
+    empty.className = 'page-picker-empty';
+    empty.textContent = 'Aucune sous-page trouvée';
+    picker.querySelector('.page-picker-list').appendChild(empty);
+  } else if (empty) {
+    empty.style.display = visible === 0 ? '' : 'none';
+  }
+}
+
 async function editPage(file, name, btn) {
   showView('editor', btn);
   document.getElementById('topbarTitle').textContent = 'Éditer : ' + name;
@@ -929,7 +1035,7 @@ async function editPage(file, name, btn) {
   state.isNewArticle = false;
   renderContextTags();
 
-  addAiMessage(`Je vais t'aider à modifier la page **${name}** (\`${file}\`).\n\nDis-moi ce que tu veux changer — tu peux coller du texte, joindre des photos, ou simplement décrire. Je génère les modifications et tu valides avant de publier.`);
+  addAiMessage(`Je vais t'aider à modifier la page **${name}** (\`${file}\`).\n\nDis-moi ce que tu veux faire :\n• ✏️ **Modifier un texte** — colle ou décris le nouveau texte\n• 🖼️ **Changer une image** — joins la nouvelle photo avec 📎\n• ➖ **Supprimer un élément** — dis-moi quel bloc enlever\n• ➕ **Ajouter un élément** — décris ce que tu veux ajouter\n\nJe prépare la modification et tu valides avant de publier.`);
 
   // Prefetch the current page HTML in the background
   if (state.config.githubToken && state.config.githubRepo) {
@@ -941,6 +1047,22 @@ async function editPage(file, name, btn) {
     } catch(e) {
       hideThinking();
       addAiMessage('⚠️ Je n\'ai pas pu charger la page depuis GitHub (vérifie ta configuration). Je ferai quand même de mon mieux.');
+    }
+
+    // If this page is a listing page, offer to edit its child pages too
+    const child = CHILD_DIRS[file];
+    if (child) {
+      showThinkingLabel('Recherche des sous-pages…');
+      try {
+        const children = await listChildPages(child.dir);
+        hideThinking();
+        if (children.length) {
+          addAiMessage(`Cette page est une liste. Tu peux modifier la page liste elle-même, **ou** choisir une des ${children.length} ${child.label} ci-dessous pour l'éditer directement :`);
+          renderChildPicker(children, child.label);
+        }
+      } catch(e) {
+        hideThinking();
+      }
     }
   }
 }
@@ -1386,10 +1508,48 @@ async function sendPrompt() {
 }
 
 // ── SYSTEM PROMPTS ──
+function buildPhotoSection(photoUrls, type) {
+  if (photoUrls.length > 0) {
+    return `\nPHOTOS UPLOADÉES (URLs à utiliser dans la page ET dans la carte liste) :\n${photoUrls.map(p => `- ${p.file} → ${p.url}`).join('\n')}\n`;
+  }
+
+  const rules = {
+    article: `\nAUCUNE PHOTO — règle obligatoire pour la page ET la carte liste :
+- Page article (.article-visual) : <div class="article-thumb thumb-COLOR">EMOJI</div>
+  (inclus les styles .thumb-orange, .thumb-green, .thumb-blue, .thumb-yellow, .thumb-pink, .thumb-purple dans le <style> de la page)
+- Carte liste (vie.html) : <div class="post-thumb thumb-COLOR">EMOJI</div> — JAMAIS de <img>
+- Couleurs par catégorie : Créativité→thumb-orange 🎨, Nature→thumb-green 🌿, Culture→thumb-blue 📚, Motricité→thumb-yellow 🏃, Musique→thumb-purple 🎵, Découvertes→thumb-orange 🌍
+- Choisis un emoji pertinent. Ne laisse jamais de visuel vide ni de hero-placeholder sans fond coloré.\n`,
+
+    event: `\nAUCUNE PHOTO — règle obligatoire pour la page ET la carte liste :
+- Page événement (.article-visual) : <div class="article-thumb thumb-COLOR">EMOJI</div>
+  (inclus les styles .thumb-orange, .thumb-green, .thumb-blue, .thumb-yellow dans le <style> de la page)
+- Carte liste (evenements.html) : <div class="event-thumb et-COLOR">EMOJI</div> — JAMAIS event-thumb-img ni <img>
+- Couleurs carte : et-orange, et-green, et-blue, et-yellow, et-pink, et-dark
+- Choisis un emoji pertinent (🎉 🏃 🤝 🎨 etc.). Ne laisse jamais de visuel vide.\n`,
+
+    presse: `\nAUCUNE IMAGE SCANNÉE — règle obligatoire pour la page ET la carte liste :
+- Page publication (.article-visual) : <div class="article-thumb thumb-COLOR">EMOJI</div>
+  (layout C du template — pas de press-scan)
+- Carte liste (presse.html) : <div class="cov-icon cov-COLOR">EMOJI</div>
+- Couleurs : cov-orange 📰, cov-blue 📺, cov-green 🤝, cov-yellow 🌐
+- L'icône cov-icon sert toujours de miniature dans la liste, même sans scan.\n`,
+  };
+
+  return rules[type] || '';
+}
+
+function pickCardExamples(listHtml, cardPattern, preferEmoji) {
+  const all = (listHtml.match(cardPattern) || []);
+  if (!preferEmoji) return all.slice(0, 2).join('\n');
+  const emoji = all.filter(c => /<div class="[^"]*(post-thumb thumb-|event-thumb et-|cov-icon cov-)/.test(c));
+  return (emoji.length ? emoji : all).slice(0, 2).join('\n');
+}
+
 function buildEditSystemPrompt(pageName, filename, currentHtml, photoUrls) {
   const photoSection = photoUrls.length > 0
-    ? `\nPHOTOS UPLOADÉES (URLs à utiliser dans le HTML) :\n${photoUrls.map(p => `- ${p.file} → ${p.url}`).join('\n')}\n`
-    : '';
+    ? `\nPHOTOS UPLOADÉES (URLs à utiliser dans des balises <img> du HTML) :\n${photoUrls.map(p => `- ${p.file} → ${p.url}`).join('\n')}\n`
+    : `\nAUCUNE PHOTO JOINTE — si on te demande d'ajouter/remplacer une image sans photo fournie, utilise un fond coloré avec emoji (<div class="article-thumb thumb-COLOR">EMOJI</div> ou équivalent), jamais un visuel vide.\n`;
 
   const htmlSection = currentHtml
     ? `\nHTML ACTUEL DE LA PAGE :\n\`\`\`html\n${currentHtml}\n\`\`\`\n`
@@ -1401,11 +1561,17 @@ Le site est en HTML/CSS/JS pur. Design : police Fraunces (titres), DM Sans (text
 
 MODE : Modification de la page "${pageName}" (${filename})
 ${htmlSection}${photoSection}
+OPÉRATIONS QUE TU SAIS FAIRE (exécute celle(s) que l'utilisateur demande) :
+- ✏️ MODIFIER UN TEXTE : remplace uniquement le texte concerné, en gardant les balises, classes et la mise en forme autour.
+- 🖼️ MODIFIER/REMPLACER UNE IMAGE : change le src de la <img> visée par l'URL de la photo uploadée. Sans photo fournie, remplace par un fond coloré + emoji.
+- ➖ SUPPRIMER UN ÉLÉMENT : retire entièrement le bloc HTML visé (section, image, paragraphe, carte, lien…). Ne laisse ni balise vide ni conteneur orphelin.
+- ➕ AJOUTER UN ÉLÉMENT : insère le nouveau bloc au bon endroit, en réutilisant les classes et le style des éléments voisins.
+
 RÈGLES :
-- Modifie uniquement ce qui est demandé, conserve le reste tel quel
-- Si des photos ont été uploadées, intègre-les avec les URLs fournies dans les balises <img>
-- Réponds en français, de façon concise et chaleureuse
-- Explique brièvement ce que tu as modifié
+- Modifie UNIQUEMENT ce qui est demandé ; conserve tout le reste à l'identique (head, nav, footer, scripts, classes, structure).
+- Conserve les chemins relatifs existants (../css/, ../js/, ../images/ pour les sous-pages).
+- Si la demande est ambiguë, pose UNE seule question courte avant de générer (sans bloc HTML).
+- Réponds en français en UNE SEULE phrase concise qui décrit ce que tu as changé (AUCUN HTML dans ce texte).
 - Termine TOUJOURS par :
   PREVIEW_READY
   <html-output>
@@ -1416,16 +1582,17 @@ Si l'utilisateur dit "publie", "c'est bon", "mets en ligne" ou similaire, répon
 }
 
 function buildNewArticleSystemPrompt(vieHtml, photoUrls, exampleHtml) {
-  const photoSection = photoUrls.length > 0
-    ? `\nPHOTOS UPLOADÉES (URLs à utiliser dans le HTML) :\n${photoUrls.map(p => `- ${p.file} → ${p.url}`).join('\n')}\n`
-    : '';
+  const photoSection = buildPhotoSection(photoUrls, 'article');
+  const hasPhotos = photoUrls.length > 0;
 
-  // Give Claude a couple of real cards from vie.html as the card model
-  const cardExamples = (vieHtml.match(/<article class="activity-post"[\s\S]*?<\/article>/gi) || [])
-    .slice(0, 2).join('\n');
+  const cardExamples = pickCardExamples(
+    vieHtml,
+    /<article class="activity-post"[\s\S]*?<\/article>/gi,
+    !hasPhotos
+  );
   const cardSection = cardExamples
-    ? `\nEXEMPLES RÉELS DE CARTES (copie EXACTEMENT cette structure pour la carte) :\n\`\`\`html\n${cardExamples}\n\`\`\`\n`
-    : '';
+    ? `\nEXEMPLES RÉELS DE CARTES${hasPhotos ? '' : ' (sans photo — fond coloré + emoji)'} :\n\`\`\`html\n${cardExamples}\n\`\`\`\n`
+    : `\nEXEMPLE DE CARTE SANS PHOTO :\n\`\`\`html\n<article class="activity-post" data-category="Créativité">\n  <div class="post-thumb thumb-orange">🎨</div>\n  <div class="post-body">\n    <div class="post-tag">🎨 Créativité</div>\n    <a href="vie/slug.html"><h2>Titre</h2></a>\n    <p>Résumé court.</p>\n    <div class="post-meta"><span>Date</span></div>\n  </div>\n</article>\n\`\`\`\n`;
 
   const exampleSection = exampleHtml
     ? `\nEXEMPLE COMPLET D'UNE PAGE ARTICLE EXISTANTE (copie EXACTEMENT cette structure, ce HEAD, cette nav, ce breadcrumb, ces styles — change seulement le contenu) :\n\`\`\`html\n${exampleHtml}\n\`\`\`\n`
@@ -1465,15 +1632,17 @@ Réponds en français.`;
 }
 
 function buildNewEventSystemPrompt(evenementsHtml, photoUrls, exampleHtml) {
-  const photoSection = photoUrls.length > 0
-    ? `\nPHOTOS UPLOADÉES (URLs à utiliser dans le HTML) :\n${photoUrls.map(p => `- ${p.file} → ${p.url}`).join('\n')}\n`
-    : '';
+  const photoSection = buildPhotoSection(photoUrls, 'event');
+  const hasPhotos = photoUrls.length > 0;
 
-  const cardExamples = (evenementsHtml.match(/<div class="event-card[\s\S]*?<\/div>\s*<\/div>/gi) || [])
-    .slice(0, 2).join('\n');
+  const cardExamples = pickCardExamples(
+    evenementsHtml,
+    /<div class="event-card[\s\S]*?<\/div>\s*<\/div>/gi,
+    !hasPhotos
+  );
   const cardSection = cardExamples
-    ? `\nEXEMPLES RÉELS DE CARTES (copie EXACTEMENT cette structure pour la carte) :\n\`\`\`html\n${cardExamples}\n\`\`\`\n`
-    : '';
+    ? `\nEXEMPLES RÉELS DE CARTES${hasPhotos ? '' : ' (sans photo — fond coloré + emoji)'} :\n\`\`\`html\n${cardExamples}\n\`\`\`\n`
+    : `\nEXEMPLE DE CARTE SANS PHOTO :\n\`\`\`html\n<div class="event-card" data-year="2025" data-href="evenements/slug.html" onclick="location.href=this.dataset.href">\n  <div class="event-thumb et-orange">🎉</div>\n  <div class="event-body">\n    <div class="event-tag tag-fete">Fête</div>\n    <h3><a href="evenements/slug.html">Titre</a></h3>\n    <div class="event-date">Date</div>\n    <p>Résumé court.</p>\n  </div>\n</div>\n\`\`\`\n`;
 
   const exampleSection = exampleHtml
     ? `\nEXEMPLE COMPLET D'UNE PAGE ÉVÉNEMENT EXISTANTE (copie EXACTEMENT cette structure, ce HEAD, cette nav, ce breadcrumb, ces styles — change seulement le contenu) :\n\`\`\`html\n${exampleHtml}\n\`\`\`\n`
@@ -1488,7 +1657,8 @@ MODE : Création d'un nouvel événement pour la section "Événements"
 STRUCTURE D'UN ÉVÉNEMENT :
 - Fichier : evenements/[slug-kebab-case].html (chemins relatifs ../css/shared.css, ../js/nav.js, ../images/…)
 - Reproduis EXACTEMENT la structure de l'exemple complet ci-dessous.
-- Couleurs thumb : et-orange, et-green, et-blue, et-yellow, et-pink, et-dark
+- Couleurs thumb page : thumb-orange, thumb-green, thumb-blue, thumb-yellow
+- Couleurs carte liste : et-orange, et-green, et-blue, et-yellow, et-pink, et-dark
 - Classes de tag : tag-fete, tag-sport, tag-solidarite, tag-culture, tag-vie
 ${photoSection}${exampleSection}${cardSection}
 RÈGLES DE SORTIE — respecte EXACTEMENT ce format, sans exception :
@@ -1513,15 +1683,16 @@ Réponds en français.`;
 }
 
 function buildNewPublicationSystemPrompt(presseHtml, photoUrls, exampleHtml) {
-  const photoSection = photoUrls.length > 0
-    ? `\nPHOTOS UPLOADÉES (URLs à utiliser dans le HTML) :\n${photoUrls.map(p => `- ${p.file} → ${p.url}`).join('\n')}\n`
-    : '';
+  const photoSection = buildPhotoSection(photoUrls, 'presse');
 
-  const cardExamples = (presseHtml.match(/<div class="coverage-item"[\s\S]*?<\/div>\s*<\/div>/gi) || [])
-    .slice(0, 2).join('\n');
+  const cardExamples = pickCardExamples(
+    presseHtml,
+    /<div class="coverage-item"[\s\S]*?<\/div>\s*<\/div>/gi,
+    false
+  );
   const cardSection = cardExamples
-    ? `\nEXEMPLES RÉELS D'ENTRÉES (copie EXACTEMENT cette structure pour l'entrée coverage-item) :\n\`\`\`html\n${cardExamples}\n\`\`\`\n`
-    : '';
+    ? `\nEXEMPLES RÉELS D'ENTRÉES LISTE (icône colorée + emoji) :\n\`\`\`html\n${cardExamples}\n\`\`\`\n`
+    : `\nEXEMPLE D'ENTRÉE LISTE :\n\`\`\`html\n<div class="coverage-item" onclick="location.href='presse/slug.html'">\n  <div class="cov-icon cov-orange">📰</div>\n  <div>\n    <div class="cov-source">Nom du média</div>\n    <div class="cov-title">Titre</div>\n    <div class="cov-date">Date</div>\n  </div>\n  <div class="cov-badge badge-presse">Presse</div>\n</div>\n\`\`\`\n`;
 
   const exampleSection = exampleHtml
     ? `\nEXEMPLE COMPLET D'UNE PAGE PRESSE EXISTANTE (copie EXACTEMENT cette structure, ce HEAD, cette nav, ce breadcrumb, ces styles — change seulement le contenu) :\n\`\`\`html\n${exampleHtml}\n\`\`\`\n`
@@ -1537,8 +1708,9 @@ STRUCTURE D'UNE PUBLICATION :
 - Fichier : presse/[slug-kebab-case].html (chemins relatifs ../css/shared.css, ../js/nav.js, ../images/…)
 - Reproduis EXACTEMENT la structure de l'exemple complet ci-dessous (head, styles, nav, breadcrumb, source-box, corps, footer).
 - Types de tag : tag-presse (📰 Presse), tag-tv (📺 Télévision), tag-asso (🤝), tag-web (🌐)
-- Image scannée : <img src="../images/presse/FICHIER.jpg" alt="..." class="press-scan" loading="lazy">
-- Entrée coverage-item : icône cov-orange/cov-blue/cov-green/cov-yellow, badge badge-presse/badge-tv/badge-asso/badge-web
+- Avec scan : <img class="press-scan"> ou <div class="press-scan-pair">
+- Sans scan : <div class="article-thumb thumb-COLOR">EMOJI</div> dans .article-visual (pas de press-scan)
+- Entrée liste : toujours <div class="cov-icon cov-COLOR">EMOJI</div>
 ${photoSection}${exampleSection}${cardSection}
 RÈGLES DE SORTIE — respecte EXACTEMENT ce format, sans exception :
 1. Une explication très courte (1-2 phrases max, AUCUN HTML dans le texte).
@@ -1757,6 +1929,17 @@ nav, .mobile-menu, footer { display: none !important; }
 .gallery-featured { grid-template-columns: 2fr 1fr; }
 .gallery-featured .gallery-stack { display: grid; grid-template-rows: 1fr 1fr; gap: 12px; }
 .gallery img, .gallery .gallery-img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: var(--radius-sm); display: block; }
+.article-thumb, .hero-placeholder {
+  width: 100%; border-radius: var(--radius); aspect-ratio: 16/7;
+  display: flex; align-items: center; justify-content: center; font-size: 80px;
+}
+.thumb-orange { background: linear-gradient(135deg, #fde8d8, #f5c9a8); }
+.thumb-green  { background: linear-gradient(135deg, #d8ead9, #b8d4b9); }
+.thumb-blue   { background: linear-gradient(135deg, #d8e8f0, #b8ccd8); }
+.thumb-yellow { background: linear-gradient(135deg, #fef3c7, #fde68a); }
+.thumb-pink   { background: linear-gradient(135deg, #fce7f3, #fbcfe8); }
+.thumb-purple { background: linear-gradient(135deg, #ede9fe, #ddd6fe); }
+.thumb-dark   { background: linear-gradient(135deg, #2a2a2a, #3d3d3d); }
 @media (max-width: 600px) {
   .gallery-3 { grid-template-columns: 1fr 1fr; }
   .gallery-featured { grid-template-columns: 1fr; }
