@@ -19,8 +19,8 @@
       --text: #f0ede8;
       --text-muted: #888;
       --text-dim: #555;
-      --terracotta: #d96b3f;
-      --terracotta-dim: rgba(217,107,63,0.15);
+      --terracotta: #027A76;
+      --terracotta-dim: rgba(2,122,118,0.15);
       --green: #4caf7d;
       --green-dim: rgba(76,175,125,0.15);
       --yellow: #f5c842;
@@ -198,7 +198,7 @@
     .btn-ghost { background: var(--surface2); color: var(--text-muted); }
     .btn-ghost:hover { background: var(--surface3); color: var(--text); }
     .btn-primary { background: var(--terracotta); color: white; }
-    .btn-primary:hover { background: #c05a30; }
+    .btn-primary:hover { background: #015F5C; }
     .btn-green { background: var(--green-dim); color: var(--green); border: 1px solid rgba(76,175,125,0.25); }
     .btn-green:hover { background: rgba(76,175,125,0.25); }
     .btn-danger { background: var(--red-dim); color: var(--red); border: 1px solid rgba(224,82,82,0.2); }
@@ -245,8 +245,8 @@
 
     /* ONBOARDING BANNER */
     .onboarding-banner {
-      background: linear-gradient(135deg, rgba(217,107,63,0.12), rgba(217,107,63,0.06));
-      border: 1px solid rgba(217,107,63,0.3);
+      background: linear-gradient(135deg, rgba(2,122,118,0.12), rgba(2,122,118,0.06));
+      border: 1px solid rgba(2,122,118,0.3);
       border-radius: var(--radius);
       padding: 20px 24px;
       margin-bottom: 24px;
@@ -330,7 +330,7 @@
       display: flex; align-items: center; justify-content: center;
       transition: all 0.15s;
     }
-    .send-btn:hover { background: #c05a30; }
+    .send-btn:hover { background: #015F5C; }
     .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
     .attachments-row { display: flex; gap: 8px; flex-wrap: wrap; padding: 0 16px 12px; }
@@ -361,7 +361,7 @@
       border-radius: 12px;
       font-size: 14px; line-height: 1.65;
     }
-    .bubble-user { background: var(--terracotta-dim); border: 1px solid rgba(217,107,63,0.2); color: var(--text); border-top-right-radius: 4px; }
+    .bubble-user { background: var(--terracotta-dim); border: 1px solid rgba(2,122,118,0.2); color: var(--text); border-top-right-radius: 4px; }
     .bubble-ai { background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-top-left-radius: 4px; }
     .bubble-ai code { background: var(--surface3); padding: 2px 6px; border-radius: 4px; font-size: 12px; color: var(--yellow); }
 
@@ -475,7 +475,7 @@
     .setting-input:focus { border-color: var(--terracotta); }
     .setting-input::placeholder { color: var(--text-dim); }
     .save-btn { background: var(--terracotta); color: white; border: none; padding: 8px 20px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; }
-    .save-btn:hover { background: #c05a30; }
+    .save-btn:hover { background: #015F5C; }
 
     /* STATUS TOAST */
     .toast {
@@ -1582,7 +1582,7 @@ function buildEditSystemPrompt(pageName, filename, currentHtml, photoUrls) {
 
   return `Tu es l'assistant de gestion du site des Microdoniens, une crèche parentale à Saint-Ouen.
 
-Le site est en HTML/CSS/JS pur. Design : police Jost (titres), DM Sans (texte), couleur terracotta #d96b3f, fond crème #faf8f4.
+Le site est en HTML/CSS/JS pur. Design : police Jost (titres), DM Sans (texte), couleur terracotta #027A76, fond crème #faf8f4.
 
 MODE : Modification de la page "${pageName}" (${filename})
 ${htmlSection}${photoSection}
@@ -1633,7 +1633,7 @@ function buildNewArticleSystemPrompt(vieHtml, photoUrls, exampleHtml) {
 
   return `Tu es l'assistant de gestion du site des Microdoniens, une crèche parentale à Saint-Ouen.
 
-Le site est en HTML/CSS/JS pur. Design : police Jost (titres), DM Sans (texte), couleur terracotta #d96b3f, fond crème #faf8f4.
+Le site est en HTML/CSS/JS pur. Design : police Jost (titres), DM Sans (texte), couleur terracotta #027A76, fond crème #faf8f4.
 
 MODE : Création d'un nouvel article pour la section "Vie de la crèche"
 
@@ -1683,7 +1683,7 @@ function buildNewEventSystemPrompt(evenementsHtml, photoUrls, exampleHtml) {
 
   return `Tu es l'assistant de gestion du site des Microdoniens, une crèche parentale à Saint-Ouen.
 
-Le site est en HTML/CSS/JS pur. Design : police Jost (titres), DM Sans (texte), couleur terracotta #d96b3f, fond crème #faf8f4.
+Le site est en HTML/CSS/JS pur. Design : police Jost (titres), DM Sans (texte), couleur terracotta #027A76, fond crème #faf8f4.
 
 MODE : Création d'un nouvel événement pour la section "Événements"
 
@@ -1733,7 +1733,7 @@ function buildNewPublicationSystemPrompt(presseHtml, photoUrls, exampleHtml) {
 
   return `Tu es l'assistant de gestion du site des Microdoniens, une crèche parentale à Saint-Ouen.
 
-Le site est en HTML/CSS/JS pur. Design : police Jost (titres), DM Sans (texte), couleur terracotta #d96b3f, fond crème #faf8f4.
+Le site est en HTML/CSS/JS pur. Design : police Jost (titres), DM Sans (texte), couleur terracotta #027A76, fond crème #faf8f4.
 
 MODE : Création d'une nouvelle publication pour la section "On parle de nous"
 
@@ -1777,7 +1777,7 @@ function buildOpenInscriptionsSystemPrompt(inscriptionsHtml, indexHtml) {
 
   return `Tu es l'assistant de gestion du site des Microdoniens, une crèche parentale à Saint-Ouen.
 
-Le site est en HTML/CSS/JS pur. Design : police Jost (titres), DM Sans (texte), couleur terracotta #d96b3f, fond crème #faf8f4.
+Le site est en HTML/CSS/JS pur. Design : police Jost (titres), DM Sans (texte), couleur terracotta #027A76, fond crème #faf8f4.
 
 MODE : Ouverture des inscriptions — mise à jour annuelle du site
 ${inscSection}${idxSection}
@@ -1850,7 +1850,7 @@ function buildCloseInscriptionsSystemPrompt(inscriptionsHtml, indexHtml) {
 
   return `Tu es l'assistant de gestion du site des Microdoniens, une crèche parentale à Saint-Ouen.
 
-Le site est en HTML/CSS/JS pur. Design : police Jost (titres), DM Sans (texte), couleur terracotta #d96b3f, fond crème #faf8f4.
+Le site est en HTML/CSS/JS pur. Design : police Jost (titres), DM Sans (texte), couleur terracotta #027A76, fond crème #faf8f4.
 
 MODE : Fermeture des inscriptions — mise à jour annuelle du site
 ${inscSection}${idxSection}
@@ -1947,7 +1947,7 @@ const SHARED_CSS = `*, *::before, *::after { box-sizing: border-box; margin: 0; 
 :root {
   --cream: #faf8f4; --warm-white: #ffffff; --charcoal: #1a1a1a;
   --text: #2d2d2d; --text-muted: #717171; --border: #e4e0d8;
-  --terracotta: #d96b3f; --terracotta-light: #f5ede7; --terracotta-dark: #b8562e;
+  --terracotta: #027A76; --terracotta-light: #e3f1f0; --terracotta-dark: #015F5C;
   --sage: #7a9e7e; --sage-light: #edf3ee; --yellow: #f5c842;
   --radius: 16px; --radius-sm: 8px;
   --shadow: 0 2px 16px rgba(0,0,0,0.08); --nav-h: 0px;
