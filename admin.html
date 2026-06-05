@@ -419,14 +419,24 @@
     .page-picker-search:focus { border-color: var(--terracotta); }
     .page-picker-list { max-height: 280px; overflow-y: auto; padding: 6px; display: flex; flex-direction: column; gap: 2px; }
     .page-picker-item {
-      display: flex; align-items: center; justify-content: space-between; gap: 10px;
-      padding: 9px 12px; border-radius: var(--radius-sm);
-      background: none; border: none; cursor: pointer; width: 100%; text-align: left;
-      font-family: 'DM Sans', sans-serif; transition: background 0.15s;
+      display: flex; align-items: stretch; gap: 2px;
+      border-radius: var(--radius-sm); overflow: hidden;
+      transition: background 0.15s;
     }
     .page-picker-item:hover { background: var(--surface2); }
+    .ppi-open {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding: 9px 12px; background: none; border: none; cursor: pointer;
+      flex: 1; min-width: 0; text-align: left; font-family: 'DM Sans', sans-serif;
+    }
     .ppi-name { font-size: 13px; color: var(--text); }
-    .ppi-file { font-size: 11px; color: var(--text-dim); }
+    .ppi-file { font-size: 11px; color: var(--text-dim); white-space: nowrap; }
+    .ppi-del {
+      background: none; border: none; cursor: pointer; color: var(--text-dim);
+      padding: 0 12px; font-size: 14px; border-radius: var(--radius-sm);
+      transition: all 0.15s; flex-shrink: 0;
+    }
+    .ppi-del:hover { background: var(--red-dim); color: var(--red); }
     .page-picker-empty { padding: 14px; font-size: 12px; color: var(--text-dim); text-align: center; }
 
     /* LOADING */
@@ -991,10 +1001,13 @@ function renderChildPicker(children, dirLabel) {
   card.className = 'page-picker';
   const itemsHtml = children.map(c => {
     const name = prettifyPageName(c);
-    return `<button class="page-picker-item" data-file="${escHtml(c)}" data-name="${escHtml(name)}" onclick="editPage(this.dataset.file, this.dataset.name, null)">
-      <span class="ppi-name">${escHtml(name)}</span>
-      <span class="ppi-file">${escHtml(c)}</span>
-    </button>`;
+    return `<div class="page-picker-item" data-file="${escHtml(c)}" data-name="${escHtml(name)}">
+      <button class="ppi-open" onclick="const i=this.closest('.page-picker-item');editPage(i.dataset.file, i.dataset.name, null)">
+        <span class="ppi-name">${escHtml(name)}</span>
+        <span class="ppi-file">${escHtml(c)}</span>
+      </button>
+      <button class="ppi-del" title="Supprimer définitivement" onclick="const i=this.closest('.page-picker-item');showDeleteConfirm(i.dataset.file, i.dataset.name)">🗑</button>
+    </div>`;
   }).join('');
   card.innerHTML = `
     <div class="page-picker-head">
@@ -1035,7 +1048,7 @@ async function editPage(file, name, btn) {
   state.isNewArticle = false;
   renderContextTags();
 
-  addAiMessage(`Je vais t'aider à modifier la page **${name}** (\`${file}\`).\n\nDis-moi ce que tu veux faire :\n• ✏️ **Modifier un texte** — colle ou décris le nouveau texte\n• 🖼️ **Changer une image** — joins la nouvelle photo avec 📎\n• ➖ **Supprimer un élément** — dis-moi quel bloc enlever\n• ➕ **Ajouter un élément** — décris ce que tu veux ajouter\n\nJe prépare la modification et tu valides avant de publier.`);
+  addAiMessage(`Je vais t'aider à modifier la page **${name}** (\`${file}\`).\n\nDis-moi ce que tu veux faire :\n• ✏️ **Modifier un texte** — colle ou décris le nouveau texte\n• 🖼️ **Changer une image** — joins la nouvelle photo avec 📎\n• ➖ **Supprimer un élément** — dis-moi quel bloc enlever\n• ➕ **Ajouter un élément** — décris ce que tu veux ajouter\n• 🗑 **Supprimer un article/événement/publication entier** — dis "supprime l'article xyz"\n\nJe prépare la modification et tu valides avant de publier.`);
 
   // Prefetch the current page HTML in the background
   if (state.config.githubToken && state.config.githubRepo) {
@@ -1057,7 +1070,7 @@ async function editPage(file, name, btn) {
         const children = await listChildPages(child.dir);
         hideThinking();
         if (children.length) {
-          addAiMessage(`Cette page est une liste. Tu peux modifier la page liste elle-même, **ou** choisir une des ${children.length} ${child.label} ci-dessous pour l'éditer directement :`);
+          addAiMessage(`Cette page est une liste. Tu peux modifier la page liste elle-même, **ou** choisir une des ${children.length} ${child.label} ci-dessous pour l'éditer (✏️) ou la supprimer (🗑). Tu peux aussi simplement me dire "supprime l'article xyz".`);
           renderChildPicker(children, child.label);
         }
       } catch(e) {
@@ -1434,6 +1447,7 @@ async function sendPrompt() {
     const articleFileMatch = reply.match(/ARTICLE_FILE:\s*(vie\/[^\s<]+\.html)/);
     const eventFileMatch = reply.match(/EVENT_FILE:\s*(evenements\/[^\s<]+\.html)/);
     const publicationFileMatch = reply.match(/PUBLICATION_FILE:\s*(presse\/[^\s<]+\.html)/);
+    const deletePageMatch = reply.match(/DELETE_PAGE:\s*((?:vie|evenements|presse)\/[^\s<]+\.html)/);
 
     const cleanReply = reply
       .replace(/<html-output>[\s\S]*?<\/html-output>/, '')
@@ -1445,6 +1459,7 @@ async function sendPrompt() {
       .replace(/ARTICLE_FILE:[^\n]*\n?/, '')
       .replace(/EVENT_FILE:[^\n]*\n?/, '')
       .replace(/PUBLICATION_FILE:[^\n]*\n?/, '')
+      .replace(/DELETE_PAGE:[^\n]*\n?/, '')
       .replace('PREVIEW_READY', '')
       // Strip any raw HTML blocks Claude may have echoed in its text (<!DOCTYPE … </html>)
       .replace(/<!DOCTYPE[\s\S]*?<\/html>/gi, '')
@@ -1456,6 +1471,10 @@ async function sendPrompt() {
       if (state.pendingHtml && state.pendingFile) {
         await publishAll();
       }
+    } else if (deletePageMatch) {
+      const f = deletePageMatch[1].trim();
+      if (cleanReply) addAiMessage(cleanReply);
+      showDeleteConfirm(f, prettifyPageName(f));
     } else if (htmlMatch) {
       state.pendingHtml = htmlMatch[1].trim();
       state.pendingVieHtml = vieUpdateMatch ? vieUpdateMatch[1].trim() : null;
@@ -1567,12 +1586,20 @@ OPÉRATIONS QUE TU SAIS FAIRE (exécute celle(s) que l'utilisateur demande) :
 - ➖ SUPPRIMER UN ÉLÉMENT : retire entièrement le bloc HTML visé (section, image, paragraphe, carte, lien…). Ne laisse ni balise vide ni conteneur orphelin.
 - ➕ AJOUTER UN ÉLÉMENT : insère le nouveau bloc au bon endroit, en réutilisant les classes et le style des éléments voisins.
 
+SUPPRESSION D'UNE PAGE ENTIÈRE (article / événement / publication) :
+- Si l'utilisateur demande de SUPPRIMER ENTIÈREMENT un article, un événement ou une publication (et non pas seulement un élément à l'intérieur de la page courante), NE génère AUCUN HTML.
+- Réponds par UNE seule phrase de confirmation, puis termine par la ligne :
+  DELETE_PAGE: vie/slug.html
+  (ou evenements/slug.html, ou presse/slug.html selon le cas)
+- Identifie le bon fichier grâce aux liens (href / data-href / onclick) présents dans le HTML de la page liste. Si plusieurs correspondent, demande lequel avant d'agir.
+- N'utilise DELETE_PAGE QUE pour des pages situées dans vie/, evenements/ ou presse/. La carte de la liste et le fichier seront retirés automatiquement, et l'utilisateur confirmera avant suppression définitive.
+
 RÈGLES :
 - Modifie UNIQUEMENT ce qui est demandé ; conserve tout le reste à l'identique (head, nav, footer, scripts, classes, structure).
 - Conserve les chemins relatifs existants (../css/, ../js/, ../images/ pour les sous-pages).
 - Si la demande est ambiguë, pose UNE seule question courte avant de générer (sans bloc HTML).
 - Réponds en français en UNE SEULE phrase concise qui décrit ce que tu as changé (AUCUN HTML dans ce texte).
-- Termine TOUJOURS par :
+- Termine TOUJOURS par (sauf en cas de suppression de page, voir ci-dessus) :
   PREVIEW_READY
   <html-output>
   [HTML complet de la page modifiée]
@@ -2055,6 +2082,171 @@ const LIST_TARGETS = {
   evenements:  { file: 'evenements.html',  re: /(<div[^>]+id="eventsGrid"[^>]*>)/i },
   presse:      { file: 'presse.html',      re: /(<div[^>]+class="[^"]*coverage-list[^"]*"[^>]*>)/i },
 };
+
+// Map child dir → listing file + how to find/remove every card linking to a child
+// page. A page can appear in several card layouts (e.g. presse has a featured
+// "press-card" AND a "coverage-item" list entry), so each type lists all openers.
+const CARD_REMOVE = {
+  vie:        { file: 'vie.html',        tag: 'article', openers: [/<article\b[^>]*activity-post[^>]*>/gi] },
+  evenements: { file: 'evenements.html', tag: 'div',     openers: [/<div\b[^>]*event-card[^>]*>/gi] },
+  presse:     { file: 'presse.html',     tag: 'div',     openers: [/<div\b[^>]*press-card[^>]*>/gi, /<div\b[^>]*coverage-item[^>]*>/gi] },
+};
+
+// Find the end index (exclusive) of an element of `tag` that starts at `start`,
+// using balanced open/close counting (handles nested same-tag elements).
+function matchElementEnd(html, start, tag) {
+  const re = new RegExp(`<${tag}\\b|</${tag}\\s*>`, 'gi');
+  re.lastIndex = start;
+  let depth = 0, m;
+  while ((m = re.exec(html)) !== null) {
+    if (m[0][1] === '/') {
+      depth--;
+      if (depth === 0) return m.index + m[0].length;
+    } else {
+      depth++;
+    }
+  }
+  return -1;
+}
+
+// Remove EVERY card (in `listHtml`) whose link references `file`. Returns the
+// updated HTML, or null if no matching card was found.
+function removeCardForFile(listHtml, file) {
+  const type = file.split('/')[0];
+  const cfg = CARD_REMOVE[type];
+  if (!cfg) return null;
+
+  let html = listHtml;
+  let removedAny = false;
+
+  for (let guard = 0; guard < 30; guard++) {
+    const refIdx = html.indexOf(file);
+    if (refIdx === -1) break;
+
+    // Nearest card opener (any layout) at or before the reference
+    let start = -1, m;
+    for (const re of cfg.openers) {
+      re.lastIndex = 0;
+      let last = -1;
+      while ((m = re.exec(html)) !== null) {
+        if (m.index <= refIdx) last = m.index; else break;
+      }
+      if (last > start) start = last;
+    }
+    if (start === -1) break; // reference not inside a known card
+
+    const end = matchElementEnd(html, start, cfg.tag);
+    if (end === -1 || refIdx > end) break; // malformed or ref outside card
+
+    const before = html.slice(0, start).replace(/[ \t]*$/, '');
+    const after = html.slice(end);
+    html = (before + after).replace(/\n[ \t]*\n[ \t]*\n+/g, '\n\n');
+    removedAny = true;
+  }
+
+  return removedAny ? html : null;
+}
+
+// Delete a file from GitHub (requires its current SHA)
+async function deleteFileFromGitHub(filename, commitMsg) {
+  const { githubToken, githubRepo, githubBranch } = state.config;
+  const branch = githubBranch || 'main';
+  const headers = {
+    'Authorization': `token ${githubToken}`,
+    'Content-Type': 'application/json',
+    'Accept': 'application/vnd.github.v3+json',
+  };
+
+  const getRes = await fetch(`https://api.github.com/repos/${githubRepo}/contents/${filename}?ref=${branch}`, { headers });
+  if (getRes.status === 404) return false; // already gone
+  if (!getRes.ok) throw new Error(`Fichier introuvable (${getRes.status})`);
+  const sha = (await getRes.json()).sha;
+
+  const delRes = await fetch(`https://api.github.com/repos/${githubRepo}/contents/${filename}`, {
+    method: 'DELETE', headers,
+    body: JSON.stringify({ message: commitMsg, sha, branch }),
+  });
+  if (!delRes.ok) {
+    const err = await delRes.json();
+    throw new Error(err.message || 'Suppression échouée');
+  }
+  return true;
+}
+
+// Confirmation card before deletion (one-line message → confirm bar)
+function showDeleteConfirm(file, name) {
+  const conv = document.getElementById('conversation');
+  const card = document.createElement('div');
+  card.className = 'preview-card';
+  const safeFile = file.replace(/'/g, "\\'");
+  const safeName = (name || prettifyPageName(file)).replace(/'/g, "\\'");
+  card.innerHTML = `
+    <div class="preview-card-bar">
+      <div class="preview-card-title">
+        <div class="dot" style="background:var(--red)"></div>
+        Suppression — ${escHtml(file)}
+      </div>
+    </div>
+    <div class="publish-bar">
+      <p>Supprimer définitivement <strong>${escHtml(name || prettifyPageName(file))}</strong> ? La carte sera retirée de la liste et la page supprimée. <strong>Action irréversible.</strong></p>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" onclick="this.closest('.preview-card').remove()">Annuler</button>
+        <button class="btn btn-danger" onclick="this.closest('.preview-card').remove(); performDelete('${safeFile}', '${safeName}')">🗑 Supprimer définitivement</button>
+      </div>
+    </div>`;
+  conv.appendChild(card);
+  card.scrollIntoView({ behavior: 'smooth', block: 'end' });
+}
+
+// Perform the actual deletion: remove the list card, then delete the file
+async function performDelete(file, name) {
+  if (!state.config.githubToken || !state.config.githubRepo) {
+    showToast('Configure d\'abord GitHub dans les paramètres', 'err');
+    showView('settings', null);
+    return;
+  }
+  showToast('Suppression en cours…', 'info');
+  showThinkingLabel('Suppression en cours…');
+  try {
+    const type = file.split('/')[0];
+    const cfg = CARD_REMOVE[type];
+    let cardRemoved = false;
+
+    if (cfg) {
+      try {
+        const listHtml = await fetchFileFromGitHub(cfg.file);
+        const updated = removeCardForFile(listHtml, file);
+        if (updated && updated !== listHtml) {
+          await pushFileToGitHub(cfg.file, updated, `🗑 Retrait de la carte « ${file} » dans ${cfg.file}`);
+          cardRemoved = true;
+        }
+      } catch(e) { /* non-blocking — still delete the file */ }
+    }
+
+    const deleted = await deleteFileFromGitHub(file, `🗑 Suppression de ${file}`);
+
+    hideThinking();
+
+    const now = new Date().toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+    localStorage.setItem('microd_lastupdate', now);
+    document.getElementById('lastUpdate').textContent = now;
+
+    // Remove the item from any open picker
+    document.querySelectorAll('.page-picker-item').forEach(it => {
+      if (it.dataset.file === file) it.remove();
+    });
+
+    showToast('✓ Supprimé !', 'ok');
+    const cardNote = cardRemoved
+      ? 'La carte a été retirée de la liste et la page supprimée.'
+      : (deleted ? 'La page a été supprimée (aucune carte de liste correspondante trouvée).' : 'La page était déjà absente.');
+    addAiMessage(`🗑 **Supprimé !** ${cardNote}\n\nLe site sera à jour dans ~30 secondes${state.config.siteUrl ? ' sur ' + state.config.siteUrl : ''}.`);
+  } catch(err) {
+    hideThinking();
+    showToast('Erreur suppression : ' + err.message, 'err');
+    addAiMessage(`⚠️ Erreur lors de la suppression : **${err.message}**\n\nVérifie que ton token GitHub a les droits d'écriture sur le repo.`);
+  }
+}
 
 // Insert a card snippet at the top of the list container in a freshly-fetched
 // list page, and push it. Robust replacement for full-page regeneration.
