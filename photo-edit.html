@@ -301,7 +301,7 @@
   <div class="pe-toolbar" id="toolbar">
     <span class="count" id="globalCount"></span>
     <button class="pe-btn" id="shuffleAll">🎲 Mélanger tout</button>
-    <button class="pe-btn primary" id="downloadAll">⬇️ Tout télécharger</button>
+    <button class="pe-btn primary" id="downloadAll">⬇️ Tout télécharger (ZIP)</button>
     <button class="pe-btn" id="clearAll">🗑️ Effacer</button>
   </div>
 
@@ -365,6 +365,7 @@
 
 <script src="js/nav.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/dist/face-api.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script>
   const EMOJIS = ['🐶','🐯','🐰','🐼','🐨','🦊','🐭','🐱','🦁'];
   const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model/';
@@ -647,6 +648,15 @@
     updateGlobalCount();
   }
 
+  // Render a card to a clean (no selection chrome) PNG blob.
+  function cardToBlob(card) {
+    return new Promise((resolve) => {
+      const off = document.createElement('canvas');
+      drawScene(card, off, false);
+      off.toBlob((blob) => resolve(blob), 'image/png');
+    });
+  }
+
   function downloadCard(card) {
     const off = document.createElement('canvas');
     drawScene(card, off, false);
@@ -784,9 +794,48 @@
     });
   });
 
-  downloadAllBtn.addEventListener('click', () => {
+  downloadAllBtn.addEventListener('click', async () => {
     const list = [...cards.values()];
-    list.forEach((card, i) => setTimeout(() => downloadCard(card), i * 300));
+    if (!list.length) return;
+
+    // Fallback if the ZIP library failed to load: download files individually.
+    if (typeof JSZip === 'undefined') {
+      list.forEach((card, i) => setTimeout(() => downloadCard(card), i * 300));
+      return;
+    }
+
+    const original = downloadAllBtn.textContent;
+    downloadAllBtn.disabled = true;
+    downloadAllBtn.textContent = '⏳ Création du ZIP…';
+    try {
+      const zip = new JSZip();
+      const usedNames = {};
+      for (const card of list) {
+        const blob = await cardToBlob(card);
+        let name = makeDownloadName(card.fileName);
+        if (usedNames[name]) {
+          const n = ++usedNames[name];
+          name = name.replace(/\.png$/i, '') + '-' + n + '.png';
+        } else {
+          usedNames[name] = 1;
+        }
+        zip.file(name, blob);
+      }
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(zipBlob);
+      a.download = 'photos-emoji.zip';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    } catch (e) {
+      console.error(e);
+      setStatus("Échec de la création du ZIP. Réessayez ou téléchargez les photos une par une.", { error: true });
+    } finally {
+      downloadAllBtn.disabled = false;
+      downloadAllBtn.textContent = original;
+    }
   });
 
   clearAllBtn.addEventListener('click', () => {
