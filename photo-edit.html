@@ -366,7 +366,7 @@
   let modelReady = false;
   let modelLoadingPromise = null;
   let cardSeq = 0;
-  const cards = new Map(); // id -> { image, boxes, emojis, canvas, fileName, els }
+  const cards = new Map(); // id -> { image, faces, emojis, canvas, fileName, els }
 
   function setStatus(html, opts = {}) {
     statusEl.style.display = 'flex';
@@ -383,7 +383,10 @@
     if (modelReady) return true;
     if (!modelLoadingPromise) {
       setStatus('Chargement du module de détection… (une seule fois)', { spinner: true });
-      modelLoadingPromise = faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL)
+      modelLoadingPromise = Promise.all([
+        faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+        faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL),
+      ])
         .then(() => { modelReady = true; })
         .catch((err) => { modelLoadingPromise = null; throw err; });
     }
@@ -400,18 +403,49 @@
 
   // Run detection at several input sizes and merge results so we catch both
   // large close-up faces and small distant faces in group photos. Maximizing
-  // recall matters here: a missed face means an uncovered child.
-  async function detectFacesMultiScale(image) {
+  // recall matters here: a missed face means an uncovered child. We also pull
+  // 68-point landmarks so the emoji can be centered/sized on the actual face
+  // (eyes/nose/jaw) instead of the loose detection box.
+  async function detectFaces(image) {
     const sizes = [416, 512, 608, 800];
     let all = [];
     for (const inputSize of sizes) {
-      const opts = new faceapi.TinyFaceDetectorOptions({ inputSize, scoreThreshold: 0.35 });
-      const dets = await faceapi.detectAllFaces(image, opts);
-      all = all.concat(dets.map(d => ({
-        x: d.box.x, y: d.box.y, width: d.box.width, height: d.box.height, score: d.score,
-      })));
+      const opts = new faceapi.TinyFaceDetectorOptions({ inputSize, scoreThreshold: 0.3 });
+      const results = await faceapi.detectAllFaces(image, opts).withFaceLandmarks(true);
+      for (const r of results) {
+        const b = r.detection.box;
+        all.push({
+          x: b.x, y: b.y, width: b.width, height: b.height,
+          score: r.detection.score, landmarks: r.landmarks,
+        });
+      }
     }
-    return mergeBoxes(all);
+    return mergeBoxes(all).map(toPlacement);
+  }
+
+  // Convert a detection (box + landmarks) into where/how big to draw the emoji.
+  function toPlacement(d) {
+    const pts = d.landmarks && d.landmarks.positions;
+    if (pts && pts.length) {
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      for (const p of pts) {
+        if (p.x < minX) minX = p.x; if (p.x > maxX) maxX = p.x;
+        if (p.y < minY) minY = p.y; if (p.y > maxY) maxY = p.y;
+      }
+      const lmW = maxX - minX, lmH = maxY - minY;
+      // Landmarks span eyebrows->chin; the forehead sits above them, so nudge
+      // the center up a bit and size the emoji to cover the whole head.
+      const cx = (minX + maxX) / 2;
+      const cy = (minY + maxY) / 2 - lmH * 0.18;
+      const size = Math.max(lmW * 1.55, lmH * 1.7);
+      return { cx, cy, size, score: d.score };
+    }
+    return {
+      cx: d.x + d.width / 2,
+      cy: d.y + d.height / 2,
+      size: Math.max(d.width, d.height) * 1.6,
+      score: d.score,
+    };
   }
 
   function iou(a, b) {
@@ -446,7 +480,7 @@
   }
 
   function renderCard(card) {
-    const { image, boxes, emojis, canvas } = card;
+    const { image, faces, emojis, canvas } = card;
     const ctx = canvas.getContext('2d');
     canvas.width = image.naturalWidth;
     canvas.height = image.naturalHeight;
@@ -455,17 +489,14 @@
 
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    boxes.forEach((box, i) => {
-      const cx = box.x + box.width / 2;
-      const cy = box.y + box.height / 2;
-      const size = Math.max(box.width, box.height) * 1.6;
-      ctx.font = size + "px 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
-      ctx.fillText(emojis[i], cx, cy);
+    faces.forEach((f, i) => {
+      ctx.font = f.size + "px 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
+      ctx.fillText(emojis[i], f.cx, f.cy);
     });
   }
 
   function updateFaceCountLabel(card) {
-    const n = card.boxes.length;
+    const n = card.faces.length;
     const el = card.els.faceCount;
     if (n === 0) {
       el.textContent = 'Aucun visage détecté';
@@ -525,19 +556,19 @@
     const ok = await ensureModel();
     if (!ok) { ui.els.loading.innerHTML = 'Détection indisponible'; return; }
 
-    let boxes = [];
+    let faces = [];
     try {
-      boxes = await detectFacesMultiScale(image);
+      faces = await detectFaces(image);
     } catch (e) {
       console.error(e);
       ui.els.loading.innerHTML = 'Erreur de détection';
       return;
     }
 
-    const emojis = boxes.map(() => randomEmoji());
+    const emojis = faces.map(() => randomEmoji());
 
     const card = {
-      id: ui.id, image, boxes, emojis,
+      id: ui.id, image, faces, emojis,
       canvas: ui.canvas, fileName: file.name, els: ui.els,
     };
     cards.set(ui.id, card);
@@ -548,7 +579,7 @@
     ui.els.downloadBtn.disabled = false;
 
     ui.els.shuffleBtn.addEventListener('click', () => {
-      card.emojis = card.boxes.map(() => randomEmoji());
+      card.emojis = card.faces.map(() => randomEmoji());
       renderCard(card);
     });
     ui.els.downloadBtn.addEventListener('click', () => downloadCard(card));
@@ -576,7 +607,7 @@
 
   function updateGlobalCount() {
     const total = cards.size;
-    const faces = [...cards.values()].reduce((s, c) => s + c.boxes.length, 0);
+    const faces = [...cards.values()].reduce((s, c) => s + c.faces.length, 0);
     globalCount.textContent = total + (total > 1 ? ' photos' : ' photo') + ' · ' + faces + (faces > 1 ? ' visages' : ' visage');
   }
 
@@ -602,14 +633,14 @@
 
   shuffleAllBtn.addEventListener('click', () => {
     cards.forEach(card => {
-      if (card.boxes.length === 0) return;
-      card.emojis = card.boxes.map(() => randomEmoji());
+      if (card.faces.length === 0) return;
+      card.emojis = card.faces.map(() => randomEmoji());
       renderCard(card);
     });
   });
 
   downloadAllBtn.addEventListener('click', () => {
-    const list = [...cards.values()].filter(c => c.boxes.length >= 0);
+    const list = [...cards.values()];
     list.forEach((card, i) => setTimeout(() => downloadCard(card), i * 300));
   });
 
