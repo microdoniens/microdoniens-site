@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Cacher les visages — Les Microdoniens</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/shared.css" />
+  <style>
+    /* ── PAGE HEADER ── */
+    .pe-header {
+      padding-top: calc(var(--nav-h) + 56px);
+      padding-bottom: 32px;
+      padding-left: 24px; padding-right: 24px;
+      max-width: 1100px; margin: 0 auto;
+    }
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+    .breadcrumb a { color: var(--text-muted); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--terracotta); }
+    .breadcrumb > span { color: var(--border); }
+    .page-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 13px; font-weight: 500;
+      color: var(--terracotta);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 16px;
+    }
+    .page-eyebrow::before {
+      content: '';
+      width: 24px; height: 2px;
+      background: var(--terracotta);
+      border-radius: 2px;
+    }
+    h1 {
+      font-family: 'Baloo 2', sans-serif;
+      font-size: clamp(36px, 5vw, 56px);
+      font-weight: 400;
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      color: var(--charcoal);
+      margin-bottom: 20px;
+    }
+    h1 em { font-style: italic; color: var(--terracotta); }
+    .pe-intro {
+      font-size: 17px; line-height: 1.75;
+      color: var(--text-muted); max-width: 640px;
+    }
+
+    /* ── PRIVACY BADGE ── */
+    .privacy-badge {
+      display: flex; gap: 14px; align-items: flex-start;
+      margin-top: 24px;
+      background: var(--sage-light);
+      border: 1.5px solid rgba(122,158,126,0.35);
+      border-radius: var(--radius);
+      padding: 16px 20px; max-width: 640px;
+    }
+    .privacy-badge .pb-icon { font-size: 22px; flex-shrink: 0; line-height: 1.4; }
+    .privacy-badge strong { display: block; color: var(--charcoal); font-size: 14px; margin-bottom: 3px; }
+    .privacy-badge p { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+    .pe-caution {
+      margin-top: 14px; max-width: 640px;
+      font-size: 13px; color: var(--text-muted); line-height: 1.6;
+    }
+
+    /* ── MAIN ── */
+    .pe-main {
+      max-width: 1100px; margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    /* ── DROPZONE ── */
+    .dropzone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      background: var(--warm-white);
+      padding: 48px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--terracotta);
+      background: var(--terracotta-light);
+    }
+    .dropzone-icon { font-size: 44px; margin-bottom: 12px; }
+    .dropzone h3 {
+      font-family: 'Baloo 2', sans-serif; font-weight: 400;
+      font-size: 22px; color: var(--charcoal); margin-bottom: 8px;
+    }
+    .dropzone p { font-size: 14px; color: var(--text-muted); }
+    .dropzone .dz-btn {
+      display: inline-block; margin-top: 18px;
+      padding: 12px 24px; border-radius: 50px;
+      background: var(--terracotta); color: white;
+      font-size: 15px; font-weight: 500;
+    }
+
+    /* ── STATUS ── */
+    .pe-status {
+      display: flex; align-items: center; gap: 10px;
+      margin-top: 20px; font-size: 14px; color: var(--text-muted);
+    }
+    .pe-status.error { color: #b3261e; }
+    .spinner {
+      width: 16px; height: 16px; flex-shrink: 0;
+      border: 2px solid var(--border);
+      border-top-color: var(--terracotta);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── TOOLBAR ── */
+    .pe-toolbar {
+      display: none;
+      flex-wrap: wrap; gap: 12px; align-items: center;
+      margin-top: 32px; padding-bottom: 8px;
+    }
+    .pe-toolbar.show { display: flex; }
+    .pe-toolbar .count {
+      font-size: 14px; color: var(--text-muted);
+      margin-right: auto;
+    }
+    .pe-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 11px 20px; border-radius: 50px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px; font-weight: 500;
+      cursor: pointer; border: 1.5px solid var(--border);
+      background: white; color: var(--charcoal);
+      transition: all 0.2s;
+    }
+    .pe-btn:hover { border-color: var(--charcoal); transform: translateY(-1px); }
+    .pe-btn.primary {
+      background: var(--terracotta); color: white; border-color: var(--terracotta);
+      box-shadow: 0 4px 14px rgba(2,122,118,0.35);
+    }
+    .pe-btn.primary:hover { background: var(--terracotta-dark); border-color: var(--terracotta-dark); }
+    .pe-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* ── RESULTS GRID ── */
+    .results {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 24px; margin-top: 24px;
+    }
+    .result-card {
+      background: var(--warm-white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      display: flex; flex-direction: column;
+    }
+    .result-canvas-wrap {
+      position: relative;
+      background: #f0ede7;
+      display: flex; align-items: center; justify-content: center;
+      min-height: 160px;
+    }
+    .result-canvas-wrap canvas {
+      width: 100%; height: auto; display: block;
+    }
+    .card-loading {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.7);
+      font-size: 13px; color: var(--text-muted);
+      gap: 8px;
+    }
+    .result-meta {
+      padding: 14px 16px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .face-count {
+      font-size: 13px; color: var(--text); font-weight: 500;
+    }
+    .face-count.none { color: var(--text-muted); font-weight: 400; }
+    .result-meta .meta-actions {
+      margin-left: auto; display: flex; gap: 8px;
+    }
+    .icon-btn {
+      width: 36px; height: 36px;
+      display: inline-flex; align-items: center; justify-content: center;
+      border-radius: 10px; border: 1.5px solid var(--border);
+      background: white; cursor: pointer; font-size: 16px;
+      transition: all 0.15s;
+    }
+    .icon-btn:hover { border-color: var(--terracotta); background: var(--terracotta-light); }
+    .icon-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .file-name {
+      padding: 0 16px 14px; font-size: 12px; color: var(--text-muted);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    @media (max-width: 600px) {
+      .results { grid-template-columns: 1fr; }
+      .pe-toolbar .count { width: 100%; margin-bottom: 4px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-mark"></div>
+      <div class="nav-logo-text">Les Microdoniens<span>Crèche parentale · Saint-Ouen</span></div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Accueil</a></li>
+      <li><a href="vie.html">Vie de la crèche</a></li>
+      <li><a href="association.html">L'association</a></li>
+      <li><a href="inscriptions.html">Inscriptions 26/27</a></li>
+      <li class="nav-dropdown">
+        <button class="nav-dropdown-btn">Autres pages ▾</button>
+        <div class="nav-dropdown-menu">
+          <a href="pedagogie.html">Pédagogie</a>
+          <a href="evenements.html">Événements</a>
+          <a href="historique.html">Historique</a>
+          <a href="presse.html">On parle de nous</a>
+          <a href="contact.html">Contact</a>
+          </div>
+      </li>
+      <li><a href="contact.html" class="nav-cta">Contact</a></li>
+    </ul>
+    <button class="hamburger" onclick="toggleMenu()" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html" onclick="toggleMenu()">Accueil</a>
+  <a href="vie.html" onclick="toggleMenu()">Vie de la crèche</a>
+  <a href="association.html" onclick="toggleMenu()">L'association</a>
+  <a href="inscriptions.html" onclick="toggleMenu()">Inscriptions 26/27</a>
+  <a href="pedagogie.html" onclick="toggleMenu()">Pédagogie</a>
+  <a href="evenements.html" onclick="toggleMenu()">Événements</a>
+  <a href="historique.html" onclick="toggleMenu()">Historique</a>
+  <a href="presse.html" onclick="toggleMenu()">On parle de nous</a>
+  <a href="contact.html" onclick="toggleMenu()">Contact</a>
+</div>
+
+<!-- HEADER -->
+<div class="pe-header">
+  <div class="breadcrumb">
+    <a href="index.html">Accueil</a><span>›</span><span>Cacher les visages</span>
+  </div>
+  <div class="page-eyebrow">Outil photo</div>
+  <h1>Cacher les <em>visages</em></h1>
+  <p class="pe-intro">
+    Importez une ou plusieurs photos : un emoji animal est automatiquement placé sur
+    chaque visage détecté. Idéal pour partager des photos d'enfants sans montrer leur visage.
+  </p>
+  <div class="privacy-badge">
+    <div class="pb-icon">🔒</div>
+    <div>
+      <strong>Vos photos restent sur votre appareil</strong>
+      <p>La détection des visages se fait entièrement dans votre navigateur. Aucune photo n'est envoyée
+      sur Internet ni à un service tiers — seul le programme de détection est téléchargé une fois.</p>
+    </div>
+  </div>
+  <p class="pe-caution">⚠️ La détection est automatique et peut manquer certains visages (de profil, flous, lointains ou de dos). Vérifiez chaque photo avant de la partager.</p>
+</div>
+
+<!-- MAIN -->
+<div class="pe-main">
+
+  <!-- DROPZONE -->
+  <div class="dropzone" id="dropzone">
+    <div class="dropzone-icon">🖼️</div>
+    <h3>Glissez vos photos ici</h3>
+    <p>ou cliquez pour parcourir — plusieurs photos possibles (JPG, PNG…)</p>
+    <span class="dz-btn">Choisir des photos</span>
+    <input type="file" id="fileInput" accept="image/*" multiple hidden />
+  </div>
+
+  <!-- STATUS -->
+  <div class="pe-status" id="status" style="display:none;"></div>
+
+  <!-- TOOLBAR -->
+  <div class="pe-toolbar" id="toolbar">
+    <span class="count" id="globalCount"></span>
+    <button class="pe-btn" id="shuffleAll">🎲 Mélanger tout</button>
+    <button class="pe-btn primary" id="downloadAll">⬇️ Tout télécharger</button>
+    <button class="pe-btn" id="clearAll">🗑️ Effacer</button>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results" id="results"></div>
+
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <div class="nav-logo-mark"></div>
+          <div class="footer-logo-text">Les Microdoniens</div>
+        </div>
+        <p class="footer-tagline">Crèche parentale associative à Saint-Ouen. Un lieu bienveillant où enfants, familles et professionnels grandissent ensemble.</p>
+      </div>
+
+      <div class="footer-col">
+        <h4>La crèche</h4>
+        <ul>
+          <li><a href="index.html#espaces">Nos espaces</a></li>
+          <li><a href="index.html#pedagogie">Pédagogie</a></li>
+          <li><a href="vie.html">Vie de la crèche</a></li>
+          <li><a href="index.html#historique">Historique</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>L'association</h4>
+        <ul>
+          <li><a href="index.html#association">Présentation</a></li>
+          <li><a href="index.html#admission">Admission</a></li>
+          <li><a href="contact.html">Inscriptions</a></li>
+          <li><a href="index.html#presse">On parle de nous</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <ul>
+          <li><a href="contact.html">Nous écrire</a></li>
+          <li><a href="https://maps.google.com/?q=53+rue+Albert+Dhalenne+Saint-Ouen" target="_blank">53 rue Dhalenne, 93400</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© 2026 Les Microdoniens — Association loi 1901</span>
+      <span>Agréée PMI Seine-Saint-Denis</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/nav.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/dist/face-api.min.js"></script>
+<script>
+  const EMOJIS = ['🐶','🐯','🐰','🐼','🐨','🦊','🐭','🐱','🦁'];
+  const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model/';
+
+  const dropzone = document.getElementById('dropzone');
+  const fileInput = document.getElementById('fileInput');
+  const statusEl = document.getElementById('status');
+  const toolbar = document.getElementById('toolbar');
+  const resultsEl = document.getElementById('results');
+  const globalCount = document.getElementById('globalCount');
+  const shuffleAllBtn = document.getElementById('shuffleAll');
+  const downloadAllBtn = document.getElementById('downloadAll');
+  const clearAllBtn = document.getElementById('clearAll');
+
+  let modelReady = false;
+  let modelLoadingPromise = null;
+  let cardSeq = 0;
+  const cards = new Map(); // id -> { image, boxes, emojis, canvas, fileName, els }
+
+  function setStatus(html, opts = {}) {
+    statusEl.style.display = 'flex';
+    statusEl.className = 'pe-status' + (opts.error ? ' error' : '');
+    statusEl.innerHTML = (opts.spinner ? '<span class="spinner"></span>' : '') + html;
+  }
+  function hideStatus() { statusEl.style.display = 'none'; }
+
+  function randomEmoji() {
+    return EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
+  }
+
+  async function ensureModel() {
+    if (modelReady) return true;
+    if (!modelLoadingPromise) {
+      setStatus('Chargement du module de détection… (une seule fois)', { spinner: true });
+      modelLoadingPromise = faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL)
+        .then(() => { modelReady = true; })
+        .catch((err) => { modelLoadingPromise = null; throw err; });
+    }
+    try {
+      await modelLoadingPromise;
+      hideStatus();
+      return true;
+    } catch (err) {
+      console.error(err);
+      setStatus("Impossible de charger le module de détection. Vérifiez votre connexion Internet, puis réessayez.", { error: true });
+      return false;
+    }
+  }
+
+  // Run detection at several input sizes and merge results so we catch both
+  // large close-up faces and small distant faces in group photos. Maximizing
+  // recall matters here: a missed face means an uncovered child.
+  async function detectFacesMultiScale(image) {
+    const sizes = [416, 512, 608, 800];
+    let all = [];
+    for (const inputSize of sizes) {
+      const opts = new faceapi.TinyFaceDetectorOptions({ inputSize, scoreThreshold: 0.35 });
+      const dets = await faceapi.detectAllFaces(image, opts);
+      all = all.concat(dets.map(d => ({
+        x: d.box.x, y: d.box.y, width: d.box.width, height: d.box.height, score: d.score,
+      })));
+    }
+    return mergeBoxes(all);
+  }
+
+  function iou(a, b) {
+    const x1 = Math.max(a.x, b.x);
+    const y1 = Math.max(a.y, b.y);
+    const x2 = Math.min(a.x + a.width, b.x + b.width);
+    const y2 = Math.min(a.y + a.height, b.y + b.height);
+    const w = Math.max(0, x2 - x1), h = Math.max(0, y2 - y1);
+    const inter = w * h;
+    if (inter === 0) return 0;
+    const union = a.width * a.height + b.width * b.height - inter;
+    return inter / union;
+  }
+
+  function mergeBoxes(boxes) {
+    const sorted = boxes.slice().sort((a, b) => (b.score || 0) - (a.score || 0));
+    const kept = [];
+    for (const box of sorted) {
+      if (!kept.some(k => iou(k, box) > 0.4)) kept.push(box);
+    }
+    return kept;
+  }
+
+  function fileToImage(file) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => { resolve(img); };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('image load error')); };
+      img.src = url;
+    });
+  }
+
+  function renderCard(card) {
+    const { image, boxes, emojis, canvas } = card;
+    const ctx = canvas.getContext('2d');
+    canvas.width = image.naturalWidth;
+    canvas.height = image.naturalHeight;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(image, 0, 0);
+
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    boxes.forEach((box, i) => {
+      const cx = box.x + box.width / 2;
+      const cy = box.y + box.height / 2;
+      const size = Math.max(box.width, box.height) * 1.6;
+      ctx.font = size + "px 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
+      ctx.fillText(emojis[i], cx, cy);
+    });
+  }
+
+  function updateFaceCountLabel(card) {
+    const n = card.boxes.length;
+    const el = card.els.faceCount;
+    if (n === 0) {
+      el.textContent = 'Aucun visage détecté';
+      el.classList.add('none');
+    } else {
+      el.textContent = n + (n > 1 ? ' visages couverts' : ' visage couvert');
+      el.classList.remove('none');
+    }
+    card.els.shuffleBtn.disabled = n === 0;
+  }
+
+  function createCardEl(fileName) {
+    const id = ++cardSeq;
+    const cardEl = document.createElement('div');
+    cardEl.className = 'result-card';
+    cardEl.innerHTML = `
+      <div class="result-canvas-wrap">
+        <canvas></canvas>
+        <div class="card-loading"><span class="spinner"></span> Analyse…</div>
+      </div>
+      <div class="result-meta">
+        <span class="face-count">…</span>
+        <span class="meta-actions">
+          <button class="icon-btn shuffle" title="Mélanger les emojis" disabled>🎲</button>
+          <button class="icon-btn download" title="Télécharger" disabled>⬇️</button>
+        </span>
+      </div>
+      <div class="file-name">${fileName}</div>
+    `;
+    resultsEl.appendChild(cardEl);
+    return {
+      id, cardEl,
+      canvas: cardEl.querySelector('canvas'),
+      els: {
+        loading: cardEl.querySelector('.card-loading'),
+        faceCount: cardEl.querySelector('.face-count'),
+        shuffleBtn: cardEl.querySelector('.icon-btn.shuffle'),
+        downloadBtn: cardEl.querySelector('.icon-btn.download'),
+      },
+    };
+  }
+
+  async function processFile(file) {
+    if (!file.type.startsWith('image/')) return;
+    const ui = createCardEl(file.name);
+    toolbar.classList.add('show');
+    updateGlobalCount();
+
+    let image;
+    try {
+      image = await fileToImage(file);
+    } catch (e) {
+      ui.els.loading.innerHTML = 'Image illisible';
+      return;
+    }
+
+    const ok = await ensureModel();
+    if (!ok) { ui.els.loading.innerHTML = 'Détection indisponible'; return; }
+
+    let boxes = [];
+    try {
+      boxes = await detectFacesMultiScale(image);
+    } catch (e) {
+      console.error(e);
+      ui.els.loading.innerHTML = 'Erreur de détection';
+      return;
+    }
+
+    const emojis = boxes.map(() => randomEmoji());
+
+    const card = {
+      id: ui.id, image, boxes, emojis,
+      canvas: ui.canvas, fileName: file.name, els: ui.els,
+    };
+    cards.set(ui.id, card);
+
+    renderCard(card);
+    ui.els.loading.style.display = 'none';
+    updateFaceCountLabel(card);
+    ui.els.downloadBtn.disabled = false;
+
+    ui.els.shuffleBtn.addEventListener('click', () => {
+      card.emojis = card.boxes.map(() => randomEmoji());
+      renderCard(card);
+    });
+    ui.els.downloadBtn.addEventListener('click', () => downloadCard(card));
+
+    updateGlobalCount();
+  }
+
+  function downloadCard(card) {
+    card.canvas.toBlob((blob) => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = makeDownloadName(card.fileName);
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    }, 'image/png');
+  }
+
+  function makeDownloadName(name) {
+    const dot = name.lastIndexOf('.');
+    const base = dot > 0 ? name.slice(0, dot) : name;
+    return base + '-emoji.png';
+  }
+
+  function updateGlobalCount() {
+    const total = cards.size;
+    const faces = [...cards.values()].reduce((s, c) => s + c.boxes.length, 0);
+    globalCount.textContent = total + (total > 1 ? ' photos' : ' photo') + ' · ' + faces + (faces > 1 ? ' visages' : ' visage');
+  }
+
+  async function handleFiles(fileList) {
+    const files = [...fileList].filter(f => f.type.startsWith('image/'));
+    // Sequential: avoids firing many heavy multi-scale detections at once.
+    for (const file of files) {
+      await processFile(file);
+    }
+  }
+
+  // ── Events ──
+  dropzone.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', (e) => { handleFiles(e.target.files); fileInput.value = ''; });
+
+  ['dragenter', 'dragover'].forEach(evt =>
+    dropzone.addEventListener(evt, (e) => { e.preventDefault(); dropzone.classList.add('dragover'); }));
+  ['dragleave', 'drop'].forEach(evt =>
+    dropzone.addEventListener(evt, (e) => { e.preventDefault(); dropzone.classList.remove('dragover'); }));
+  dropzone.addEventListener('drop', (e) => {
+    if (e.dataTransfer && e.dataTransfer.files) handleFiles(e.dataTransfer.files);
+  });
+
+  shuffleAllBtn.addEventListener('click', () => {
+    cards.forEach(card => {
+      if (card.boxes.length === 0) return;
+      card.emojis = card.boxes.map(() => randomEmoji());
+      renderCard(card);
+    });
+  });
+
+  downloadAllBtn.addEventListener('click', () => {
+    const list = [...cards.values()].filter(c => c.boxes.length >= 0);
+    list.forEach((card, i) => setTimeout(() => downloadCard(card), i * 300));
+  });
+
+  clearAllBtn.addEventListener('click', () => {
+    cards.clear();
+    resultsEl.innerHTML = '';
+    toolbar.classList.remove('show');
+    hideStatus();
+  });
+</script>
+
+</body>
+</html>
