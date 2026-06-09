@@ -125,6 +125,16 @@
       margin-top: 32px; padding-bottom: 8px;
     }
     .pe-toolbar.show { display: flex; }
+    .pe-hint {
+      display: none;
+      margin-top: 12px;
+      font-size: 13px; color: var(--text-muted); line-height: 1.6;
+      background: var(--terracotta-light);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+    }
+    .pe-hint.show { display: block; }
+    .pe-hint strong { color: var(--charcoal); font-weight: 500; }
     .pe-toolbar .count {
       font-size: 14px; color: var(--text-muted);
       margin-right: auto;
@@ -269,7 +279,7 @@
       sur Internet ni à un service tiers — seul le programme de détection est téléchargé une fois.</p>
     </div>
   </div>
-  <p class="pe-caution">⚠️ La détection est automatique et peut manquer certains visages (de profil, flous, lointains ou de dos). Vérifiez chaque photo avant de la partager.</p>
+  <p class="pe-caution">⚠️ La détection est automatique et peut manquer certains visages (de profil, flous, lointains, de dos ou avec une tétine). Vérifiez chaque photo et ajoutez les emojis manquants à la main avant de partager.</p>
 </div>
 
 <!-- MAIN -->
@@ -294,6 +304,12 @@
     <button class="pe-btn primary" id="downloadAll">⬇️ Tout télécharger</button>
     <button class="pe-btn" id="clearAll">🗑️ Effacer</button>
   </div>
+
+  <p class="pe-hint" id="hint">
+    💡 Retouche manuelle : <strong>cliquez sur un visage oublié</strong> pour y ajouter un emoji.
+    Cliquez sur un emoji pour le <strong>déplacer</strong> (glisser), le <strong>redimensionner</strong>
+    (poignée verte) ou le <strong>retirer</strong> (✕ rouge).
+  </p>
 
   <!-- RESULTS -->
   <div class="results" id="results"></div>
@@ -362,6 +378,7 @@
   const shuffleAllBtn = document.getElementById('shuffleAll');
   const downloadAllBtn = document.getElementById('downloadAll');
   const clearAllBtn = document.getElementById('clearAll');
+  const hintEl = document.getElementById('hint');
 
   let modelReady = false;
   let modelLoadingPromise = null;
@@ -479,8 +496,23 @@
     });
   }
 
-  function renderCard(card) {
-    const { image, faces, emojis, canvas } = card;
+  const SEL_R = 0.42; // emoji visual radius as a fraction of its font size
+
+  function handleGeom(f) {
+    const r = f.size * SEL_R;
+    const d = r * 0.7071;
+    return {
+      r,
+      hx: f.cx + d, hy: f.cy + d, // resize handle (bottom-right)
+      rx: f.cx + d, ry: f.cy - d, // remove badge (top-right)
+      hr: Math.max(9, f.size * 0.11),
+    };
+  }
+
+  // Draws image + emojis to any canvas. Selection chrome (ring/handles) is only
+  // drawn on screen, never into the downloaded image.
+  function drawScene(card, canvas, withChrome) {
+    const { image, faces, emojis } = card;
     const ctx = canvas.getContext('2d');
     canvas.width = image.naturalWidth;
     canvas.height = image.naturalHeight;
@@ -493,7 +525,33 @@
       ctx.font = f.size + "px 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
       ctx.fillText(emojis[i], f.cx, f.cy);
     });
+
+    if (withChrome && card.selected >= 0 && card.selected < faces.length) {
+      const f = faces[card.selected];
+      const g = handleGeom(f);
+      ctx.save();
+      ctx.strokeStyle = '#027A76';
+      ctx.lineWidth = Math.max(2, f.size * 0.02);
+      ctx.setLineDash([f.size * 0.06, f.size * 0.06]);
+      ctx.beginPath(); ctx.arc(f.cx, f.cy, g.r, 0, Math.PI * 2); ctx.stroke();
+      ctx.setLineDash([]);
+      // resize handle (teal)
+      ctx.fillStyle = '#027A76';
+      ctx.beginPath(); ctx.arc(g.hx, g.hy, g.hr, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold ' + (g.hr * 1.3) + "px sans-serif";
+      ctx.fillText('⤡', g.hx, g.hy);
+      // remove badge (red)
+      ctx.fillStyle = '#b3261e';
+      ctx.beginPath(); ctx.arc(g.rx, g.ry, g.hr, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold ' + (g.hr * 1.4) + "px sans-serif";
+      ctx.fillText('×', g.rx, g.ry);
+      ctx.restore();
+    }
   }
+
+  function renderCard(card) { drawScene(card, card.canvas, true); }
 
   function updateFaceCountLabel(card) {
     const n = card.faces.length;
@@ -543,6 +601,7 @@
     if (!file.type.startsWith('image/')) return;
     const ui = createCardEl(file.name);
     toolbar.classList.add('show');
+    hintEl.classList.add('show');
     updateGlobalCount();
 
     let image;
@@ -568,12 +627,13 @@
     const emojis = faces.map(() => randomEmoji());
 
     const card = {
-      id: ui.id, image, faces, emojis,
+      id: ui.id, image, faces, emojis, selected: -1,
       canvas: ui.canvas, fileName: file.name, els: ui.els,
     };
     cards.set(ui.id, card);
 
     renderCard(card);
+    attachEditing(card);
     ui.els.loading.style.display = 'none';
     updateFaceCountLabel(card);
     ui.els.downloadBtn.disabled = false;
@@ -588,7 +648,9 @@
   }
 
   function downloadCard(card) {
-    card.canvas.toBlob((blob) => {
+    const off = document.createElement('canvas');
+    drawScene(card, off, false);
+    off.toBlob((blob) => {
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = makeDownloadName(card.fileName);
@@ -597,6 +659,89 @@
       a.remove();
       setTimeout(() => URL.revokeObjectURL(a.href), 1000);
     }, 'image/png');
+  }
+
+  // ── Manual touch-up: add / move / resize / remove emojis ──
+  function canvasPoint(canvas, ev) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: (ev.clientX - rect.left) * (canvas.width / rect.width),
+      y: (ev.clientY - rect.top) * (canvas.height / rect.height),
+    };
+  }
+
+  function defaultSize(card) {
+    const sizes = card.faces.map(f => f.size).filter(Boolean).sort((a, b) => a - b);
+    if (sizes.length) return sizes[Math.floor(sizes.length / 2)];
+    return Math.max(40, card.canvas.width * 0.15);
+  }
+
+  function attachEditing(card) {
+    const canvas = card.canvas;
+    let mode = null, offX = 0, offY = 0;
+    canvas.style.cursor = 'crosshair';
+    canvas.style.touchAction = 'none';
+
+    canvas.addEventListener('pointerdown', (ev) => {
+      ev.preventDefault();
+      const p = canvasPoint(canvas, ev);
+      const sel = card.selected;
+
+      if (sel >= 0 && sel < card.faces.length) {
+        const g = handleGeom(card.faces[sel]);
+        if (Math.hypot(p.x - g.rx, p.y - g.ry) <= g.hr * 1.6) {
+          card.faces.splice(sel, 1);
+          card.emojis.splice(sel, 1);
+          card.selected = -1;
+          renderCard(card); updateFaceCountLabel(card); updateGlobalCount();
+          return;
+        }
+        if (Math.hypot(p.x - g.hx, p.y - g.hy) <= g.hr * 1.8) {
+          mode = 'resize';
+          canvas.setPointerCapture(ev.pointerId);
+          return;
+        }
+      }
+
+      let hit = -1;
+      for (let i = card.faces.length - 1; i >= 0; i--) {
+        const f = card.faces[i];
+        if (Math.hypot(p.x - f.cx, p.y - f.cy) <= f.size * 0.5) { hit = i; break; }
+      }
+
+      if (hit >= 0) {
+        card.selected = hit;
+        mode = 'move';
+        offX = card.faces[hit].cx - p.x;
+        offY = card.faces[hit].cy - p.y;
+      } else {
+        card.faces.push({ cx: p.x, cy: p.y, size: defaultSize(card) });
+        card.emojis.push(randomEmoji());
+        card.selected = card.faces.length - 1;
+        mode = 'move'; offX = 0; offY = 0;
+        updateFaceCountLabel(card); updateGlobalCount();
+      }
+      canvas.setPointerCapture(ev.pointerId);
+      renderCard(card);
+    });
+
+    canvas.addEventListener('pointermove', (ev) => {
+      if (!mode) return;
+      const f = card.faces[card.selected];
+      if (!f) return;
+      const p = canvasPoint(canvas, ev);
+      if (mode === 'move') { f.cx = p.x + offX; f.cy = p.y + offY; }
+      else if (mode === 'resize') { f.size = Math.max(16, Math.hypot(p.x - f.cx, p.y - f.cy) / SEL_R); }
+      renderCard(card);
+    });
+
+    const endPointer = (ev) => {
+      if (!mode) return;
+      mode = null;
+      try { canvas.releasePointerCapture(ev.pointerId); } catch (e) {}
+    };
+    canvas.addEventListener('pointerup', endPointer);
+    canvas.addEventListener('pointercancel', endPointer);
   }
 
   function makeDownloadName(name) {
@@ -648,7 +793,16 @@
     cards.clear();
     resultsEl.innerHTML = '';
     toolbar.classList.remove('show');
+    hintEl.classList.remove('show');
     hideStatus();
+  });
+
+  // Escape deselects any active emoji selection.
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    cards.forEach(card => {
+      if (card.selected !== -1) { card.selected = -1; renderCard(card); }
+    });
   });
 </script>
 
