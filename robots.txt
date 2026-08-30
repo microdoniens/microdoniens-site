@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Cockpit d'administration — ne doit jamais être indexé
+Disallow: /admin.html
+Disallow: /admin
+
+Sitemap: https://lesmicrodoniens.netlify.app/sitemap.xml
