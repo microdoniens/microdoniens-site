@@ -694,7 +694,7 @@
           <div class="prompt-context-bar">
             <span>Contexte :</span>
             <div id="contextTags" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
-            <span id="noContext" style="color:var(--text-dim);font-size:12px;">Aucune page — Claude va créer un nouvel article</span>
+            <span id="noContext" style="color:var(--text-dim);font-size:12px;">Aucune page sélectionnée</span>
           </div>
 
           <div class="prompt-input-wrap">
@@ -843,6 +843,7 @@ const state = {
   isOpeningInscriptions: false,
   isClosingInscriptions: false,
   isThinking: false,
+  editorEpoch: 0,
 };
 
 // ── INIT ──
@@ -949,6 +950,11 @@ function showView(name, btn) {
   document.getElementById('topbarTitle').textContent = titles[name] || name;
 }
 
+function bumpEditorEpoch() {
+  state.editorEpoch += 1;
+  return state.editorEpoch;
+}
+
 function resetEditor() {
   state.conversation = [];
   state.attachments = [];
@@ -962,6 +968,7 @@ function resetEditor() {
   state.pendingListType = null;
   state.currentPageHtml = null;
   state._indexHtmlForContext = null;
+  state.context = [];
   state.isNewArticle = false;
   state.isNewEvent = false;
   state.isNewPublication = false;
@@ -970,6 +977,85 @@ function resetEditor() {
   document.getElementById('conversation').innerHTML = '';
   document.getElementById('promptInput').value = '';
   renderAttachments();
+  renderContextTags();
+}
+
+function isCreateMode() {
+  return state.isNewArticle || state.isNewEvent || state.isNewPublication;
+}
+
+function createKind() {
+  if (state.isNewArticle) return 'article';
+  if (state.isNewEvent) return 'event';
+  if (state.isNewPublication) return 'publication';
+  return null;
+}
+
+const CREATE_KINDS = {
+  article:      { dir: 'vie',         label: "l'article" },
+  event:        { dir: 'evenements',  label: "l'événement" },
+  publication:  { dir: 'presse',      label: 'la publication' },
+};
+
+function slugifyFilename(text) {
+  return (text || '')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 50);
+}
+
+function resolveCreateFilePath(kind, rawFromClaude, html) {
+  const spec = CREATE_KINDS[kind];
+  if (!spec) return { error: 'Type de création inconnu. Rien n\'a été publié.' };
+
+  let basename = '';
+  if (rawFromClaude && String(rawFromClaude).trim()) {
+    basename = String(rawFromClaude).trim().split('/').pop();
+  }
+  if (!basename && html) {
+    const h1 = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+    const titleTag = html.match(/<title>([\s\S]*?)<\/title>/i);
+    const rawTitle = h1
+      ? h1[1].replace(/<[^>]+>/g, '').trim()
+      : titleTag
+        ? titleTag[1].replace(/\s*[-–|].*$/, '').trim()
+        : '';
+    const fromTitle = slugifyFilename(rawTitle);
+    if (fromTitle) basename = fromTitle + '.html';
+  }
+  if (basename && !basename.toLowerCase().endsWith('.html')) basename += '.html';
+
+  if (!basename) {
+    return { error: `Le nom du fichier est vide. Donne un titre à ${spec.label} pour pouvoir le créer. Aucune page du site n'a été modifiée.` };
+  }
+
+  const slug = slugifyFilename(basename.replace(/\.html$/i, ''));
+  if (!slug) {
+    return { error: `Le nom de fichier « ${basename} » n'est pas utilisable. Aucune page du site n'a été modifiée.` };
+  }
+  if (slug.startsWith('_')) {
+    return { error: `Le fichier « ${spec.dir}/${slug}.html » est réservé. Aucune page du site n'a été modifiée.` };
+  }
+
+  return { path: `${spec.dir}/${slug}.html` };
+}
+
+function assertPublishTarget(filename, { create }) {
+  if (!filename || !String(filename).trim()) {
+    throw new Error('Publication annulée : aucun nom de fichier. Rien n\'a été modifié sur le site.');
+  }
+  const path = String(filename).trim().replace(/^\/+/, '');
+  if (!path || path.includes('..') || path.includes('\\') || path.includes('//')) {
+    throw new Error('Publication annulée : chemin de fichier invalide. Rien n\'a été modifié sur le site.');
+  }
+  if (create) {
+    if (!/^(vie|evenements|presse)\/[a-z0-9][a-z0-9-]*\.html$/.test(path)) {
+      throw new Error(`Publication annulée : un nouvel article doit être créé dans vie/, evenements/ ou presse/ (reçu : « ${path} »). Aucune page existante n'a été modifiée.`);
+    }
+  }
+  return path;
 }
 
 // Parent listing pages → their child-page directory
@@ -1048,6 +1134,7 @@ function filterChildPicker(input) {
 }
 
 async function editPage(file, name, btn) {
+  const epoch = bumpEditorEpoch();
   showView('editor', btn);
   document.getElementById('topbarTitle').textContent = 'Éditer : ' + name;
   resetEditor();
@@ -1061,13 +1148,18 @@ async function editPage(file, name, btn) {
   if (state.config.githubToken && state.config.githubRepo) {
     showThinkingLabel('Chargement de la page…');
     try {
-      state.currentPageHtml = await fetchFileFromGitHub(file);
+      const html = await fetchFileFromGitHub(file);
+      if (epoch !== state.editorEpoch) return;
+      state.currentPageHtml = html;
       hideThinking();
       addAiMessage('✓ Page chargée. Je connais son contenu actuel.');
     } catch(e) {
+      if (epoch !== state.editorEpoch) return;
       hideThinking();
       addAiMessage('⚠️ Je n\'ai pas pu charger la page depuis GitHub (vérifie ta configuration). Je ferai quand même de mon mieux.');
     }
+
+    if (epoch !== state.editorEpoch) return;
 
     // If this page is a listing page, offer to edit its child pages too
     const child = CHILD_DIRS[file];
@@ -1075,12 +1167,14 @@ async function editPage(file, name, btn) {
       showThinkingLabel('Recherche des sous-pages…');
       try {
         const children = await listChildPages(child.dir);
+        if (epoch !== state.editorEpoch) return;
         hideThinking();
         if (children.length) {
           addAiMessage(`Cette page est une liste. Tu peux modifier la page liste elle-même, **ou** choisir une des ${children.length} ${child.label} ci-dessous pour l'éditer (✏️) ou la supprimer (🗑). Tu peux aussi simplement me dire "supprime l'article xyz".`);
           renderChildPicker(children, child.label);
         }
       } catch(e) {
+        if (epoch !== state.editorEpoch) return;
         hideThinking();
       }
     }
@@ -1088,13 +1182,24 @@ async function editPage(file, name, btn) {
 }
 
 async function setEditorMode(mode) {
+  const epoch = bumpEditorEpoch();
+  const modeTitles = {
+    new: 'Nouvel article',
+    'new-event': 'Nouvel événement',
+    'new-publication': 'Nouvelle publication',
+    'open-inscriptions': 'Ouvrir les inscriptions',
+    'close-inscriptions': 'Fermer les inscriptions',
+  };
+  if (modeTitles[mode]) document.getElementById('topbarTitle').textContent = modeTitles[mode];
+
   if (mode === 'new') {
     resetEditor();
     state.context = [];
     state.isNewArticle = true;
     state.isNewEvent = false;
+    state.isNewPublication = false;
     renderContextTags();
-    addAiMessage(`Je suis prêt à créer un **nouvel article** pour la section "Vie de la crèche".\n\nDécris l'activité ou la sortie — sujet, date, ce qui s'est passé, photos si tu en as. Je crée l'article et l'ajoute automatiquement à la liste.`);
+    addAiMessage(`Je suis prêt à créer un **nouvel article** pour la section "Vie de la crèche".\n\nDécris l'activité ou la sortie — sujet, date, ce qui s'est passé, photos si tu en as. Je crée l'article dans \`vie/\` et l'ajoute automatiquement à la liste.`);
   } else if (mode === 'new-event') {
     resetEditor();
     state.context = [];
@@ -1102,7 +1207,7 @@ async function setEditorMode(mode) {
     state.isNewEvent = true;
     state.isNewPublication = false;
     renderContextTags();
-    addAiMessage(`Je suis prêt à créer un **nouvel événement** pour la page Événements.\n\nDécris l'événement — nom, date, lieu, ce qui s'est passé, photos si tu en as. Je crée la page détail et l'ajoute automatiquement à la liste des événements.`);
+    addAiMessage(`Je suis prêt à créer un **nouvel événement** pour la page Événements.\n\nDécris l'événement — nom, date, lieu, ce qui s'est passé, photos si tu en as. Je crée la page détail dans \`evenements/\` et l'ajoute automatiquement à la liste des événements.`);
   } else if (mode === 'new-publication') {
     resetEditor();
     state.context = [];
@@ -1110,7 +1215,7 @@ async function setEditorMode(mode) {
     state.isNewEvent = false;
     state.isNewPublication = true;
     renderContextTags();
-    addAiMessage(`Je suis prêt à créer une **nouvelle publication presse** pour la page "On parle de nous".\n\nDécris la parution — source (journal, TV, site…), date, titre de l'article, contenu, et joins l'image scannée si tu en as une. Je crée la page détail et l'ajoute automatiquement à la revue de presse.`);
+    addAiMessage(`Je suis prêt à créer une **nouvelle publication presse** pour la page "On parle de nous".\n\nDécris la parution — source (journal, TV, site…), date, titre de l'article, contenu, et joins l'image scannée si tu en as une. Je crée la page détail dans \`presse/\` et l'ajoute automatiquement à la revue de presse.`);
   } else if (mode === 'close-inscriptions') {
     resetEditor();
     state.context = [{ file: 'inscriptions.html', name: 'Inscriptions 26/27' }];
@@ -1126,11 +1231,13 @@ async function setEditorMode(mode) {
           fetchFileFromGitHub('inscriptions.html'),
           fetchFileFromGitHub('index.html'),
         ]);
+        if (epoch !== state.editorEpoch) return;
         state.currentPageHtml = inscHtml;
         state._indexHtmlForContext = idxHtml;
         hideThinking();
         addAiMessage('✓ Pages chargées. Donne-moi les informations ci-dessus et je génère les modifications.');
       } catch(e) {
+        if (epoch !== state.editorEpoch) return;
         hideThinking();
         addAiMessage('⚠️ Je n\'ai pas pu charger les pages depuis GitHub. Donne-moi les informations et je ferai de mon mieux.');
       }
@@ -1150,12 +1257,14 @@ async function setEditorMode(mode) {
           fetchFileFromGitHub('inscriptions.html'),
           fetchFileFromGitHub('index.html'),
         ]);
+        if (epoch !== state.editorEpoch) return;
         state.currentPageHtml = inscHtml;
         state.pendingIndexHtml = null;
         state._indexHtmlForContext = idxHtml;
         hideThinking();
         addAiMessage('✓ Pages chargées. Donne-moi les informations ci-dessus et je génère les modifications.');
       } catch(e) {
+        if (epoch !== state.editorEpoch) return;
         hideThinking();
         addAiMessage('⚠️ Je n\'ai pas pu charger les pages depuis GitHub. Je ferai de mon mieux avec les informations que tu me donneras.');
       }
@@ -1167,9 +1276,14 @@ async function setEditorMode(mode) {
 function renderContextTags() {
   const container = document.getElementById('contextTags');
   const noCtx = document.getElementById('noContext');
+  if (!container || !noCtx) return;
   container.innerHTML = '';
   if (state.context.length === 0) {
     noCtx.style.display = 'block';
+    if (state.isNewArticle) noCtx.textContent = 'Nouvel article — sera créé dans vie/';
+    else if (state.isNewEvent) noCtx.textContent = 'Nouvel événement — sera créé dans evenements/';
+    else if (state.isNewPublication) noCtx.textContent = 'Nouvelle publication — sera créée dans presse/';
+    else noCtx.textContent = 'Aucune page sélectionnée';
     return;
   }
   noCtx.style.display = 'none';
@@ -1476,48 +1590,76 @@ async function sendPrompt() {
     if (reply.includes('PUBLISH_CONFIRMED')) {
       addAiMessage('Publication confirmée ! Je mets le site à jour…');
       if (state.pendingHtml && state.pendingFile) {
-        await publishAll();
+        await publishAll(state.pendingFile);
+      } else {
+        addAiMessage('⚠️ Rien à publier : aucun fichier n\'est prêt. Aucune page du site n\'a été modifiée.');
       }
     } else if (deletePageMatch) {
       const f = deletePageMatch[1].trim();
       if (cleanReply) addAiMessage(cleanReply);
       showDeleteConfirm(f, prettifyPageName(f));
     } else if (htmlMatch) {
-      state.pendingHtml = htmlMatch[1].trim();
-      state.pendingVieHtml = vieUpdateMatch ? vieUpdateMatch[1].trim() : null;
-      state.pendingEvenementsHtml = evenementsUpdateMatch ? evenementsUpdateMatch[1].trim() : null;
-      state.pendingPresseHtml = presseUpdateMatch ? presseUpdateMatch[1].trim() : null;
-      state.pendingIndexHtml = indexUpdateMatch ? indexUpdateMatch[1].trim() : null;
-      state.pendingListCard = listCardMatch ? listCardMatch[1].trim() : null;
-      state.pendingListType = state.isNewArticle ? 'vie'
-        : state.isNewEvent ? 'evenements'
-        : state.isNewPublication ? 'presse'
-        : null;
+      const generatedHtml = htmlMatch[1].trim();
+      let targetFile = null;
+      const create = isCreateMode();
 
-      if (state.isNewArticle && articleFileMatch) {
-        state.pendingFile = articleFileMatch[1].trim();
-      } else if (state.isNewArticle) {
-        // Fallback: derive slug from the article title
-        const articleTitle = extractTitleFromHtml(state.pendingHtml);
-        const slug = articleTitle
-          .toLowerCase()
-          .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/^-+|-+$/g, '')
-          .slice(0, 50) || 'article';
-        state.pendingFile = `vie/${slug}.html`;
-      } else if (state.isNewEvent && eventFileMatch) {
-        state.pendingFile = eventFileMatch[1].trim();
-      } else if (state.isNewPublication && publicationFileMatch) {
-        state.pendingFile = publicationFileMatch[1].trim();
+      if (create) {
+        const kind = createKind();
+        const raw = kind === 'article' ? articleFileMatch?.[1]
+          : kind === 'event' ? eventFileMatch?.[1]
+          : publicationFileMatch?.[1];
+        const resolved = resolveCreateFilePath(kind, raw, generatedHtml);
+        if (resolved.error) {
+          if (cleanReply) addAiMessage(cleanReply);
+          addAiMessage('⚠️ ' + resolved.error);
+          showToast(resolved.error, 'err');
+          state.pendingHtml = null;
+          state.pendingFile = null;
+        } else {
+          targetFile = resolved.path;
+        }
       } else {
-        state.pendingFile = state.context[0]?.file || 'nouveau-article.html';
+        targetFile = state.context[0]?.file || null;
+        if (!targetFile) {
+          if (cleanReply) addAiMessage(cleanReply);
+          addAiMessage('⚠️ Impossible de publier : aucune page n\'est sélectionnée. Choisis une page dans le menu, ou clique sur « Nouvel article ». Rien n\'a été envoyé au site.');
+          showToast('Aucune page sélectionnée — publication bloquée', 'err');
+        }
       }
 
-      if (cleanReply) addAiMessage(cleanReply);
-      showPreview(state.pendingHtml, state.pendingFile);
-      if (state.pendingIndexHtml) {
-        addAiMessage('✓ index.html sera également mis à jour lors de la publication.');
+      if (targetFile) {
+        state.pendingHtml = generatedHtml;
+        state.pendingFile = targetFile;
+        state.pendingVieHtml = vieUpdateMatch ? vieUpdateMatch[1].trim() : null;
+        state.pendingEvenementsHtml = evenementsUpdateMatch ? evenementsUpdateMatch[1].trim() : null;
+        state.pendingPresseHtml = presseUpdateMatch ? presseUpdateMatch[1].trim() : null;
+        state.pendingIndexHtml = indexUpdateMatch ? indexUpdateMatch[1].trim() : null;
+        state.pendingListCard = listCardMatch ? listCardMatch[1].trim() : null;
+        state.pendingListType = state.isNewArticle ? 'vie'
+          : state.isNewEvent ? 'evenements'
+          : state.isNewPublication ? 'presse'
+          : null;
+
+        if (cleanReply) addAiMessage(cleanReply);
+        showPreview(state.pendingHtml, state.pendingFile);
+        if (state.pendingIndexHtml) {
+          addAiMessage('✓ index.html sera également mis à jour lors de la publication.');
+        }
+        if (create && state.config.githubToken) {
+          const previewPath = targetFile;
+          getGitHubFileMeta(previewPath).then(meta => {
+            if (!meta.exists) return;
+            if (state.pendingFile !== previewPath) return;
+            state.pendingHtml = null;
+            state.pendingFile = null;
+            const msg = `Le fichier « ${previewPath} » existe déjà. La publication est bloquée pour ne pas écraser cette page. Change le titre.`;
+            addAiMessage('⚠️ ' + msg);
+            showToast(msg, 'err');
+            document.querySelectorAll('.preview-card').forEach(c => {
+              if ((c.querySelector('.preview-card-title')?.textContent || '').includes(previewPath)) c.remove();
+            });
+          }).catch(() => {});
+        }
       }
     } else {
       addAiMessage(reply);
@@ -1639,7 +1781,7 @@ Le site est en HTML/CSS/JS pur. Design : police Baloo 2 (titres), DM Sans (texte
 MODE : Création d'un nouvel article pour la section "Vie de la crèche"
 
 STRUCTURE D'UN ARTICLE :
-- Fichier : vie/[slug-kebab-case].html (chemins relatifs ../css/shared.css, ../js/nav.js, ../images/…)
+- Fichier : vie/[slug-kebab-case].html UNIQUEMENT. N'écris JAMAIS un fichier à la racine du site (surtout pas inscriptions.html, index.html, ou une autre page existante).
 - Reproduis EXACTEMENT la structure de l'exemple complet ci-dessous (head, nav, breadcrumb, galerie, corps, footer).
 - Classes galerie disponibles : gallery-2, gallery-3, gallery-4, gallery-featured
 - Catégories disponibles : Musique, Créativité, Nature, Motricité, Culture, Découvertes
@@ -1689,7 +1831,7 @@ Le site est en HTML/CSS/JS pur. Design : police Baloo 2 (titres), DM Sans (texte
 MODE : Création d'un nouvel événement pour la section "Événements"
 
 STRUCTURE D'UN ÉVÉNEMENT :
-- Fichier : evenements/[slug-kebab-case].html (chemins relatifs ../css/shared.css, ../js/nav.js, ../images/…)
+- Fichier : evenements/[slug-kebab-case].html UNIQUEMENT. N'écris JAMAIS un fichier à la racine du site.
 - Reproduis EXACTEMENT la structure de l'exemple complet ci-dessous.
 - Couleurs thumb page : thumb-orange, thumb-green, thumb-blue, thumb-yellow
 - Couleurs carte liste : et-orange, et-green, et-blue, et-yellow, et-pink, et-dark
@@ -1739,7 +1881,7 @@ Le site est en HTML/CSS/JS pur. Design : police Baloo 2 (titres), DM Sans (texte
 MODE : Création d'une nouvelle publication pour la section "On parle de nous"
 
 STRUCTURE D'UNE PUBLICATION :
-- Fichier : presse/[slug-kebab-case].html (chemins relatifs ../css/shared.css, ../js/nav.js, ../images/…)
+- Fichier : presse/[slug-kebab-case].html UNIQUEMENT. N'écris JAMAIS un fichier à la racine du site.
 - Reproduis EXACTEMENT la structure de l'exemple complet ci-dessous (head, styles, nav, breadcrumb, source-box, corps, footer).
 - Types de tag : tag-presse (📰 Presse), tag-tv (📺 Télévision), tag-asso (🤝), tag-web (🌐)
 - Avec scan : <img class="press-scan"> ou <div class="press-scan-pair">
@@ -2012,8 +2154,8 @@ function showPreview(html, filename) {
   const previewHtml = resolvePreviewHtml(html);
   const blob = new Blob([previewHtml], { type: 'text/html' });
   const url = URL.createObjectURL(blob);
-  const isNew = state.isNewArticle || state.isNewEvent;
-  const publishLabel = isNew ? '🚀 Publier l\'article' : '🚀 Publier sur le site';
+  const isNew = isCreateMode();
+  const publishLabel = isNew ? '🚀 Publier (nouveau fichier)' : '🚀 Publier sur le site';
   card.innerHTML = `
     <div class="preview-card-bar">
       <div class="preview-card-title">
@@ -2026,7 +2168,9 @@ function showPreview(html, filename) {
     </div>
     <iframe class="preview-iframe" src="${url}"></iframe>
     <div class="publish-bar">
-      <p>Tu es satisfait·e ? <strong>Dis-le à Claude</strong> ou clique sur Publier.</p>
+      <p>${isNew
+        ? `Nouveau fichier : <strong>${escHtml(filename)}</strong>. S'il existe déjà, la publication sera refusée.`
+        : `Tu vas <strong>remplacer</strong> la page existante <strong>${escHtml(filename)}</strong>. Ce n'est pas une création d'article.`}</p>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-ghost" onclick="this.closest('.preview-card').remove()">Annuler</button>
         <button class="btn btn-green" onclick="confirmPublish('${escHtml(filename)}')">${publishLabel}</button>
@@ -2042,11 +2186,37 @@ function confirmPublish(filename) {
     showView('settings', null);
     return;
   }
-  publishAll();
+  if (!filename || !state.pendingFile || filename !== state.pendingFile) {
+    showToast('Publication bloquée : le fichier à publier ne correspond pas à l\'aperçu.', 'err');
+    addAiMessage('⚠️ Publication annulée : le fichier de l\'aperçu ne correspond plus à celui qui serait envoyé. Rien n\'a été modifié sur le site.');
+    return;
+  }
+  publishAll(filename);
 }
 
-// ── GITHUB PUBLISH ──
-async function pushFileToGitHub(filename, html, commitMsg) {
+async function getGitHubFileMeta(filename) {
+  const { githubToken, githubRepo, githubBranch } = state.config;
+  const branch = githubBranch || 'main';
+  const headers = {
+    'Authorization': `token ${githubToken}`,
+    'Accept': 'application/vnd.github.v3+json',
+  };
+  const res = await fetch(
+    `https://api.github.com/repos/${githubRepo}/contents/${filename}?ref=${branch}`,
+    { headers }
+  );
+  if (res.status === 404) return { exists: false, sha: null };
+  if (!res.ok) throw new Error(`Impossible de vérifier « ${filename} » sur GitHub (HTTP ${res.status}).`);
+  const data = await res.json();
+  if (Array.isArray(data) || data.type !== 'file') {
+    throw new Error(`« ${filename} » n'est pas un fichier.`);
+  }
+  if (!data.sha) throw new Error(`SHA manquant pour « ${filename} ».`);
+  return { exists: true, sha: data.sha };
+}
+
+async function pushFileToGitHub(filename, html, commitMsg, { create = false } = {}) {
+  const path = assertPublishTarget(filename, { create });
   const { githubToken, githubRepo, githubBranch } = state.config;
   const branch = githubBranch || 'main';
   const headers = {
@@ -2055,17 +2225,23 @@ async function pushFileToGitHub(filename, html, commitMsg) {
     'Accept': 'application/vnd.github.v3+json',
   };
 
-  // Get current SHA (needed for updates)
-  let sha = null;
-  try {
-    const getRes = await fetch(`https://api.github.com/repos/${githubRepo}/contents/${filename}?ref=${branch}`, { headers });
-    if (getRes.ok) sha = (await getRes.json()).sha;
-  } catch(e) {}
+  const meta = await getGitHubFileMeta(path);
+  if (create && meta.exists) {
+    throw new Error(`Le fichier « ${path} » existe déjà sur le site. L'article n'a pas été publié pour ne pas écraser une page existante. Change le titre, ou ouvre cette page depuis le menu pour la modifier.`);
+  }
+  if (!create && !meta.exists) {
+    throw new Error(`Le fichier « ${path} » est introuvable. Publication annulée pour ne pas créer un fichier par erreur.`);
+  }
 
   const content = btoa(unescape(encodeURIComponent(html)));
-  const putRes = await fetch(`https://api.github.com/repos/${githubRepo}/contents/${filename}`, {
+  const body = { message: commitMsg, content, branch };
+  if (meta.exists) {
+    body.sha = meta.sha;
+  }
+
+  const putRes = await fetch(`https://api.github.com/repos/${githubRepo}/contents/${path}`, {
     method: 'PUT', headers,
-    body: JSON.stringify({ message: commitMsg, content, branch, ...(sha ? { sha } : {}) }),
+    body: JSON.stringify(body),
   });
 
   if (!putRes.ok) {
@@ -2276,14 +2452,32 @@ async function insertCardAndPush(type, card) {
   return true;
 }
 
-async function publishAll() {
+async function publishAll(explicitFilename) {
+  const create = isCreateMode();
+  let target;
+  try {
+    target = assertPublishTarget(explicitFilename || state.pendingFile, { create });
+    if (state.pendingFile && target !== state.pendingFile) {
+      throw new Error('Publication annulée : le fichier à envoyer ne correspond pas à l\'aperçu. Rien n\'a été modifié sur le site.');
+    }
+    if (!state.pendingHtml) {
+      throw new Error('Publication annulée : aucun contenu à envoyer. Rien n\'a été modifié sur le site.');
+    }
+  } catch (err) {
+    showToast(err.message, 'err');
+    addAiMessage('⚠️ ' + err.message);
+    return;
+  }
+
   showToast('Publication en cours…', 'info');
   try {
-    // Push main file
     await pushFileToGitHub(
-      state.pendingFile,
+      target,
       state.pendingHtml,
-      `✏️ Mise à jour ${state.pendingFile} via tableau de bord`
+      create
+        ? `✨ Création ${target} via tableau de bord`
+        : `✏️ Mise à jour ${target} via tableau de bord`,
+      { create }
     );
 
     // Update the relevant list page (vie / evenements / presse).
