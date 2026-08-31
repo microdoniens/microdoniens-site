@@ -1071,7 +1071,7 @@ async function listChildPages(dir) {
   const branch = githubBranch || 'main';
   const res = await fetch(
     `https://api.github.com/repos/${githubRepo}/contents/${dir}?ref=${branch}`,
-    { headers: { 'Authorization': `token ${githubToken}`, 'Accept': 'application/vnd.github.v3+json' } }
+    { cache: 'no-store', headers: { 'Authorization': `token ${githubToken}`, 'Accept': 'application/vnd.github.v3+json' } }
   );
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const data = await res.json();
@@ -1341,7 +1341,7 @@ async function fetchFileFromGitHub(filename) {
   const branch = githubBranch || 'main';
   const res = await fetch(
     `https://api.github.com/repos/${githubRepo}/contents/${filename}?ref=${branch}`,
-    { headers: { 'Authorization': `token ${githubToken}`, 'Accept': 'application/vnd.github.v3+json' } }
+    { cache: 'no-store', headers: { 'Authorization': `token ${githubToken}`, 'Accept': 'application/vnd.github.v3+json' } }
   );
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const data = await res.json();
@@ -2203,7 +2203,7 @@ async function getGitHubFileMeta(filename) {
   };
   const res = await fetch(
     `https://api.github.com/repos/${githubRepo}/contents/${filename}?ref=${branch}`,
-    { headers }
+    { cache: 'no-store', headers }
   );
   if (res.status === 404) return { exists: false, sha: null };
   if (!res.ok) throw new Error(`Impossible de vérifier « ${filename} » sur GitHub (HTTP ${res.status}).`);
@@ -2340,7 +2340,7 @@ async function deleteFileFromGitHub(filename, commitMsg) {
     'Accept': 'application/vnd.github.v3+json',
   };
 
-  const getRes = await fetch(`https://api.github.com/repos/${githubRepo}/contents/${filename}?ref=${branch}`, { headers });
+  const getRes = await fetch(`https://api.github.com/repos/${githubRepo}/contents/${filename}?ref=${branch}`, { cache: 'no-store', headers });
   if (getRes.status === 404) return false; // already gone
   if (!getRes.ok) throw new Error(`Fichier introuvable (${getRes.status})`);
   const sha = (await getRes.json()).sha;
@@ -2499,8 +2499,8 @@ async function fetchGitHubFileAndSha(filename) {
   const { githubToken, githubRepo, githubBranch } = state.config;
   const branch = githubBranch || 'main';
   const res = await fetch(
-    `https://api.github.com/repos/${githubRepo}/contents/${filename}?ref=${branch}`,
-    { headers: { 'Authorization': `token ${githubToken}`, 'Accept': 'application/vnd.github.v3+json' } }
+    `https://api.github.com/repos/${githubRepo}/contents/${filename}?ref=${branch}&t=${Date.now()}`,
+    { cache: 'no-store', headers: { 'Authorization': `token ${githubToken}`, 'Accept': 'application/vnd.github.v3+json' } }
   );
   if (!res.ok) throw new Error(`Impossible de lire « ${filename} » (HTTP ${res.status}).`);
   const data = await res.json();
