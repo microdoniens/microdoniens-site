@@ -2452,6 +2452,115 @@ async function insertCardAndPush(type, card) {
   return true;
 }
 
+function siteBaseUrl() {
+  return (state.config.siteUrl || 'https://lesmicrodoniens.netlify.app').replace(/\/$/, '');
+}
+
+function sitemapLocFor(filename) {
+  const file = String(filename || '').replace(/^\/+/, '');
+  if (!file || file === 'index.html') return siteBaseUrl() + '/';
+  return siteBaseUrl() + '/' + file;
+}
+
+function insertUrlIntoSitemap(xml, loc, { lastmod, changefreq, priority }) {
+  const doc = new DOMParser().parseFromString(xml, 'application/xml');
+  if (doc.querySelector('parsererror')) throw new Error('sitemap.xml mal formé');
+  const urlset = doc.documentElement;
+  if (!urlset || urlset.localName !== 'urlset') throw new Error('sitemap.xml mal formé');
+
+  const ns = urlset.namespaceURI || 'http://www.sitemaps.org/schemas/sitemap/0.9';
+  const existing = ns
+    ? urlset.getElementsByTagNameNS(ns, 'loc')
+    : urlset.getElementsByTagName('loc');
+  for (const el of existing) {
+    if ((el.textContent || '').trim() === loc) return { xml, changed: false };
+  }
+
+  const urlEl = doc.createElementNS(ns, 'url');
+  const add = (name, text) => {
+    const child = doc.createElementNS(ns, name);
+    child.textContent = text;
+    urlEl.appendChild(child);
+  };
+  add('loc', loc);
+  add('lastmod', lastmod);
+  add('changefreq', changefreq);
+  add('priority', String(priority));
+  urlset.appendChild(urlEl);
+
+  let serialized = new XMLSerializer().serializeToString(doc);
+  if (!serialized.startsWith('<?xml')) {
+    serialized = '<?xml version="1.0" encoding="UTF-8"?>\n' + serialized;
+  }
+  return { xml: serialized, changed: true };
+}
+
+async function fetchGitHubFileAndSha(filename) {
+  const { githubToken, githubRepo, githubBranch } = state.config;
+  const branch = githubBranch || 'main';
+  const res = await fetch(
+    `https://api.github.com/repos/${githubRepo}/contents/${filename}?ref=${branch}`,
+    { headers: { 'Authorization': `token ${githubToken}`, 'Accept': 'application/vnd.github.v3+json' } }
+  );
+  if (!res.ok) throw new Error(`Impossible de lire « ${filename} » (HTTP ${res.status}).`);
+  const data = await res.json();
+  if (Array.isArray(data) || data.type !== 'file' || !data.sha) {
+    throw new Error(`« ${filename} » n'est pas un fichier versionné.`);
+  }
+  const text = decodeURIComponent(escape(atob(data.content.replace(/\n/g, ''))));
+  return { text, sha: data.sha };
+}
+
+async function putGitHubFileWithSha(filename, text, commitMsg, sha) {
+  if (!sha) throw new Error(`SHA manquant pour « ${filename} ».`);
+  const { githubToken, githubRepo, githubBranch } = state.config;
+  const branch = githubBranch || 'main';
+  const putRes = await fetch(`https://api.github.com/repos/${githubRepo}/contents/${filename}`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `token ${githubToken}`,
+      'Content-Type': 'application/json',
+      'Accept': 'application/vnd.github.v3+json',
+    },
+    body: JSON.stringify({
+      message: commitMsg,
+      content: btoa(unescape(encodeURIComponent(text))),
+      branch,
+      sha,
+    }),
+  });
+  if (putRes.status === 409) {
+    throw new Error('SHA_CONFLICT');
+  }
+  if (!putRes.ok) {
+    const err = await putRes.json().catch(() => ({}));
+    throw new Error(err.message || `HTTP ${putRes.status}`);
+  }
+}
+
+async function addPageToSitemap(filename) {
+  const loc = sitemapLocFor(filename);
+  const today = new Date().toISOString().slice(0, 10);
+
+  const attempt = async () => {
+    const { text, sha } = await fetchGitHubFileAndSha('sitemap.xml');
+    const { xml: updated, changed } = insertUrlIntoSitemap(text, loc, {
+      lastmod: today,
+      changefreq: 'yearly',
+      priority: '0.3',
+    });
+    if (!changed) return;
+    await putGitHubFileWithSha('sitemap.xml', updated, `🗺️ Ajout ${filename} dans sitemap.xml`, sha);
+  };
+
+  try {
+    await attempt();
+  } catch (e) {
+    if (e.message !== 'SHA_CONFLICT') throw e;
+    await attempt();
+  }
+}
+
 async function publishAll(explicitFilename) {
   const create = isCreateMode();
   let target;
@@ -2508,6 +2617,15 @@ async function publishAll(explicitFilename) {
     const isNewItem = state.isNewArticle || state.isNewEvent || state.isNewPublication;
     if (isNewItem && !listUpdated) {
       addAiMessage('⚠️ La page principale (liste) n\'a pas pu être mise à jour automatiquement. La page existe mais n\'apparaîtra pas dans la liste — dis-le moi et je réessaie.');
+    }
+
+    if (create) {
+      try {
+        await addPageToSitemap(target);
+      } catch (e) {
+        addAiMessage(`⚠️ L'article a bien été publié, mais le sitemap n'a pas pu être mis à jour (${e.message}). Les moteurs de recherche le trouveront peut-être un peu plus tard.`);
+        showToast('Article publié — sitemap non mis à jour', 'err');
+      }
     }
 
     // Push index.html update if opening inscriptions
