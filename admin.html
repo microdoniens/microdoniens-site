@@ -391,10 +391,35 @@
       padding: 14px 16px;
       background: var(--surface2);
       border-top: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: space-between;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 12px;
     }
-    .publish-bar p { font-size: 13px; color: var(--text-muted); }
+    .publish-bar p { font-size: 13px; color: var(--text-muted); margin: 0; }
     .publish-bar strong { color: var(--text); }
+    .publish-files {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--surface);
+    }
+    .publish-files li {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      padding: 8px 12px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--border);
+    }
+    .publish-files li:last-child { border-bottom: none; }
+    .publish-files .file-path { font-weight: 600; color: var(--text); word-break: break-all; }
+    .publish-files .file-status { color: var(--text-muted); flex-shrink: 0; }
+    .publish-bar-actions { display: flex; gap: 8px; justify-content: flex-end; }
 
     /* CHILD PAGE PICKER */
     .page-picker {
@@ -835,6 +860,9 @@ const state = {
   pendingIndexHtml: null,
   pendingListCard: null,
   pendingListType: null,
+  pendingSitemapFor: null,
+  publishedThisBatch: [],
+  isPublishing: false,
   currentPageHtml: null,
   _indexHtmlForContext: null,
   isNewArticle: false,
@@ -955,9 +983,11 @@ function bumpEditorEpoch() {
   return state.editorEpoch;
 }
 
-function resetEditor() {
-  state.conversation = [];
-  state.attachments = [];
+function isStaleEpoch(epoch) {
+  return epoch !== state.editorEpoch;
+}
+
+function clearAllPending() {
   state.pendingHtml = null;
   state.pendingFile = null;
   state.pendingVieHtml = null;
@@ -966,6 +996,14 @@ function resetEditor() {
   state.pendingIndexHtml = null;
   state.pendingListCard = null;
   state.pendingListType = null;
+  state.pendingSitemapFor = null;
+  state.publishedThisBatch = [];
+}
+
+function resetEditor() {
+  state.conversation = [];
+  state.attachments = [];
+  clearAllPending();
   state.currentPageHtml = null;
   state._indexHtmlForContext = null;
   state.context = [];
@@ -1365,11 +1403,13 @@ function fileToBase64(file) {
 
 // Upload an image to GitHub and return its Netlify URL
 async function uploadImageToGitHub(file) {
+  const epoch = state.editorEpoch;
   const { githubToken, githubRepo, githubBranch, siteUrl } = state.config;
   const branch = githubBranch || 'main';
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '-').toLowerCase();
   const path = `images/vie/${Date.now()}-${safeName}`;
   const base64 = await fileToBase64(file);
+  if (isStaleEpoch(epoch)) return null;
 
   const res = await fetch(`https://api.github.com/repos/${githubRepo}/contents/${path}`, {
     method: 'PUT',
@@ -1410,6 +1450,7 @@ async function sendPrompt() {
   state.attachments = [];
   renderAttachments();
 
+  const epoch = state.editorEpoch;
   state.isThinking = true;
   document.getElementById('sendBtn').disabled = true;
 
@@ -1438,6 +1479,8 @@ async function sendPrompt() {
       }
       hideThinking();
     }
+
+    if (isStaleEpoch(epoch)) return;
 
     // 2. For new articles/events/publications, fetch the index page for context
     let vieHtml = '';
@@ -1480,6 +1523,8 @@ async function sendPrompt() {
       }
       hideThinking();
     }
+
+    if (isStaleEpoch(epoch)) return;
 
     // 3. Show Claude thinking
     showThinkingLabel('Claude réfléchit…');
@@ -1552,6 +1597,11 @@ async function sendPrompt() {
 
     const data = await response.json();
     const reply = data.content[0].text;
+    if (isStaleEpoch(epoch)) {
+      hideThinking();
+      showToast('Réponse ignorée : tu as changé de page.', 'err');
+      return;
+    }
     hideThinking();
 
     // Store in conversation (text only for history)
@@ -1589,8 +1639,9 @@ async function sendPrompt() {
 
     if (reply.includes('PUBLISH_CONFIRMED')) {
       addAiMessage('Publication confirmée ! Je mets le site à jour…');
-      if (state.pendingHtml && state.pendingFile) {
-        await publishAll(state.pendingFile);
+      if (collectPublishPlan().length) {
+        await publishAll();
+        if (isStaleEpoch(epoch)) return;
       } else {
         addAiMessage('⚠️ Rien à publier : aucun fichier n\'est prêt. Aucune page du site n\'a été modifiée.');
       }
@@ -1613,8 +1664,7 @@ async function sendPrompt() {
           if (cleanReply) addAiMessage(cleanReply);
           addAiMessage('⚠️ ' + resolved.error);
           showToast(resolved.error, 'err');
-          state.pendingHtml = null;
-          state.pendingFile = null;
+          clearAllPending();
         } else {
           targetFile = resolved.path;
         }
@@ -1639,25 +1689,23 @@ async function sendPrompt() {
           : state.isNewEvent ? 'evenements'
           : state.isNewPublication ? 'presse'
           : null;
+        state.pendingSitemapFor = (create && !isGuardedListPage(targetFile)) ? targetFile : null;
+        state.publishedThisBatch = [];
 
         if (cleanReply) addAiMessage(cleanReply);
-        showPreview(state.pendingHtml, state.pendingFile);
-        if (state.pendingIndexHtml) {
-          addAiMessage('✓ index.html sera également mis à jour lors de la publication.');
-        }
+        showPreview();
+        if (isStaleEpoch(epoch)) return;
         if (create && state.config.githubToken) {
           const previewPath = targetFile;
           getGitHubFileMeta(previewPath).then(meta => {
+            if (isStaleEpoch(epoch)) return;
             if (!meta.exists) return;
             if (state.pendingFile !== previewPath) return;
-            state.pendingHtml = null;
-            state.pendingFile = null;
+            clearAllPending();
             const msg = `Le fichier « ${previewPath} » existe déjà. La publication est bloquée pour ne pas écraser cette page. Change le titre.`;
             addAiMessage('⚠️ ' + msg);
             showToast(msg, 'err');
-            document.querySelectorAll('.preview-card').forEach(c => {
-              if ((c.querySelector('.preview-card-title')?.textContent || '').includes(previewPath)) c.remove();
-            });
+            document.querySelectorAll('.preview-card-publish').forEach(c => c.remove());
           }).catch(() => {});
         }
       }
@@ -2147,20 +2195,46 @@ function resolvePreviewHtml(html) {
   return out;
 }
 
-function showPreview(html, filename) {
+function jobStatusLabel(job) {
+  return job.create ? 'Nouveau fichier' : 'Remplacement d\'une page existante';
+}
+
+function renderPublishFileList(jobs) {
+  if (!jobs.length) {
+    return '<li><span class="file-path">Aucun fichier</span><span class="file-status">Rien à envoyer</span></li>';
+  }
+  return jobs.map(j => (
+    `<li><span class="file-path">${escHtml(j.file)}</span><span class="file-status">${escHtml(jobStatusLabel(j))}</span></li>`
+  )).join('');
+}
+
+function refreshPublishCardList() {
+  const ul = document.querySelector('.preview-card-publish .publish-files');
+  if (!ul) return;
+  ul.innerHTML = renderPublishFileList(collectPublishPlan());
+}
+
+function removePublishPreview() {
+  document.querySelectorAll('.preview-card-publish').forEach(c => c.remove());
+}
+
+function showPreview() {
+  const html = state.pendingHtml;
+  if (!html) return;
+  removePublishPreview();
+
+  const plan = collectPublishPlan();
   const conv = document.getElementById('conversation');
   const card = document.createElement('div');
-  card.className = 'preview-card';
+  card.className = 'preview-card preview-card-publish';
   const previewHtml = resolvePreviewHtml(html);
   const blob = new Blob([previewHtml], { type: 'text/html' });
   const url = URL.createObjectURL(blob);
-  const isNew = isCreateMode();
-  const publishLabel = isNew ? '🚀 Publier (nouveau fichier)' : '🚀 Publier sur le site';
   card.innerHTML = `
     <div class="preview-card-bar">
       <div class="preview-card-title">
         <div class="dot"></div>
-        Prévisualisation — ${escHtml(filename)}
+        Aperçu avant publication
       </div>
       <div class="preview-card-actions">
         <a href="${url}" target="_blank" class="btn btn-ghost" style="font-size:12px;">Ouvrir ↗</a>
@@ -2168,30 +2242,52 @@ function showPreview(html, filename) {
     </div>
     <iframe class="preview-iframe" src="${url}"></iframe>
     <div class="publish-bar">
-      <p>${isNew
-        ? `Nouveau fichier : <strong>${escHtml(filename)}</strong>. S'il existe déjà, la publication sera refusée.`
-        : `Tu vas <strong>remplacer</strong> la page existante <strong>${escHtml(filename)}</strong>. Ce n'est pas une création d'article.`}</p>
-      <div style="display:flex;gap:8px;">
-        <button class="btn btn-ghost" onclick="this.closest('.preview-card').remove()">Annuler</button>
-        <button class="btn btn-green" onclick="confirmPublish('${escHtml(filename)}')">${publishLabel}</button>
+      <p>En cliquant sur <strong>Publier</strong>, ces pages seront mises à jour :</p>
+      <ul class="publish-files">${renderPublishFileList(plan)}</ul>
+      <div class="publish-bar-actions">
+        <button class="btn btn-ghost" type="button" onclick="cancelPreview()">Annuler</button>
+        <button class="btn btn-green" type="button" onclick="confirmPublish()">🚀 Publier</button>
       </div>
     </div>`;
   conv.appendChild(card);
   card.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function confirmPublish(filename) {
+function confirmPublish() {
   if (!state.config.githubToken || !state.config.githubRepo) {
     showToast('Configure d\'abord GitHub dans les paramètres', 'err');
     showView('settings', null);
     return;
   }
-  if (!filename || !state.pendingFile || filename !== state.pendingFile) {
-    showToast('Publication bloquée : le fichier à publier ne correspond pas à l\'aperçu.', 'err');
-    addAiMessage('⚠️ Publication annulée : le fichier de l\'aperçu ne correspond plus à celui qui serait envoyé. Rien n\'a été modifié sur le site.');
+  if (state.isPublishing) return;
+  const plan = collectPublishPlan();
+  if (!plan.length) {
+    showToast('Rien à publier.', 'err');
+    addAiMessage('⚠️ Rien à publier : aucun fichier n\'est prêt. Aucune page du site n\'a été modifiée.');
     return;
   }
-  publishAll(filename);
+  try {
+    for (const job of plan) {
+      assertPublishTarget(job.file, { create: !!job.create });
+    }
+  } catch (e) {
+    showToast(e.message, 'err');
+    addAiMessage('⚠️ ' + e.message);
+    return;
+  }
+  publishAll();
+}
+
+function cancelPreview() {
+  if (state.isPublishing) return;
+  const alreadyOnline = (state.publishedThisBatch || []).slice();
+  clearAllPending();
+  removePublishPreview();
+  if (alreadyOnline.length) {
+    addAiMessage('Aperçu annulé. Les pages déjà mises en ligne restent en ligne :\n' + alreadyOnline.map(f => '• `' + f + '`').join('\n'));
+  } else {
+    addAiMessage('Aperçu annulé. Rien n\'a été envoyé au site.');
+  }
 }
 
 async function getGitHubFileMeta(filename) {
@@ -2265,6 +2361,171 @@ const LIST_TARGETS = {
   evenements:  { file: 'evenements.html',  re: /(<div[^>]+id="eventsGrid"[^>]*>)/i },
   presse:      { file: 'presse.html',      re: /(<div[^>]+class="[^"]*coverage-list[^"]*"[^>]*>)/i },
 };
+
+const GUARDED_PAGES = ['vie.html', 'evenements.html', 'presse.html', 'index.html', 'inscriptions.html'];
+
+function isGuardedListPage(filename) {
+  return GUARDED_PAGES.includes(filename);
+}
+
+function applyListCard(listHtml, type, card) {
+  const target = LIST_TARGETS[type];
+  if (!target || !listHtml || !card) return null;
+  const m = listHtml.match(target.re);
+  if (!m) return null;
+  return listHtml.replace(m[0], m[0] + '\n' + card + '\n');
+}
+
+async function buildListHtmlWithCard(type, card) {
+  const target = LIST_TARGETS[type];
+  if (!target || !card) return null;
+  try {
+    const listHtml = await fetchFileFromGitHub(target.file);
+    return applyListCard(listHtml, type, card);
+  } catch (e) {
+    return null;
+  }
+}
+
+function listPendingHtml(type) {
+  if (type === 'vie') return state.pendingVieHtml;
+  if (type === 'evenements') return state.pendingEvenementsHtml;
+  if (type === 'presse') return state.pendingPresseHtml;
+  return null;
+}
+
+function collectPublishPlan() {
+  const jobs = [];
+  const seen = new Set();
+  const add = (job) => {
+    if (!job?.file || seen.has(job.file)) return;
+    seen.add(job.file);
+    jobs.push(job);
+  };
+
+  if (state.pendingFile && state.pendingHtml) {
+    add({
+      file: state.pendingFile,
+      html: state.pendingHtml,
+      create: isCreateMode() && !isGuardedListPage(state.pendingFile),
+      kind: 'page',
+    });
+  }
+
+  const maybeList = (type) => {
+    const spec = LIST_TARGETS[type];
+    if (!spec) return;
+    if (spec.file === state.pendingFile) return;
+    const html = listPendingHtml(type);
+    const useCard = state.pendingListType === type && !!state.pendingListCard;
+    if (!useCard && !html) return;
+    add({
+      file: spec.file,
+      html,
+      create: false,
+      kind: 'list',
+      listType: type,
+      useCardInsert: useCard,
+    });
+  };
+
+  if (state.pendingListType) maybeList(state.pendingListType);
+  maybeList('vie');
+  maybeList('evenements');
+  maybeList('presse');
+
+  if (state.pendingIndexHtml && state.pendingFile !== 'index.html') {
+    add({
+      file: 'index.html',
+      html: state.pendingIndexHtml,
+      create: false,
+      kind: 'index',
+    });
+  }
+
+  const createPage = jobs.find(j => j.create);
+  const sitemapFor = createPage?.file || state.pendingSitemapFor;
+  if (sitemapFor) {
+    add({
+      file: 'sitemap.xml',
+      create: false,
+      kind: 'sitemap',
+      articleFile: sitemapFor,
+    });
+  }
+
+  return jobs;
+}
+
+function consumePublishedJob(job) {
+  if (!state.publishedThisBatch) state.publishedThisBatch = [];
+  state.publishedThisBatch.push(job.file);
+
+  if (job.create && job.file) {
+    state.pendingSitemapFor = job.file;
+  }
+  if (state.pendingFile === job.file) {
+    state.pendingHtml = null;
+    state.pendingFile = null;
+  }
+  if (job.file === 'vie.html') {
+    state.pendingVieHtml = null;
+    if (state.pendingListType === 'vie') {
+      state.pendingListCard = null;
+      state.pendingListType = null;
+    }
+  }
+  if (job.file === 'evenements.html') {
+    state.pendingEvenementsHtml = null;
+    if (state.pendingListType === 'evenements') {
+      state.pendingListCard = null;
+      state.pendingListType = null;
+    }
+  }
+  if (job.file === 'presse.html') {
+    state.pendingPresseHtml = null;
+    if (state.pendingListType === 'presse') {
+      state.pendingListCard = null;
+      state.pendingListType = null;
+    }
+  }
+  if (job.file === 'index.html') {
+    state.pendingIndexHtml = null;
+  }
+  if (job.kind === 'sitemap') {
+    state.pendingSitemapFor = null;
+  }
+}
+
+function describePublishFiles(files) {
+  return files.map(f => '• `' + f + '`').join('\n');
+}
+
+function reportPublishOutcome({ done, remaining, error }) {
+  if (!error && remaining.length === 0) {
+    addAiMessage(
+      `🚀 **C'est en ligne.** Pages mises à jour :\n${describePublishFiles(done)}\n\nLe site sera à jour dans environ 30 secondes` +
+      (state.config.siteUrl ? ' sur ' + state.config.siteUrl : '') + '.'
+    );
+    showToast('✓ Publié !', 'ok');
+    return;
+  }
+  const parts = ['⚠️ **La publication s\'est arrêtée.**'];
+  if (done.length) {
+    parts.push('\nDéjà en ligne :\n' + describePublishFiles(done));
+  } else {
+    parts.push('\nAucune page n\'a été modifiée.');
+  }
+  if (remaining.length) {
+    parts.push('\nPas encore modifié :\n' + describePublishFiles(remaining));
+  }
+  if (error) parts.push('\nRaison : ' + error);
+  if (done.length && remaining.length) {
+    parts.push('\nTu peux cliquer sur **Publier** pour continuer avec ce qui reste, ou **Annuler** pour tout oublier. Les pages déjà en ligne resteront en ligne.');
+  }
+  addAiMessage(parts.join('\n'));
+  showToast(error || 'Publication incomplète', 'err');
+}
 
 // Map child dir → listing file + how to find/remove every card linking to a child
 // page. A page can appear in several card layouts (e.g. presse has a featured
@@ -2383,6 +2644,7 @@ function showDeleteConfirm(file, name) {
 
 // Perform the actual deletion: remove the list card, then delete the file
 async function performDelete(file, name) {
+  const epoch = state.editorEpoch;
   if (!state.config.githubToken || !state.config.githubRepo) {
     showToast('Configure d\'abord GitHub dans les paramètres', 'err');
     showView('settings', null);
@@ -2391,6 +2653,11 @@ async function performDelete(file, name) {
   showToast('Suppression en cours…', 'info');
   showThinkingLabel('Suppression en cours…');
   try {
+    if (isStaleEpoch(epoch)) {
+      hideThinking();
+      showToast('Suppression annulée : tu as changé de page.', 'err');
+      return;
+    }
     const type = file.split('/')[0];
     const cfg = CARD_REMOVE[type];
     let cardRemoved = false;
@@ -2398,15 +2665,33 @@ async function performDelete(file, name) {
     if (cfg) {
       try {
         const listHtml = await fetchFileFromGitHub(cfg.file);
+        if (isStaleEpoch(epoch)) {
+          hideThinking();
+          showToast('Suppression annulée : tu as changé de page.', 'err');
+          return;
+        }
         const updated = removeCardForFile(listHtml, file);
         if (updated && updated !== listHtml) {
           await pushFileToGitHub(cfg.file, updated, `🗑 Retrait de la carte « ${file} » dans ${cfg.file}`);
+          if (isStaleEpoch(epoch)) {
+            hideThinking();
+            return;
+          }
           cardRemoved = true;
         }
       } catch(e) { /* non-blocking — still delete the file */ }
     }
 
+    if (isStaleEpoch(epoch)) {
+      hideThinking();
+      showToast('Suppression annulée : tu as changé de page.', 'err');
+      return;
+    }
     const deleted = await deleteFileFromGitHub(file, `🗑 Suppression de ${file}`);
+    if (isStaleEpoch(epoch)) {
+      hideThinking();
+      return;
+    }
 
     hideThinking();
 
@@ -2434,22 +2719,26 @@ async function performDelete(file, name) {
 // Insert a card snippet at the top of the list container in a freshly-fetched
 // list page, and push it. Robust replacement for full-page regeneration.
 async function insertCardAndPush(type, card) {
+  const epoch = state.editorEpoch;
   const target = LIST_TARGETS[type];
   if (!target || !card) return false;
 
-  let listHtml;
+  const attempt = async () => {
+    const { text, sha } = await fetchGitHubFileAndSha(target.file);
+    if (isStaleEpoch(epoch)) return false;
+    const updated = applyListCard(text, type, card);
+    if (!updated) return false;
+    await putGitHubFileWithSha(target.file, updated, `📰 Ajout "${state.pendingFile || target.file}" dans ${target.file}`, sha);
+    return true;
+  };
+
   try {
-    listHtml = await fetchFileFromGitHub(target.file);
-  } catch(e) {
-    return false;
+    return await attempt();
+  } catch (e) {
+    if (e.message !== 'SHA_CONFLICT') throw e;
+    if (isStaleEpoch(epoch)) return false;
+    return await attempt();
   }
-
-  const m = listHtml.match(target.re);
-  if (!m) return false;
-
-  const updated = listHtml.replace(m[0], m[0] + '\n' + card + '\n');
-  await pushFileToGitHub(target.file, updated, `📰 Ajout "${state.pendingFile}" dans ${target.file}`);
-  return true;
 }
 
 function siteBaseUrl() {
@@ -2561,16 +2850,20 @@ async function addPageToSitemap(filename) {
   }
 }
 
-async function publishAll(explicitFilename) {
-  const create = isCreateMode();
-  let target;
+async function publishAll() {
+  const epoch = state.editorEpoch;
+  if (state.isPublishing) return;
+
+  const plan = collectPublishPlan();
+  if (!plan.length) {
+    showToast('Rien à publier.', 'err');
+    addAiMessage('⚠️ Publication annulée : aucun contenu à envoyer. Rien n\'a été modifié sur le site.');
+    return;
+  }
+
   try {
-    target = assertPublishTarget(explicitFilename || state.pendingFile, { create });
-    if (state.pendingFile && target !== state.pendingFile) {
-      throw new Error('Publication annulée : le fichier à envoyer ne correspond pas à l\'aperçu. Rien n\'a été modifié sur le site.');
-    }
-    if (!state.pendingHtml) {
-      throw new Error('Publication annulée : aucun contenu à envoyer. Rien n\'a été modifié sur le site.');
+    for (const job of plan) {
+      assertPublishTarget(job.file, { create: !!job.create });
     }
   } catch (err) {
     showToast(err.message, 'err');
@@ -2578,91 +2871,68 @@ async function publishAll(explicitFilename) {
     return;
   }
 
+  if (isStaleEpoch(epoch)) {
+    showToast('Publication annulée : tu as changé de page.', 'err');
+    addAiMessage('⚠️ Publication annulée : tu as changé de page. Rien n\'a été modifié sur le site.');
+    return;
+  }
+
+  state.isPublishing = true;
   showToast('Publication en cours…', 'info');
+
   try {
-    await pushFileToGitHub(
-      target,
-      state.pendingHtml,
-      create
-        ? `✨ Création ${target} via tableau de bord`
-        : `✏️ Mise à jour ${target} via tableau de bord`,
-      { create }
-    );
-
-    // Update the relevant list page (vie / evenements / presse).
-    // Preferred path: insert the small card snippet client-side into the
-    // freshly-fetched list page (reliable, token-cheap).
-    // Backward-compat: if Claude returned a full <…-update> page, use it.
-    let listUpdated = false;
-
-    if (state.pendingListCard && state.pendingListType) {
-      listUpdated = await insertCardAndPush(state.pendingListType, state.pendingListCard);
-    }
-
-    if (!listUpdated && state.pendingVieHtml) {
-      await pushFileToGitHub('vie.html', state.pendingVieHtml, `📰 Ajout article "${state.pendingFile}" dans vie.html`);
-      listUpdated = true;
-    }
-    if (!listUpdated && state.pendingEvenementsHtml) {
-      await pushFileToGitHub('evenements.html', state.pendingEvenementsHtml, `🎉 Ajout événement "${state.pendingFile}" dans evenements.html`);
-      listUpdated = true;
-    }
-    if (!listUpdated && state.pendingPresseHtml) {
-      await pushFileToGitHub('presse.html', state.pendingPresseHtml, `📰 Ajout publication "${state.pendingFile}" dans presse.html`);
-      listUpdated = true;
-    }
-
-    // If this was a new article/event/publication but the list page could not
-    // be updated, warn clearly so the user knows it won't appear in the list.
-    const isNewItem = state.isNewArticle || state.isNewEvent || state.isNewPublication;
-    if (isNewItem && !listUpdated) {
-      addAiMessage('⚠️ La page principale (liste) n\'a pas pu être mise à jour automatiquement. La page existe mais n\'apparaîtra pas dans la liste — dis-le moi et je réessaie.');
-    }
-
-    if (create) {
-      try {
-        await addPageToSitemap(target);
-      } catch (e) {
-        addAiMessage(`⚠️ L'article a bien été publié, mais le sitemap n'a pas pu être mis à jour (${e.message}). Les moteurs de recherche le trouveront peut-être un peu plus tard.`);
-        showToast('Article publié — sitemap non mis à jour', 'err');
+    for (const job of plan) {
+      if (isStaleEpoch(epoch)) {
+        throw new Error('Publication interrompue : tu as changé de page.');
       }
+
+      if (job.kind === 'sitemap') {
+        await addPageToSitemap(job.articleFile);
+      } else if (job.useCardInsert && job.listType) {
+        const ok = await insertCardAndPush(job.listType, state.pendingListCard);
+        if (isStaleEpoch(epoch)) {
+          throw new Error('Publication interrompue : tu as changé de page.');
+        }
+        if (!ok) {
+          throw new Error('Impossible de mettre à jour la page liste « ' + job.file + ' ».');
+        }
+      } else {
+        if (!job.html) {
+          throw new Error('Le contenu de « ' + job.file + ' » n\'est plus disponible. Ce fichier n\'a pas été modifié.');
+        }
+        await pushFileToGitHub(
+          job.file,
+          job.html,
+          job.create
+            ? `✨ Création ${job.file} via tableau de bord`
+            : `✏️ Mise à jour ${job.file} via tableau de bord`,
+          { create: !!job.create }
+        );
+      }
+
+      consumePublishedJob(job);
     }
 
-    // Push index.html update if opening inscriptions
-    if (state.pendingIndexHtml) {
-      await pushFileToGitHub(
-        'index.html',
-        state.pendingIndexHtml,
-        `🎊 Ouverture inscriptions — mise à jour index.html`
-      );
-    }
-
+    const done = (state.publishedThisBatch || []).slice();
     const now = new Date().toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
     localStorage.setItem('microd_lastupdate', now);
     document.getElementById('lastUpdate').textContent = now;
 
-    const addedToList = listUpdated;
-    const label = state.pendingIndexHtml
-      ? `inscriptions.html et index.html publiés ! Site live dans ~30 secondes.`
-      : addedToList
-        ? `Publié et ajouté à la liste ! Site live dans ~30 secondes.`
-        : `\`${state.pendingFile}\` publié ! Site live dans ~30 secondes.`;
-
-    showToast(`✓ ${state.pendingIndexHtml ? 'Inscriptions mises à jour !' : addedToList ? 'Publié et ajouté à la liste !' : state.pendingFile + ' publié !'}`, 'ok');
-    addAiMessage(`🚀 **Publié !** ${label}\n\nTu peux vérifier sur ${state.config.siteUrl || 'ton URL Netlify'}.`);
-
-    state.pendingHtml = null;
-    state.pendingFile = null;
-    state.pendingVieHtml = null;
-    state.pendingEvenementsHtml = null;
-    state.pendingPresseHtml = null;
-    state.pendingIndexHtml = null;
-    state.pendingListCard = null;
-    state.pendingListType = null;
-
-  } catch(err) {
-    showToast('Erreur publication : ' + err.message, 'err');
-    addAiMessage(`⚠️ Erreur lors de la publication : **${err.message}**\n\nVérifie que ton token GitHub a les droits d'écriture sur le repo.`);
+    clearAllPending();
+    removePublishPreview();
+    reportPublishOutcome({ done, remaining: [], error: null });
+  } catch (err) {
+    const done = (state.publishedThisBatch || []).slice();
+    const remaining = collectPublishPlan().map(j => j.file);
+    if (done.length) {
+      const now = new Date().toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+      localStorage.setItem('microd_lastupdate', now);
+      document.getElementById('lastUpdate').textContent = now;
+      refreshPublishCardList();
+    }
+    reportPublishOutcome({ done, remaining, error: err.message });
+  } finally {
+    state.isPublishing = false;
   }
 }
 
