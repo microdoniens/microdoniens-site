@@ -80,8 +80,8 @@
     h2 { font-family: 'Baloo 2', sans-serif; font-size: clamp(26px, 3vw, 38px); font-weight: 400; letter-spacing: -0.02em; color: var(--charcoal); line-height: 1.15; margin-bottom: 40px; }
 
     .featured-press { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
-    .press-card { background: white; border-radius: var(--radius); border: 1.5px solid var(--border); overflow: hidden; transition: all 0.22s; }
-    .press-card[onclick] { cursor: pointer; }
+    .press-card { background: white; border-radius: var(--radius); border: 1.5px solid var(--border); overflow: hidden; transition: all 0.22s; text-decoration: none; color: inherit; display: block; }
+    a.press-card { cursor: pointer; }
     .press-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); border-color: transparent; }
     .press-card.hero-card { grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr; }
 
@@ -110,9 +110,9 @@
 .older-section { background: white; padding: 72px 24px; }
     .older-inner { max-width: 1200px; margin: 0 auto; }
     .coverage-list { display: flex; flex-direction: column; gap: 0; margin-top: 40px; }
-    .coverage-item { display: flex; align-items: center; gap: 20px; padding: 20px 0; border-bottom: 1px solid var(--border); transition: background 0.15s; border-radius: var(--radius-sm); }
+    .coverage-item { display: flex; align-items: center; gap: 20px; padding: 20px 0; border-bottom: 1px solid var(--border); transition: background 0.15s; border-radius: var(--radius-sm); text-decoration: none; color: inherit; }
     .coverage-item:last-child { border-bottom: none; }
-    .coverage-item[onclick] { cursor: pointer; }
+    a.coverage-item { cursor: pointer; }
     .coverage-item:hover { background: var(--cream); padding-left: 12px; padding-right: 12px; margin: 0 -12px; }
     .cov-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
     .cov-orange { background: var(--terracotta-light); }
@@ -242,7 +242,7 @@
   <div class="featured-press">
 
     <!-- FRANCE 3 HERO -->
-    <div class="press-card hero-card" onclick="location.href='presse/france3-2014.html'">
+    <a class="press-card hero-card" href="presse/france3-2014.html">
       <div class="press-visual pv-dark">
         <img src="images/presse/france3-2014.png" alt="Capture du reportage France 3 — Olivia et Gaby dans les jardins du Grand Parc" loading="lazy">
       </div>
@@ -253,10 +253,10 @@
         <h3>Les jardins ouvriers et partagés de Saint-Ouen</h3>
         <p>Dès qu'on parle de Saint-Ouen, un Microdonien est dans les parages ! Les stars du reportage sont Olivia et Gaby, gambadant dans les jardins du Grand Parc. Depuis la diffusion, la crèche a été inondée d'appels — et Olivia et Gaby ont reçu de nombreuses propositions de castings.</p>
       </div>
-    </div>
+    </a>
 
     <!-- LE PARISIEN 2015 -->
-    <div class="press-card" onclick="location.href='presse/parisien-2015.html'">
+    <a class="press-card" href="presse/parisien-2015.html">
       <div class="press-visual pv-orange">
         <img src="images/presse/parisien-2015-photo.jpg" alt="Article papier du Parisien — La petite crèche s'est agrandie" loading="lazy">
       </div>
@@ -267,10 +267,10 @@
         <h3>La petite crèche s'est agrandie</h3>
         <p>Article paru le jour de l'inauguration de la crèche agrandie. Le Parisien couvre l'extension des Microdoniens — de 16 à 22 familles — et le modèle unique de gouvernance parentale.</p>
       </div>
-    </div>
+    </a>
 
     <!-- JOURNAL ST OUEN -->
-    <div class="press-card" onclick="location.href='presse/journal-saint-ouen-2015.html'">
+    <a class="press-card" href="presse/journal-saint-ouen-2015.html">
       <div class="press-visual pv-blue">
         <img src="images/presse/journal-saint-ouen-2015.jpg" alt="Journal de Saint-Ouen n°106 — Les Microdoniens s'agrandissent" loading="lazy">
       </div>
@@ -281,7 +281,7 @@
         <h3>Les Microdoniens s'agrandissent</h3>
         <p>Le mensuel de la ville consacre un article à l'agrandissement des Microdoniens et à l'inauguration officielle de la crèche étendue.</p>
       </div>
-    </div>
+    </a>
 
   </div>
 </section>
@@ -301,7 +301,7 @@
 
     <div class="coverage-list">
 
-      <div class="coverage-item" onclick="location.href='presse/france3-2014.html'">
+      <a class="coverage-item" href="presse/france3-2014.html">
         <div class="cov-icon cov-blue">📺</div>
         <div>
           <div class="cov-source">France 3 Île-de-France</div>
@@ -309,9 +309,9 @@
           <div class="cov-date">Septembre 2014</div>
         </div>
         <div class="cov-badge badge-tv">TV</div>
-      </div>
+      </a>
 
-      <div class="coverage-item" onclick="location.href='presse/acepp-2014.html'">
+      <a class="coverage-item" href="presse/acepp-2014.html">
         <div class="cov-icon cov-green">📋</div>
         <div>
           <div class="cov-source">Gazette de l'ACEPP</div>
@@ -319,9 +319,9 @@
           <div class="cov-date">Mars 2014 · N°110</div>
         </div>
         <div class="cov-badge badge-asso">Asso</div>
-      </div>
+      </a>
 
-      <div class="coverage-item" onclick="location.href='presse/parisien-2015.html'">
+      <a class="coverage-item" href="presse/parisien-2015.html">
         <div class="cov-icon cov-orange">📰</div>
         <div>
           <div class="cov-source">Le Parisien</div>
@@ -329,9 +329,9 @@
           <div class="cov-date">Décembre 2014</div>
         </div>
         <div class="cov-badge badge-presse">Presse</div>
-      </div>
+      </a>
 
-      <div class="coverage-item" onclick="location.href='presse/journal-saint-ouen-2015.html'">
+      <a class="coverage-item" href="presse/journal-saint-ouen-2015.html">
         <div class="cov-icon cov-blue">🗞️</div>
         <div>
           <div class="cov-source">Journal de Saint-Ouen</div>
@@ -339,9 +339,9 @@
           <div class="cov-date">Janvier 2015</div>
         </div>
         <div class="cov-badge badge-presse">Presse</div>
-      </div>
+      </a>
 
-      <div class="coverage-item" onclick="location.href='presse/journal-saint-ouen-2013.html'">
+      <a class="coverage-item" href="presse/journal-saint-ouen-2013.html">
         <div class="cov-icon cov-orange">📰</div>
         <div>
           <div class="cov-source">Journal de Saint-Ouen</div>
@@ -349,9 +349,9 @@
           <div class="cov-date">Février–Mars 2013</div>
         </div>
         <div class="cov-badge badge-presse">Presse</div>
-      </div>
+      </a>
 
-      <div class="coverage-item" onclick="location.href='presse/les-maternelles-2013.html'">
+      <a class="coverage-item" href="presse/les-maternelles-2013.html">
         <div class="cov-icon cov-blue">📺</div>
         <div>
           <div class="cov-source">Les Maternelles — France 5</div>
@@ -359,9 +359,9 @@
           <div class="cov-date">Janvier 2013 · 2 passages</div>
         </div>
         <div class="cov-badge badge-tv">TV</div>
-      </div>
+      </a>
 
-      <div class="coverage-item" onclick="location.href='presse/parisien-2013.html'">
+      <a class="coverage-item" href="presse/parisien-2013.html">
         <div class="cov-icon cov-orange">📰</div>
         <div>
           <div class="cov-source">Le Parisien</div>
@@ -369,9 +369,9 @@
           <div class="cov-date">Février 2013</div>
         </div>
         <div class="cov-badge badge-presse">Presse</div>
-      </div>
+      </a>
 
-      <div class="coverage-item" onclick="location.href='presse/site-saint-ouen-2013.html'">
+      <a class="coverage-item" href="presse/site-saint-ouen-2013.html">
         <div class="cov-icon cov-yellow">🌐</div>
         <div>
           <div class="cov-source">Saint-Ouen.fr</div>
@@ -379,9 +379,9 @@
           <div class="cov-date">Janvier 2013</div>
         </div>
         <div class="cov-badge badge-web">Web</div>
-      </div>
+      </a>
 
-      <div class="coverage-item" onclick="location.href='presse/infocreche-2013.html'">
+      <a class="coverage-item" href="presse/infocreche-2013.html">
         <div class="cov-icon cov-green">📋</div>
         <div>
           <div class="cov-source">Infocrèche IPRO</div>
@@ -389,7 +389,7 @@
           <div class="cov-date">Mars 2013</div>
         </div>
         <div class="cov-badge badge-asso">Asso</div>
-      </div>
+      </a>
 
     </div>
   </div>
@@ -421,7 +421,7 @@
           <li><a href="index.html#espaces">Nos espaces</a></li>
           <li><a href="index.html#pedagogie">Pédagogie</a></li>
           <li><a href="vie.html">Vie de la crèche</a></li>
-          <li><a href="index.html#historique">Historique</a></li>
+          <li><a href="historique.html">Historique</a></li>
         </ul>
       </div>
 
@@ -430,8 +430,8 @@
         <ul>
           <li><a href="index.html#association">Présentation</a></li>
           <li><a href="index.html#admission">Admission</a></li>
-          <li><a href="contact.html">Inscriptions</a></li>
-          <li><a href="index.html#presse">On parle de nous</a></li>
+          <li><a href="inscriptions.html">Inscriptions</a></li>
+          <li><a href="presse.html">On parle de nous</a></li>
         </ul>
       </div>
 
@@ -439,7 +439,7 @@
         <h4>Contact</h4>
         <ul>
           <li><a href="contact.html">Nous écrire</a></li>
-          <li><a href="https://maps.google.com/?q=53+rue+Albert+Dhalenne+Saint-Ouen" target="_blank">53 rue Dhalenne, 93400</a></li>
+          <li><a href="https://maps.google.com/?q=53+rue+Albert+Dhalenne+Saint-Ouen" target="_blank">53 rue Albert Dhalenne, 93400</a></li>
         </ul>
       </div>
     </div>

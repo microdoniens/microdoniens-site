@@ -125,6 +125,14 @@
 
     .contact-block a:hover { text-decoration: underline; }
 
+    .honeypot {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+    }
+
     
 .map-placeholder {
       margin-top: 40px;
@@ -339,7 +347,23 @@
       <div class="contact-icon">📍</div>
       <div>
         <strong>Adresse</strong>
-        <p>53 rue Albert Dhalenne<br>93400 Saint-Ouen</p>
+        <p>53 rue Albert Dhalenne, 93400 Saint-Ouen</p>
+      </div>
+    </div>
+
+    <div class="contact-block">
+      <div class="contact-icon">📞</div>
+      <div>
+        <strong>Téléphone</strong>
+        <p><a href="tel:+33983439101">09 83 43 91 01</a></p>
+      </div>
+    </div>
+
+    <div class="contact-block">
+      <div class="contact-icon">✉️</div>
+      <div>
+        <strong>Email</strong>
+        <p><a href="mailto:contact@lesmicrodoniens.fr">contact@lesmicrodoniens.fr</a></p>
       </div>
     </div>
 
@@ -375,31 +399,35 @@
       <h2>Envoyer un message</h2>
       <p>Nous vous répondrons dans les meilleurs délais.</p>
 
-      <div id="contactForm">
+      <form id="contactForm" name="contact" method="POST" action="/contact.html" netlify netlify-honeypot="bot-field">
+        <input type="hidden" name="form-name" value="contact" />
+        <p class="honeypot" aria-hidden="true">
+          <label>Ne pas remplir <input type="text" name="bot-field" tabindex="-1" autocomplete="off"></label>
+        </p>
         <div class="form-row">
           <div class="form-group">
             <label for="prenom">Prénom *</label>
-            <input type="text" id="prenom" placeholder="Marie" required />
+            <input type="text" id="prenom" name="prenom" placeholder="Marie" required />
           </div>
           <div class="form-group">
             <label for="nom">Nom *</label>
-            <input type="text" id="nom" placeholder="Dupont" required />
+            <input type="text" id="nom" name="nom" placeholder="Dupont" required />
           </div>
         </div>
 
         <div class="form-group">
           <label for="email">Email *</label>
-          <input type="email" id="email" placeholder="marie.dupont@email.com" required />
+          <input type="email" id="email" name="email" placeholder="marie.dupont@email.com" required />
         </div>
 
         <div class="form-group">
           <label for="tel">Téléphone</label>
-          <input type="tel" id="tel" placeholder="06 00 00 00 00" />
+          <input type="tel" id="tel" name="telephone" placeholder="06 00 00 00 00" />
         </div>
 
         <div class="form-group">
           <label for="sujet">Sujet</label>
-          <select id="sujet">
+          <select id="sujet" name="sujet">
             <option value="">Choisir un sujet…</option>
             <option value="inscription">Inscription 2026/2027</option>
             <option value="visite">Demande de visite</option>
@@ -410,12 +438,12 @@
 
         <div class="form-group">
           <label for="message">Message *</label>
-          <textarea id="message" placeholder="Bonjour, je souhaite en savoir plus sur les inscriptions…" required></textarea>
+          <textarea id="message" name="message" placeholder="Bonjour, je souhaite en savoir plus sur les inscriptions…" required></textarea>
           <p class="form-note">Si vous candidatez pour une inscription, merci d'indiquer l'âge de votre enfant et votre disponibilité pour une permanence.</p>
         </div>
 
-        <button class="btn-submit" onclick="submitForm()">Envoyer le message →</button>
-      </div>
+        <button type="submit" class="btn-submit">Envoyer le message →</button>
+      </form>
 
       <div class="form-success" id="formSuccess">
         <div class="success-icon">✅</div>
@@ -444,7 +472,7 @@
           <li><a href="index.html#espaces">Nos espaces</a></li>
           <li><a href="index.html#pedagogie">Pédagogie</a></li>
           <li><a href="vie.html">Vie de la crèche</a></li>
-          <li><a href="index.html#historique">Historique</a></li>
+          <li><a href="historique.html">Historique</a></li>
         </ul>
       </div>
 
@@ -453,8 +481,8 @@
         <ul>
           <li><a href="index.html#association">Présentation</a></li>
           <li><a href="index.html#admission">Admission</a></li>
-          <li><a href="contact.html">Inscriptions</a></li>
-          <li><a href="index.html#presse">On parle de nous</a></li>
+          <li><a href="inscriptions.html">Inscriptions</a></li>
+          <li><a href="presse.html">On parle de nous</a></li>
         </ul>
       </div>
 
@@ -462,7 +490,7 @@
         <h4>Contact</h4>
         <ul>
           <li><a href="contact.html">Nous écrire</a></li>
-          <li><a href="https://maps.google.com/?q=53+rue+Albert+Dhalenne+Saint-Ouen" target="_blank">53 rue Dhalenne, 93400</a></li>
+          <li><a href="https://maps.google.com/?q=53+rue+Albert+Dhalenne+Saint-Ouen" target="_blank">53 rue Albert Dhalenne, 93400</a></li>
         </ul>
       </div>
     </div>
@@ -476,7 +504,9 @@
 
 <script src="js/nav.js"></script>
 <script>
-  async function submitForm() {
+  document.getElementById('contactForm').addEventListener('submit', async function (event) {
+    event.preventDefault();
+
     const required = ['prenom', 'nom', 'email', 'message'];
     let valid = true;
 
@@ -492,26 +522,15 @@
 
     if (!valid) return;
 
-    const btn = document.querySelector('.btn-submit');
+    const btn = this.querySelector('.btn-submit');
     btn.disabled = true;
     btn.textContent = 'Envoi en cours…';
 
-    const data = {
-      prenom: document.getElementById('prenom').value,
-      nom: document.getElementById('nom').value,
-      email: document.getElementById('email').value,
-      telephone: document.getElementById('tel').value,
-      sujet: document.getElementById('sujet').value,
-      message: document.getElementById('message').value,
-      _replyto: document.getElementById('email').value,
-      _subject: 'Message depuis le site — Les Microdoniens',
-    };
-
     try {
-      const res = await fetch('https://formspree.io/f/VOTRE_ID_FORMSPREE', {
+      const res = await fetch('/contact.html', {
         method: 'POST',
-        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(new FormData(this)).toString(),
       });
 
       if (res.ok) {
@@ -527,7 +546,7 @@
       btn.textContent = 'Envoyer le message →';
       alert('Une erreur est survenue. Veuillez réessayer ou nous écrire directement à contact@lesmicrodoniens.fr');
     }
-  }
+  });
 </script>
 </body>
 </html>

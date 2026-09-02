@@ -5,4 +5,9 @@ Allow: /
 Disallow: /admin.html
 Disallow: /admin
 
+# Gabarits internes
+Disallow: /vie/_template.html
+Disallow: /evenements/_template.html
+Disallow: /presse/_template.html
+
 Sitemap: https://lesmicrodoniens.netlify.app/sitemap.xml
